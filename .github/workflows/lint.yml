@@ -1,0 +1,21 @@
+# Run linting and basic file format checks
+
+name: Lint
+
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+      - name: run ruff linter and formatter
+        run: |
+          pip install ruff==0.6.2
+          ruff check .
+          ruff format . --check
