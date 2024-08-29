@@ -10,9 +10,15 @@ pydantic = "^2.8.2"
 rich = "^13.8.0"
 django-compressor = "^4.5.1"
 django-libsass = "^0.9"
+django-environ = "^0.11.2"
+psycopg2 = "^2.9.9"
+pandas = "^2.2.2"
+pyarrow = "^17.0.0"
+duckdb = "^1.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.2"
+pgcli = "^4.1.0"
 
 [tool.ruff]
 extend-exclude = ["migrations"]

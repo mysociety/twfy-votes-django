@@ -12,9 +12,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env(
+    DEBUG=(bool, False),
+    ALLOWED_HOSTS=(list, []),
+    HIDE_DEBUG_TOOLBAR=(bool, False),
+    GOOGLE_ANALYTICS=(str, ""),
+)
+
+environ.Env.read_env(BASE_DIR / ".env")
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / ".static"
@@ -78,18 +88,17 @@ WSGI_APPLICATION = "twfy_votes.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+DATABASES = {"default": env.db()}
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
     "compressor.finders.CompressorFinder",
 )
+
+BUILD_DIR = BASE_DIR / "build"
+if BUILD_DIR.exists() is False:
+    BUILD_DIR.mkdir()
 
 STATICFILES_DIRS = [
     BASE_DIR / "votes" / "static",
@@ -131,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en-uk"
 
 TIME_ZONE = "UTC"
 

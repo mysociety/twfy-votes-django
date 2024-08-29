@@ -1,4 +1,3 @@
-
 from django.views.generic import TemplateView
 
 from .mixins import TitleMixin
