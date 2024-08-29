@@ -1,65 +1,60 @@
 from dataclasses import dataclass, field
-from typing import Callable, NamedTuple, Protocol, TypeVar
+from enum import IntEnum
+from typing import Callable, Protocol, TypeVar
 
 import rich
 
 
-class AcceptsVerbose(Protocol):
+class ImportOrder(IntEnum):
+    DOWNLOAD = 1
+    LOOKUPS = 10
+
+
+class AcceptsQuiet(Protocol):
     def __call__(self, quiet: bool) -> None: ...
 
 
-class OrderFunc(NamedTuple):
-    order: int
-    func: AcceptsVerbose
-
-
-Verbose = TypeVar("Verbose", bound=AcceptsVerbose)
+Verbose = TypeVar("Verbose", bound=AcceptsQuiet)
 
 
 @dataclass
 class ImportRegister:
-    import_functions: dict[str, OrderFunc] = field(default_factory=dict)
-    groups: dict[str, list[str]] = field(default_factory=dict)
+    import_functions: dict[str, AcceptsQuiet] = field(default_factory=dict)
+    groups: dict[ImportOrder, list[str]] = field(default_factory=dict)
 
-    def register(
-        self, name: str, group: str = "", order: int = 0
-    ) -> Callable[[Verbose], Verbose]:
-        if group:
-            if group not in self.groups:
-                self.groups[group] = []
-            self.groups[group].append(name)
+    def register(self, name: str, group: ImportOrder) -> Callable[[Verbose], Verbose]:
+        if group not in self.groups:
+            self.groups[group] = []
+        self.groups[group].append(name)
 
         def decorator(func: Verbose) -> Verbose:
-            self.import_functions[name] = OrderFunc(order, func)
+            self.import_functions[name] = func
             return func
 
         return decorator
 
     def run_import(self, slug: str, quiet: bool = False) -> None:
-        _, func = self.import_functions[slug]
+        func = self.import_functions[slug]
         if not quiet:
             rich.print(f"[blue]Running {slug}[/blue]")
         func(quiet=quiet)
 
     def run_group(self, group: str, quiet: bool = False) -> None:
-        to_run = self.groups[group]
+        import_order = ImportOrder[group.upper()]
+
+        to_run = self.groups[import_order]
         tuples = [(slug, self.import_functions[slug]) for slug in to_run]
-        # sort
-        tuples.sort(key=lambda x: x[1].order)
-        for slug, (order, func) in tuples:
+        for slug, func in tuples:
             if not quiet:
                 rich.print(f"[blue]Running {slug}[blue]")
             func(quiet=quiet)
 
     def run_all(self, quiet: bool = False) -> None:
-        all_slugs = self.import_functions.keys()
-        tuples = [(slug, self.import_functions[slug]) for slug in all_slugs]
-        # sort
-        tuples.sort(key=lambda x: x[1].order)
-        for slug, (order, func) in tuples:
-            if not quiet:
-                rich.print(f"[blue]Running {slug}[/blue]")
-            func(quiet=quiet)
+        groups = list(self.groups.keys())
+        groups.sort(key=lambda x: x.value)
+
+        for group in groups:
+            self.run_group(group.name, quiet=quiet)
 
 
 import_register = ImportRegister()

@@ -6,14 +6,14 @@ import rich
 import tomllib
 
 from ..models import GovernmentParty
-from .register import import_register
+from .register import ImportOrder, import_register
 
 
-@import_register.register("government_parties", group="basic", order=0)
+@import_register.register("government_parties", ImportOrder.LOOKUPS)
 def populate_government_parties(quiet: bool = False):
     BASE_DIR = Path(settings.BASE_DIR)
 
-    data_file = BASE_DIR / "data" / "government_parties.toml"
+    data_file = BASE_DIR / "data" / "lookups" / "government_parties.toml"
 
     data = tomllib.loads(data_file.read_text())
 
