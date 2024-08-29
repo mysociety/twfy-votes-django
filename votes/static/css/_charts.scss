@@ -1,0 +1,34 @@
+// Fallback styling, for if chart doesn’t work.
+table.js-chart {
+    margin-bottom: 0;
+
+    tr > :first-child {
+        padding-left: 0;
+    }
+
+    tr > :last-child {
+        padding-right: 0;
+    }
+
+    tbody tr:last-child > * {
+        border-bottom: none;
+    }
+
+    .chartwrapper + & {
+        @include visually-hidden;
+    }
+}
+
+.js-chart-tooltip {
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0.25rem 0 0 0.25rem;
+    background: #fff;
+    box-shadow: $box-shadow-sm;
+    font-size: $badge-font-size;
+    line-height: 1;
+    padding: $badge-padding-y $badge-padding-x;
+    border-radius: $badge-border-radius;
+    border: 1px solid $border-color;
+}

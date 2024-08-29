@@ -1,0 +1,197 @@
+.area-subnav {
+    --bs-bg-opacity: 0.9 !important;
+    backdrop-filter: blur(5px);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+    @include media-breakpoint-up('lg') {
+        --bs-bg-opacity: 1 !important;
+        backdrop-filter: none;
+        position: static;
+    }
+
+    & > div {
+        border-bottom: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color);
+
+        @include media-breakpoint-up('lg') {
+            border-bottom: 0;
+            position: sticky;
+            top: 1rem;
+            z-index: 1;
+            margin-top: -0.5rem;
+        }
+    }
+
+    nav {
+        margin: 0 calc(var(--bs-gutter-x, 1rem) * -0.5);
+    }
+
+    .nav-link {
+        padding: 0.5rem calc(var(--bs-gutter-x, 1rem) * 0.5);
+        font-weight: bold;
+    }
+}
+
+.area-tabs {
+    overflow-x: auto;
+    background: linear-gradient(0deg, var(--bs-border-color-translucent) 1px, transparent 1px);
+
+    .nav {
+        --bs-nav-tabs-link-active-bg: var(--bs-light);
+        --bs-nav-tabs-border-color: var(--bs-border-color-translucent);
+        --bs-nav-tabs-link-active-border-color: var(--bs-nav-tabs-border-color) var(--bs-nav-tabs-border-color) var(--bs-light);
+        --bs-nav-link-padding-y: 1em;
+        --bs-nav-link-padding-x: 1.5em;
+
+        flex-wrap: nowrap;
+        align-items: flex-end;
+        border-bottom: none;
+    }
+
+    .nav-link {
+        margin-bottom: 0;
+        border-bottom: none;
+        white-space: nowrap;
+
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: map-get($spacers, 2);
+
+        // TODO: Better :focus style
+    }
+}
+
+.area-data-grid {
+    display: grid;
+    grid-gap: 1rem;
+    grid-template-columns: 1fr;
+    grid-auto-flow: row dense;
+
+    @include media-breakpoint-up('md') {
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: $grid-gutter-width;
+    }
+
+    @include media-breakpoint-up('lg') {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.area-data--sm {
+    grid-row: span 1;
+}
+
+.area-data--md {
+    grid-row: span 2;
+}
+
+.area-data--lg {
+    grid-row: span 3;
+}
+
+.area-data-favourites {
+    display: none; // will be shown later on
+
+    svg {
+        margin: 0 0.33rem;
+    }
+}
+
+.area-data-more {
+    display: none; // will be shown later on
+    margin-top: map-get($spacers, 3);
+
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: map-get($spacers, 1);
+        border-radius: $border-radius;
+        background: rgba(#fff, 0.5);
+        border: 1px solid rgba(#000, 0.1);
+        padding: $card-spacer-y $card-spacer-x;
+
+        &:hover, &:focus {
+            background: $card-bg;
+            border-color: $card-border-color;
+        }
+    }
+}
+
+@each $tab in ("mp", "opinion", "place", "movement") {
+    .area-content[data-section="#{$tab}"] {
+        .area-section:not(##{$tab}),
+        .area-data-more {
+            display: none;
+        }
+    }
+}
+
+.area-content[data-section="featured"] {
+    .area-data-more {
+        display: block;
+    }
+
+    .area-data-grid > :not(.area-data--featured) {
+        display: none;
+    }
+}
+
+.area-content[data-section="favourites"] {
+    .area-data-favourites {
+        display: block;
+    }
+
+    .area-data-grid > :not(.dataset-card--favourite) {
+        display: none;
+    }
+
+    .area-section:not(:has(.dataset-card--favourite)) {
+        display: none;
+    }
+}
+
+.social-sharing-menu {
+    --bs-dropdown-item-padding-y: 0.5rem;
+
+    .dropdown-item {
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+
+        svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            margin-right: 0.75rem;
+        }
+    }
+}
+
+@keyframes success-ping {
+    0% {
+        box-shadow: 0 0 0 0rem rgba($color-tcc-honeysuckle-yellow, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 0 10rem rgba($color-tcc-honeysuckle-yellow, 0);
+    }
+}
+
+[data-copy-text][data-copied] {
+    animation: 500ms linear success-ping;
+}
+
+// Mailing list signup on area page
+// TODO: This is super hacky, maybe we should make a component for this?
+.row > * + * > .mailing-list-signup {
+    margin-top: map-get($spacers, 4);
+    padding-top: map-get($spacers, 4);
+    border-top: var(--#{$prefix}border-width) var(--#{$prefix}border-style) var(--#{$prefix}border-color);
+
+    @include media-breakpoint-up('lg') {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+}

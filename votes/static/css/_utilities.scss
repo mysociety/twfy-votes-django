@@ -1,0 +1,93 @@
+$spacers: map-merge($spacers, (
+    "gutter": calc(var(--#{$variable-prefix}gutter-x, #{$grid-gutter-width}) * 0.5)
+));
+
+@if $enable-negative-margins {
+    $negative-spacers: map-merge($negative-spacers, (
+        "ngutter": calc(var(--#{$variable-prefix}gutter-x, #{$grid-gutter-width}) * -0.5)
+    ));
+}
+
+$gray-colors: ();
+@each $key, $value in $grays {
+    $gray-colors: map-merge(
+        $gray-colors,
+        ( "gray-#{$key}": $value )
+    );
+}
+
+$social-colors: (
+    "facebook-blue": $color-facebook-blue,
+    "twitter-black": $color-twitter-black,
+    "threads-black": $color-threads-black,
+    "linkedin-blue": $color-linkedin-blue,
+    "whatsapp-green": $color-whatsapp-green,
+);
+
+$all-colors: map-merge-multiple($blues, $indigos, $purples, $pinks, $reds, $oranges, $yellows, $greens, $teals, $cyans, $gray-colors, $social-colors);
+
+$utilities: map-merge(
+    $utilities,
+    (
+        "color": map-merge(
+            map-get($utilities, "color"),
+            (
+                values: map-merge(
+                    map-get(map-get($utilities, "color"), "values"),
+                    $all-colors,
+                ),
+            ),
+        ),
+        "background-color": map-merge(
+            map-get($utilities, "background-color"),
+            (
+                values: map-merge(
+                    map-get(map-get($utilities, "background-color"), "values"),
+                    $all-colors,
+                ),
+            ),
+        ),
+        "font-weight": map-merge(
+            map-get($utilities, "font-weight"),
+            (
+                values: map-merge(
+                    map-get(map-get($utilities, "font-weight"), "values"),
+                    (
+                        lightest: 100,
+                        boldest: 900
+                    ),
+                ),
+            ),
+        ),
+        "max-width": map-merge(
+            map-get($utilities, "max-width"),
+            (
+                values: (
+                    50: 50%,
+                    100: 100%,
+                    10rem: 10rem, // 160px, 3-6 words
+                    20rem: 20rem, // 320px, 6-9 words
+                    30rem: 30rem, // 480px, 9-12 words
+                    35rem: 35rem,
+                    40rem: 40rem, // 640px, 12-15 words
+                    45rem: 45rem,
+                    50rem: 50rem,
+                ),
+            ),
+        ),
+        "position": map-merge(
+            map-get($utilities, "position"),
+            (
+                responsive: true
+            ),
+        ),
+    ),
+);
+
+@each $color, $value in $all-colors {
+    $color-rgb: to-rgb($value);
+    .text-bg-#{$color} {
+        color: color-contrast($value) if($enable-important-utilities, !important, null);
+        background-color: RGBA($color-rgb, var(--#{$prefix}bg-opacity, 1)) if($enable-important-utilities, !important, null);
+    }
+}

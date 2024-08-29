@@ -1,0 +1,19 @@
+<nav class="navbar navbar-expand-sm bg-green-100">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}" aria-label="Local Intelligence Hub">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto flex-wrap justify-content-end">
+                {% include 'votes/includes/nav-item.html' with name='home' label='Home' %}
+              {% if user.is_authenticated %}
+                {% include 'votes/includes/nav-item.html' with name='my_account' label='Account' %}
+              {% else %}
+                {% include 'votes/includes/nav-item.html' with name='login' label='Sign in' %}
+              {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
