@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# check that we are in the expected directory
+cd `dirname $0`/..
+
+# if nothing has been passed in, show the help
+if [ $# -eq 0 ]; then
+    script/dev-command python -m django help --settings=twfy_votes.settings
+    exit
+else
+    script/dev-command python -m django "$@" --settings=twfy_votes.settings
+fi
