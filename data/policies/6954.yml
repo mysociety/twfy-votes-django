@@ -1,0 +1,31 @@
+id: 6954
+name: Crimes Motivated by Hostility Towards Sex or Gender of the Victim
+context_description: <b>treating crimes motivated by hostility towards the sex or
+  gender of the victim more seriously</b>
+policy_description: There have been votes in Parliament on whether to treat the fact a
+  crime has been motivated by hostility towards the sex or gender of the victim as
+  aggravating factor when sentencing and on if to require the police to provide statistics
+  on such crimes.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2022-02-28
+    division_number: 194
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-28
+    division_number: 232
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

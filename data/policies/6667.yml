@@ -1,0 +1,584 @@
+id: 6667
+name: Coalition Programme for Government (2010-2015)
+context_description: the policies included in the 2010 <b><a 
+  href="http://webarchive.nationalarchives.gov.uk/20100527091800/http://programmeforgovernment.hmg.gov.uk/">Conservative
+  - Liberal Democrat Coalition Agreement</a></b>
+policy_description: The policies outlined in the "programme for government" also known
+  as the "coalition agreement" agreed between the Conservatives and Liberal Democrats
+  are right
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-06-07
+    division_number: 1
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-06-08
+    division_number: 2
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-06-08
+    division_number: 4
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 40
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-09-06
+    division_number: 50
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-09-06
+    division_number: 51
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-20
+    division_number: 91
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-20
+    division_number: 92
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-02
+    division_number: 110
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-13
+    division_number: 152
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-01-12
+    division_number: 166
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-01-17
+    division_number: 169
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-01-31
+    division_number: 185
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-09
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 203
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 205
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-16
+    division_number: 210
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-29
+    division_number: 237
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-31
+    division_number: 249
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 256
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 257
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-18
+    division_number: 283
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-05
+    division_number: 317
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-07
+    division_number: 342
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-12
+    division_number: 345
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-12
+    division_number: 346
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-11
+    division_number: 362
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-07
+    division_number: 392
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-23
+    division_number: 400
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-25
+    division_number: 441
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-25
+    division_number: 442
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-01
+    division_number: 450
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-01
+    division_number: 451
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-01
+    division_number: 452
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-01
+    division_number: 453
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-07
+    division_number: 461
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-08
+    division_number: 462
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-08
+    division_number: 463
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-08
+    division_number: 464
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-08
+    division_number: 465
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-08
+    division_number: 466
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-13
+    division_number: 488
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-26
+    division_number: 503
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-16
+    division_number: 507
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-16
+    division_number: 508
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-23
+    division_number: 11
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-23
+    division_number: 12
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-06-26
+    division_number: 27
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-06-27
+    division_number: 34
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-10
+    division_number: 47
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-16
+    division_number: 54
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-10-25
+    division_number: 87
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-12-19
+    division_number: 127
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-29
+    division_number: 146
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-15
+    division_number: 201
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 20
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-05
+    division_number: 21
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-05
+    division_number: 22
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-26
+    division_number: 35
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-26
+    division_number: 36
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-02
+    division_number: 43
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-22
+    division_number: 106
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-31
+    division_number: 117
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-12-04
+    division_number: 150
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-01-30
+    division_number: 201
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-03-13
+    division_number: 232
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-03-25
+    division_number: 236
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-03-25
+    division_number: 239
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 241
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 242
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 243
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-28
+    division_number: 254
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-28
+    division_number: 255
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-05-07
+    division_number: 264
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-02
+    division_number: 32
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 36
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 39
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-11-07
+    division_number: 76
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-23
+    division_number: 179
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-25
+    division_number: 187
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

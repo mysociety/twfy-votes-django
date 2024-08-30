@@ -1,0 +1,52 @@
+id: 6741
+name: Hydraulic Fracturing (Fracking) to Extract Shale Gas
+context_description: greater regulation of <b>hydraulic fracturing (fracking)</b>
+  to extract shale gas
+policy_description: Parliament has voted on whether hydraulic fracturing (fracking)
+  should be permitted at all, where it should be permitted, and how such operations
+  ought be regulated.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2015-01-26
+    division_number: 137
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-01-26
+    division_number: 139
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-02-11
+    division_number: 156
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-12-16
+    division_number: 151
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-10-19
+    division_number: 66
+    key: commons-2022-10-19-66
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

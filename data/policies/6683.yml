@@ -1,0 +1,58 @@
+id: 6683
+name: Retention of Business Rates by Local Councils
+context_description: local councils keeping money raised from <b>taxes on business
+  premises</b> in their areas
+policy_description: 'There have been votes in Parliament on reforming the way local
+  councils are funded including a switch from central grants to allowing councils
+  to retain a proportion of the business rates generated in their area. '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-01-10
+    division_number: 414
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-11
+    division_number: 418
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-18
+    division_number: 424
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-21
+    division_number: 7
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-02-13
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-03-20
+    division_number: 371
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

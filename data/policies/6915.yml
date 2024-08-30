@@ -1,0 +1,217 @@
+id: 6915
+name: Restrictions on the Right to Protest
+context_description: restricting the <b>right to protest</b>
+policy_description: |
+  There have been votes in Parliament on imposing conditions and restrictions on the form and practice of the right to protest.
+  The right to protest emerges from the rights of assembly, association and free expression.
+  Advocates of restrictions on the right to protest justify these measures as a means of balancing the rights of protestors
+  with the rights and freedoms of others. 
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 1998-02-04
+    division_number: 152
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-12-07
+    division_number: 7
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-02-03
+    division_number: 64
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-02-07
+    division_number: 74
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-02-07
+    division_number: 75
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-07-09
+    division_number: 428
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-06-24
+    division_number: 59
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-06
+    division_number: 127
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-06
+    division_number: 193
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-03-16
+    division_number: 238
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-03-16
+    division_number: 239
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-27
+    division_number: 280
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-05
+    division_number: 38
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-05
+    division_number: 44
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-28
+    division_number: 198
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-28
+    division_number: 199
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-28
+    division_number: 200
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-28
+    division_number: 201
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-28
+    division_number: 233
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-28
+    division_number: 234
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-25
+    division_number: 258
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-25
+    division_number: 259
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-23
+    division_number: 6
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-23
+    division_number: 7
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-06-12
+    division_number: 251
+    key: commons-2023-06-12-251
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-10-18
+    division_number: 64
+    key: commons-2022-10-18-64
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-10-18
+    division_number: 62
+    key: commons-2022-10-18-62
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-03-07
+    division_number: 185
+    key: commons-2023-03-07-185
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

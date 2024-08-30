@@ -1,0 +1,85 @@
+id: 6892
+name: Landlords paying for costs of Building Safety Works
+context_description: <b>landlords paying for the costs of building safety works</b>
+policy_description: There have been votes in Parliament on preventing landlords from
+  passing on the costs of legally required building safety works to leaseholders and
+  tenants.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-02-24
+    division_number: 234
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-03-22
+    division_number: 245
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-27
+    division_number: 278
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-28
+    division_number: 281
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-18
+    division_number: 1
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-19
+    division_number: 165
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 242
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 243
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 244
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 245
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

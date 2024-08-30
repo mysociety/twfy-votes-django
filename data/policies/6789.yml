@@ -1,0 +1,183 @@
+id: 6789
+name: Powers of the Devolved Administration in Northern Ireland
+context_description: <b>more powers for</b> the devolved administration in <b>Northern
+  Ireland</b>
+policy_description: There have been votes in Parliament on the powers of the devolved
+  administration in Northern Ireland.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2017-12-04
+    division_number: 54
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-12-04
+    division_number: 55
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-12-04
+    division_number: 56
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-12-13
+    division_number: 70
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-01-16
+    division_number: 94
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-01-16
+    division_number: 95
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-06-12
+    division_number: 177
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-07-17
+    division_number: 217
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-07-17
+    division_number: 219
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-07-20
+    division_number: 81
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-01
+    division_number: 84
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-15
+    division_number: 97
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-21
+    division_number: 101
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-07
+    division_number: 176
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-07
+    division_number: 177
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-10
+    division_number: 184
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-10
+    division_number: 185
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-10
+    division_number: 186
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-12-15
+    division_number: 187
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-19
+    division_number: 205
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-09-14
+    division_number: 70
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-23
+    division_number: 121
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-13
+    division_number: 147
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-14
+    division_number: 211
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

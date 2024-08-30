@@ -1,0 +1,30 @@
+id: 6903
+name: Digital Services Tax
+context_description: <b>higher taxes</b> on the providers of major <b>social media,
+  search engine and online marketplace services</b>
+policy_description: There have been votes in Parliament on introducing a tax on revenues
+  generated in the United Kingdom by major social media, search engine and online
+  marketplace providers.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-04-19
+    division_number: 264
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-24
+    division_number: 7
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

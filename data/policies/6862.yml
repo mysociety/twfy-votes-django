@@ -1,0 +1,49 @@
+id: 6862
+name: Planning Law
+context_description: more <b>proscriptive planning laws</b>
+policy_description: There have been votes in Parliament on whether planning laws should
+  be relaxed or made more proscriptive.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-09-30
+    division_number: 122
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-30
+    division_number: 123
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-30
+    division_number: 124
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-26
+    division_number: 16
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-14
+    division_number: 54
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

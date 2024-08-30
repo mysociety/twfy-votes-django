@@ -1,0 +1,93 @@
+id: 6699
+name: Taxes on Plane Tickets
+context_description: higher <b>taxes on plane tickets</b>
+policy_description: MPs have held a number of votes on the rates of Air Passenger
+  Duty and the details of which flights it ought apply to.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+- environment
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-03-26
+    division_number: 505
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-16
+    division_number: 507
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-16
+    division_number: 508
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-03
+    division_number: 41
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 199
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-15
+    division_number: 201
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-18
+    division_number: 220
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-02
+    division_number: 43
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-03-25
+    division_number: 238
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-09-12
+    division_number: 16
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-10-31
+    division_number: 31
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

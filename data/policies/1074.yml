@@ -1,0 +1,247 @@
+id: 1074
+name: Autonomy for Schools
+context_description: greater <b>autonomy for schools</b>
+policy_description: There have been votes in Parliament on giving greater autonomy
+  for schools, including on if more schools should be able to obtain the financial
+  and managerial freedom from local authority control associated with "academy" status,
+  and the degree of freedom schools ought have in relation to admissions policies.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- education
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 1998-03-11
+    division_number: 198
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-03-11
+    division_number: 201
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-03-24
+    division_number: 223
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-03-24
+    division_number: 228
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-03-24
+    division_number: 229
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-02-05
+    division_number: 156
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-02-06
+    division_number: 157
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-02-06
+    division_number: 158
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-02-06
+    division_number: 159
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-07-15
+    division_number: 310
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-03-15
+    division_number: 192
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-23
+    division_number: 248
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-23
+    division_number: 249
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-24
+    division_number: 252
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-24
+    division_number: 253
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-24
+    division_number: 254
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-05-24
+    division_number: 255
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-19
+    division_number: 29
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-19
+    division_number: 30
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 37
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 38
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 39
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 40
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 41
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 42
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-26
+    division_number: 47
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-26
+    division_number: 49
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-08
+    division_number: 193
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-11
+    division_number: 269
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-11
+    division_number: 271
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-30
+    division_number: 114
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-01-29
+    division_number: 196
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-21
+    division_number: 189
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

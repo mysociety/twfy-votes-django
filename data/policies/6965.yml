@@ -1,0 +1,64 @@
+id: 6965
+name: Deprivation of Citizenship
+context_description: making it easier to <b>remove someone's British citizenship</b>
+policy_description: There have been votes in Parliament on whether there should be a requirement to
+  give an individual notice of intent to remove their citizenship, and on if removal
+  of citizenship should be permitted if it would leave a person stateless.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2014-01-30
+    division_number: 198
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-05-07
+    division_number: 266
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-20
+    division_number: 57
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-20
+    division_number: 58
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-08
+    division_number: 143
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-22
+    division_number: 218
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 246
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

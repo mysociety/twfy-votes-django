@@ -1,0 +1,51 @@
+id: 6818
+name: Referendum on EU Withdrawal Arrangements
+context_description: a second <b>referendum on the terms of the UK's withdrawal from the
+  EU</b>
+policy_description: There have been votes in Parliament on whether a second EU referendum should
+  be held on if to accept proposed arrangements for the United Kingdom's withdrawal
+  from the European Union.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2017-12-20
+    division_number: 86
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-01-29
+    division_number: 307
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-03-14
+    division_number: 360
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-03-27
+    division_number: 392
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-04-01
+    division_number: 399
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

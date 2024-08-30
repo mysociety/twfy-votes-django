@@ -1,0 +1,43 @@
+id: 6705
+name: Pub Leases
+context_description: requiring pub companies to offer <b>pub landlords rent-only leases</b>
+policy_description: There have been votes in Parliament on the question of if pub
+  companies should be required to offer their tenants an option to rent the premises
+  with no requirement to buy beer, and other supplies, from the pub company.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-01-09
+    division_number: 131
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-01-21
+    division_number: 183
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-11-18
+    division_number: 82
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-02-02
+    division_number: 181
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

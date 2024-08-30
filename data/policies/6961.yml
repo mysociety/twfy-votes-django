@@ -1,0 +1,127 @@
+id: 6961
+name: Sale and Advertising of Tobacco and Other Nicotine Products
+context_description: <b>restricting</b> the sale and advertising of <b>tobacco and
+  other nicotine products</b>
+policy_description: There have been votes in Parliament on regulating the advertising
+  and sales of tobacco and other nicotine based products and on the taxation of tobacco.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- health
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2001-01-22
+    division_number: 70
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2001-01-22
+    division_number: 71
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2001-01-22
+    division_number: 73
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2001-02-13
+    division_number: 118
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2001-02-13
+    division_number: 119
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-04-29
+    division_number: 220
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-02-10
+    division_number: 208
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-11
+    division_number: 174
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-11
+    division_number: 233
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-09-06
+    division_number: 61
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-04-18
+    division_number: 194
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-04-18
+    division_number: 195
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-09-12
+    division_number: 16
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-10-31
+    division_number: 31
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-22
+    division_number: 113
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-30
+    division_number: 236
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

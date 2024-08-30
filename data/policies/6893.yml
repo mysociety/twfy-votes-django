@@ -1,0 +1,43 @@
+id: 6893
+name: Income Tax - Higher Rate Threshold
+context_description: raising the threshold at which people start to pay <b>the higher
+  rate of income tax</b>
+policy_description: There have been votes in Parliament on the income threshold above
+  which income tax is paid at the higher rate.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-03-09
+    division_number: 236
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-13
+    division_number: 248
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-19
+    division_number: 261
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-24
+    division_number: 11
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

@@ -1,0 +1,71 @@
+id: 6866
+name: Support for the Economy in Response to COVID-19
+context_description: more <b>support for the economy</b> in response to the <b>COVID-19</b>
+  pandemic
+policy_description: There have been votes in Parliament on support for the economy
+  in response to COVID-19.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-10-14
+    division_number: 136
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-21
+    division_number: 149
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-21
+    division_number: 153
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-01
+    division_number: 225
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-23
+    division_number: 231
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-23
+    division_number: 232
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-03-25
+    division_number: 246
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-06-15
+    division_number: 26
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

@@ -1,0 +1,49 @@
+id: 6720
+name: Register of Lobbyists
+context_description: a statutory <b>register of lobbyists</b>
+policy_description: There have been votes in Parliament on whether there should be a register
+  of those who professionally lobby MPs.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-06-25
+    division_number: 32
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-03
+    division_number: 71
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-03
+    division_number: 72
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-09
+    division_number: 78
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-09
+    division_number: 95
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

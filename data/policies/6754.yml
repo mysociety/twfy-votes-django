@@ -1,0 +1,85 @@
+id: 6754
+name: Reduce capital gains tax
+context_description: reducing <b>capital gains tax</b>
+policy_description: Capital gains taxes should be reduced.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-07-06
+    division_number: 14
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 198
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-22
+    division_number: 221
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-22
+    division_number: 223
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-22
+    division_number: 225
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-11
+    division_number: 233
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-28
+    division_number: 28
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-09-06
+    division_number: 58
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-09-06
+    division_number: 61
+  alignment: agree
+  strength: strong
+  notes: ''
+- policy_id:
+  decision:
+    chamber_slug: commons
+    date: 2024-03-12
+    division_number: 89
+    key: commons-2024-03-12-89
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

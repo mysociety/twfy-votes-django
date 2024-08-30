@@ -1,0 +1,122 @@
+id: 810
+name: Gambling Regulation
+context_description: greater <b>regulation of gambling</b>
+policy_description: There have been votes in Parliament on a number of aspects of
+  the regulation of gambling. Specific votes have been on the powers of local councils
+  to use planning laws to control the numbers, and locations, of betting shops as
+  well as regulations limiting stakes, and prizes, for gambling machines, and the
+  laws governing the operation of casinos.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2004-11-01
+    division_number: 296
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-11-01
+    division_number: 297
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-01-24
+    division_number: 38
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-01-24
+    division_number: 43
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-06-14
+    division_number: 12
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-01-19
+    division_number: 132
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-03-28
+    division_number: 88
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-04-28
+    division_number: 155
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-17
+    division_number: 278
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-16
+    division_number: 102
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-26
+    division_number: 138
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-26
+    division_number: 139
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-12-04
+    division_number: 149
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-01-08
+    division_number: 172
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-01-08
+    division_number: 173
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

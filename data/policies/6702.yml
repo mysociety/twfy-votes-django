@@ -1,0 +1,78 @@
+id: 6702
+name: Jobs Guarantee for Young People
+context_description: spending public money to create <b>guaranteed jobs for young
+  people</b> who have spent a long time unemployed
+policy_description: 'There have been votes in Parliament on whether the Government should
+  fund guaranteed jobs for young people.  '
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-10-12
+    division_number: 365
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-09
+    division_number: 394
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-12-14
+    division_number: 413
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 2
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 3
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-05-15
+    division_number: 2
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-04
+    division_number: 74
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-27
+    division_number: 140
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-06-12
+    division_number: 2
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

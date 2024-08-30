@@ -1,0 +1,86 @@
+id: 6766
+name: Preservation of Environmental Protections on Withdrawal from the European Union
+context_description: the <b>preservation of environmental protections</b> after withdrawal
+  from the EU
+policy_description: There have been votes in Parliament on the retention of environmental
+  protections on the United Kingdom's withdrawal from the European Union.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2016-07-12
+    division_number: 42
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-11-15
+    division_number: 38
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-11-15
+    division_number: 41
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-11-15
+    division_number: 42
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-12-12
+    division_number: 63
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-01-17
+    division_number: 99
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-06-13
+    division_number: 185
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-09-04
+    division_number: 441
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-09
+    division_number: 229
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-05-24
+    division_number: 243
+    key: commons-2023-05-24-243
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

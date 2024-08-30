@@ -1,0 +1,148 @@
+id: 6901
+name: Protecting and Supporting Victims of Crime
+context_description: <b>protecting and supporting victims of crime</b>
+policy_description: There have been votes in Parliament on providing more support
+  and assistance to victims of crime, particularly victims of rape, sexual and domestic
+  abuse, and coercive control.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-07-06
+    division_number: 72
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-07-06
+    division_number: 73
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 253
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 254
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 255
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 256
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 257
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 258
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 259
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-15
+    division_number: 260
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-26
+    division_number: 273
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-26
+    division_number: 274
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-26
+    division_number: 275
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-19
+    division_number: 3
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-06-09
+    division_number: 24
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-05
+    division_number: 42
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-08
+    division_number: 141
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-08
+    division_number: 142
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-20
+    division_number: 257
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

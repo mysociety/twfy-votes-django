@@ -1,0 +1,49 @@
+id: 6851
+name: Standards for Imported Goods
+context_description: requiring <b>imported goods</b> to meet <b>domestic standards</b>
+policy_description: There have been votes in Parliament on whether the standards applying
+  to imported goods should equal those applying in the United Kingdom
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-07-20
+    division_number: 79
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-12
+    division_number: 129
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-11-04
+    division_number: 161
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-19
+    division_number: 205
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-09
+    division_number: 229
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

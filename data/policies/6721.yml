@@ -1,0 +1,71 @@
+id: 6721
+name: Mass Retention of Communications Data
+context_description: requiring the mass <b>retention of information about communications</b>
+policy_description: 'There have been votes in Parliament on whether we should require the
+  mass retention of information about communications (but not the content of those
+  communications). '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2009-03-17
+    division_number: 77
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 35
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 36
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 37
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 38
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-15
+    division_number: 39
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-07
+    division_number: 12
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-07
+    division_number: 13
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

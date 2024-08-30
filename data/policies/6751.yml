@@ -1,0 +1,48 @@
+id: 6751
+name: Mass Surveillance
+context_description: <b>mass surveillance</b> of people&rsquo;s communications and
+  activities
+policy_description: There have been votes in Parliament on whether the state should
+  be permitted, with safeguards, to intercept people&rsquo;s communications en masse,
+  as well as obtain and use datasets which could include people&rsquo;s personal banking,
+  travel, and health data. The question of if the state should be able to require
+  the retention of details of people&rsquo;s internet use has also been voted on.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2016-03-15
+    division_number: 220
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-07
+    division_number: 12
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-07
+    division_number: 13
+  alignment: agree
+  strength: strong
+  notes: ''
+- policy_id:
+  decision:
+    chamber_slug: commons
+    date: 2024-03-25
+    division_number: 116
+    key: commons-2024-03-25-116
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

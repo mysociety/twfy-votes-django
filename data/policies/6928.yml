@@ -1,0 +1,49 @@
+id: 6928
+name: Environmental Water Quality
+context_description: improving <b>environmental water quality</b>
+policy_description: There have been votes in Parliament on enviornmental water quality, including reducing the harm caused
+  by untreated sewage discharges.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-10-17
+    division_number: 75
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 213
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 87
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 88
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 91
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

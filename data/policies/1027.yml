@@ -1,0 +1,106 @@
+id: 1027
+name: Referendum on the UK's membership of the EU
+context_description: a referendum on the UK's membership of the <b>EU</b>
+policy_description: There have been a number of votes in Parliament on whether there should
+  be a national referendum on the United Kingdom's continued membership of the European
+  Union.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2008-03-04
+    division_number: 112
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-03-05
+    division_number: 117
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-03-05
+    division_number: 118
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-01
+    division_number: 186
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-24
+    division_number: 372
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-05-15
+    division_number: 3
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-05
+    division_number: 45
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-22
+    division_number: 134
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-10-17
+    division_number: 58
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-06-09
+    division_number: 5
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-06-09
+    division_number: 6
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-09-07
+    division_number: 61
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-02-29
+    division_number: 201
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

@@ -1,0 +1,78 @@
+id: 852
+name: Nuclear Power
+context_description: new <b>nuclear power</b>
+policy_description: There have been votes in Parliament on whether to support new civil
+  nuclear power plants to generate electricity. There have also been votes on how
+  to fund nuclear power generation.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2002-03-05
+    division_number: 182
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-03-05
+    division_number: 183
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-10-22
+    division_number: 326
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-10-22
+    division_number: 327
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-01-17
+    division_number: 126
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-01-17
+    division_number: 127
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-24
+    division_number: 128
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-03
+    division_number: 101
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-10
+    division_number: 155
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

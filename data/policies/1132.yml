@@ -1,0 +1,22 @@
+id: 1132
+name: Undergraduate Tuition Fees - England
+context_description: raising England&rsquo;s <b>undergraduate tuition fee</b> cap
+  to &pound;9,000 per year
+policy_description: There have been votes in Parliament on the level of undergraduate
+  tuition fees universities in England are permitted to charge students from the UK.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- education
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-12-09
+    division_number: 150
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

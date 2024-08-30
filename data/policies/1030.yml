@@ -1,0 +1,392 @@
+id: 1030
+name: Measures to prevent climate change
+context_description: measures to <b>prevent climate change</b>
+policy_description: There have been votes in Parliament on targets for reducing carbon
+  dioxide emissions and on increasing the proportion of electricity generated via
+  renewable means as well as on the establishment of a UK Green Investment Bank, to
+  invest in projects which, for example, reduce greenhouse gas emissions.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2000-03-10
+    division_number: 101
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2000-03-27
+    division_number: 124
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-11-08
+    division_number: 311
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-08
+    division_number: 107
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-04-30
+    division_number: 165
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-06-02
+    division_number: 206
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-06-09
+    division_number: 212
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-10-28
+    division_number: 295
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-10-28
+    division_number: 296
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-10-28
+    division_number: 297
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-10-28
+    division_number: 298
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-10-21
+    division_number: 229
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-14
+    division_number: 353
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-06-11
+    division_number: 13
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-10-17
+    division_number: 78
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-10-17
+    division_number: 82
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-12-19
+    division_number: 127
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-03
+    division_number: 14
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 18
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 19
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 20
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-12-04
+    division_number: 151
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-07-14
+    division_number: 44
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-07-14
+    division_number: 47
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-09-08
+    division_number: 63
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-10-26
+    division_number: 89
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-14
+    division_number: 216
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-14
+    division_number: 217
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-03
+    division_number: 261
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-09
+    division_number: 267
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-09-06
+    division_number: 60
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-06-25
+    division_number: 424
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-10-24
+    division_number: 10
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-02-05
+    division_number: 32
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-29
+    division_number: 114
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-12
+    division_number: 130
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-11-16
+    division_number: 171
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-13
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 213
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-26
+    division_number: 18
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-06-07
+    division_number: 20
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-14
+    division_number: 55
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-14
+    division_number: 56
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 88
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-03
+    division_number: 101
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-23
+    division_number: 122
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-13
+    division_number: 148
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-10
+    division_number: 155
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-18
+    division_number: 4
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-12-04
+    division_number: 25
+    key: commons-2023-12-04-25
+  alignment: agree
+  strength: strong
+  notes: ''
+- policy_id:
+  decision:
+    chamber_slug: commons
+    date: 2024-02-20
+    division_number: 76
+    key: commons-2024-02-20-76
+  alignment: agree
+  strength: strong
+  notes: ''
+- policy_id:
+  decision:
+    chamber_slug: commons
+    date: 2024-02-20
+    division_number: 77
+    key: commons-2024-02-20-77
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2019-06-24
+    decision_ref: b.530.1
+  alignment: agree
+  strength: strong
+  notes: ''

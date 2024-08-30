@@ -1,0 +1,65 @@
+id: 6674
+name: Welfare Benefit Levels
+context_description: raising <b>welfare benefits</b> at least in line with prices
+policy_description: Welfare benefits are payments, including tax credits, which the
+  Government makes to those on who are on low incomes or who meet certain criteria.
+  There have been votes in Parliament on the level of these payments and if they should
+  increase at least in line with prices.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-01-08
+    division_number: 128
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-08
+    division_number: 129
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-21
+    division_number: 136
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-21
+    division_number: 137
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-21
+    division_number: 138
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-07
+    division_number: 185
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-03-02
+    division_number: 205
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

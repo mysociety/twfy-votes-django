@@ -1,0 +1,135 @@
+id: 6693
+name: Fuel Taxes
+context_description: lower taxes on <b>fuel for motor vehicles</b>
+policy_description: There have been votes in Parliament on the rates of taxation applying
+  to fuel for motor vehicles.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+- taxation
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 17
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 22
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-07
+    division_number: 191
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-16
+    division_number: 231
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-29
+    division_number: 237
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 256
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 257
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-22
+    division_number: 304
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-28
+    division_number: 308
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-05
+    division_number: 317
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-16
+    division_number: 1
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-03
+    division_number: 38
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-03
+    division_number: 41
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-11-12
+    division_number: 100
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-18
+    division_number: 216
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-09-21
+    division_number: 81
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

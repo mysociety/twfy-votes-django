@@ -1,0 +1,80 @@
+id: 6868
+name: Authorised Criminal Conduct by Undercover Sources
+context_description: authorising <b>criminal conduct by undercover officers and covert
+  sources</b>
+policy_description: There have been votes in Parliament on procedures for enabling
+  the authorisation of criminal conduct by undercover police officers, other public
+  officials working undercover, and members of the public recruited by public bodies
+  as covert sources.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-10-05
+    division_number: 125
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-15
+    division_number: 138
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-15
+    division_number: 139
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-15
+    division_number: 140
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-15
+    division_number: 141
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-10-15
+    division_number: 142
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-27
+    division_number: 219
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-27
+    division_number: 220
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-27
+    division_number: 223
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

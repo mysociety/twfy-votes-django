@@ -1,0 +1,49 @@
+id: 6854
+name: Fire Safety
+context_description: stronger <b>fire safety measures</b>
+policy_description: There have been votes in Parliament on fire safety measures, including
+  requirements for inspections and data sharing with fire services.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2020-09-07
+    division_number: 86
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-01
+    division_number: 224
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-24
+    division_number: 233
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-18
+    division_number: 1
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-19
+    division_number: 165
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

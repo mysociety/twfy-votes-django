@@ -1,0 +1,30 @@
+id: 6682
+name: Financial Support for 16-19 Year Olds in Education and Training
+context_description: ending <b>financial support</b> for some 16-19 year olds in training
+  and further education
+policy_description: There have been votes in Parliament on providing financial support
+  for 16-19 year olds in education or training; particularly following the replacement
+  of the education maintenance allowance.
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- education
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-01-19
+    division_number: 176
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-01-19
+    division_number: 177
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

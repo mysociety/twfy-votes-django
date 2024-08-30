@@ -1,0 +1,28 @@
+id: 1124
+name: automatic enrolment in occupational pensions
+context_description: automatic enrolment in <b>occupational pensions</b>
+policy_description: A vote for automatic enrolment in occupational pensions is a vote
+  for low-to-mid income earners to be enrolled into pension schemes automatically
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-03-08
+    division_number: 103
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-06-28
+    division_number: 11
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

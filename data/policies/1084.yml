@@ -1,0 +1,65 @@
+id: 1084
+name: Proportional Representation When Electing MPs
+context_description: a more <a href="https://en.wikipedia.org/wiki/Proportional_representation">proportional
+  system</a> for electing MPs
+policy_description: 'There have been votes in Parliament on whether the system used to
+  elect MPs to the House of Commons should change to a one where the proportion of
+  seats won by a political party better reflects the proportion of the vote they win. '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-02-09
+    division_number: 78
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-02-09
+    division_number: 79
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-12
+    division_number: 68
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-02
+    division_number: 109
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-12-16
+    division_number: 152
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-07-20
+    division_number: 50
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-01-20
+    division_number: 18
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

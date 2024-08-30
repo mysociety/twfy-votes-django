@@ -1,0 +1,59 @@
+id: 20001
+name: Approve reports of Standards Committee
+context_description: approving <b>reports and recommendations made by the Standards
+  Committee</b>
+policy_description: The Standards Committee investigates if MPs have broken rules,
+  and recommends sanctions for MPs to vote on. There have been votes (and decisions without a vote) on sanctions against individual MPs.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2023-06-19
+    division_number: 258
+    key: commons-2023-06-19-258
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-03
+    division_number: 99
+    key: commons-2021-11-03-99
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-06-06
+    division_number: 245
+    key: commons-2023-06-06-245
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2023-10-25
+    decision_ref: c.936.7
+    division_name: ''
+    key: commons-2023-10-25-c.936.7
+    source_gid: uk.org.publicwhip/debate/2023-10-25c.936.7
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-16
+    decision_ref: d.489.1
+    division_name: ''
+    key: commons-2021-11-16-d.489.1
+    source_gid: uk.org.publicwhip/debate/2021-11-16d.489.1
+  alignment: agree
+  strength: strong
+  notes: ''

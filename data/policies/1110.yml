@@ -1,0 +1,217 @@
+id: 1110
+name: VAT rate
+context_description: increasing the <b>rate of VAT</b>
+policy_description: There have been votes in Parliament on the rate at which Value
+  Added Tax (VAT) is charged.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2008-12-17
+    division_number: 9
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-06-28
+    division_number: 10
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-06
+    division_number: 14
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 17
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 18
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 19
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-13
+    division_number: 22
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-20
+    division_number: 32
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-22
+    division_number: 304
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-28
+    division_number: 308
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-12
+    division_number: 365
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-09
+    division_number: 394
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-23
+    division_number: 399
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-12-14
+    division_number: 413
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-11
+    division_number: 421
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-16
+    division_number: 1
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 2
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 3
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-03
+    division_number: 38
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-05
+    division_number: 57
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-05
+    division_number: 58
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-18
+    division_number: 216
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-07-14
+    division_number: 44
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-07-21
+    division_number: 52
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-07-21
+    division_number: 53
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-10-26
+    division_number: 93
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-06-25
+    division_number: 424
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-11
+    division_number: 158
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-18
+    division_number: 3
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

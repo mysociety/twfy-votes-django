@@ -1,0 +1,30 @@
+id: 6697
+name: Public Forests
+context_description: selling England&rsquo;s state owned <b>forests</b>
+policy_description: The Public Forest Estate in England comprises about 2% of the
+  land in England and 18% of the woods and forests. MPs have voted on if the estate
+  ought remain publicly-owned and managed by the Forestry Commission or if it should
+  be sold off.
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-02-02
+    division_number: 188
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-02
+    division_number: 189
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

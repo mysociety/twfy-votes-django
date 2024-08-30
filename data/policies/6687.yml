@@ -1,0 +1,94 @@
+id: 6687
+name: Academy Schools
+context_description: <a href="https://en.wikipedia.org/wiki/Academy_(English_school)">academy
+  schools</a>
+policy_description: Schools with "Academy Status" are given financial independence
+  and freedom from local authority control. Votes have also been held on what requirements
+  ought be made of Academy Schools in relation to admissions, exclusions and personal,
+  social and health education.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- education
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-07-19
+    division_number: 29
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-19
+    division_number: 30
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 37
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-21
+    division_number: 38
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-26
+    division_number: 47
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-07-26
+    division_number: 49
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-08
+    division_number: 193
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-11
+    division_number: 271
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-22
+    division_number: 221
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-13
+    division_number: 236
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-25
+    division_number: 1
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

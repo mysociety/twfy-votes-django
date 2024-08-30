@@ -1,0 +1,23 @@
+id: 6958
+name: The Republic of Ireland - Northern Ireland Border
+context_description: <b>avoiding physical infrastructure at the border between the
+  Republic of Ireland and Northern Ireland</b>
+policy_description: There have been votes in Parliament which would impact if a "hard
+  border", with infrastructure to enable checks on people and goods crossing the border,
+  between Northern Ireland and the Republic of Ireland was required.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2022-03-22
+    division_number: 230
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

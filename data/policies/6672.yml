@@ -1,0 +1,143 @@
+id: 6672
+name: Housing Benefit Reduction For Those Deemed to have Excess Bedrooms
+context_description: reducing <b>housing benefit</b> for social tenants deemed to
+  have excess bedrooms (which Labour describe as the "bedroom tax")
+policy_description: There have been votes in Parliament on the introduction, and operation
+  of, a policy to restrict housing benefit for those in social housing deemed to have
+  excess bedrooms. This policy has been called the "Bedroom Tax" by Labour and some
+  commentators.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-03-09
+    division_number: 219
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-09
+    division_number: 220
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-15
+    division_number: 297
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-01
+    division_number: 459
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-02-21
+    division_number: 472
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-10-24
+    division_number: 84
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-02-27
+    division_number: 167
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-12
+    division_number: 126
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-11-12
+    division_number: 127
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-12-18
+    division_number: 164
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-02-12
+    division_number: 211
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-02-26
+    division_number: 214
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-09-05
+    division_number: 47
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-10-14
+    division_number: 55
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-11-26
+    division_number: 97
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-12-17
+    division_number: 120
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-12-17
+    division_number: 121
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-05-08
+    division_number: 149
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

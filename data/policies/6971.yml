@@ -1,0 +1,52 @@
+id: 6971
+name: Suspending MPs or Reducing their Salaries
+context_description: <b>suspending MPs or reducing their salaries</b> in specific
+  cases
+policy_description: There have been votes in Parliament on whether to suspend MPs from
+  the House of Commons, or if to reduce their salaries, in light of particular case-specific
+  circumstances.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2018-05-23
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-07-11
+    division_number: 207
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-03
+    division_number: 99
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-30
+    division_number: 125
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-06-14
+    division_number: 13
+    key: commons-2022-06-14-13
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

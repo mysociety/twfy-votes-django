@@ -1,0 +1,35 @@
+id: 6747
+name: Public Control over Bus Services
+context_description: greater public control of <b>bus services</b>
+policy_description: There have been votes in Parliament on greater public control
+  of bus services.
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2014-11-05
+    division_number: 74
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-19
+    division_number: 167
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-15
+    division_number: 20
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

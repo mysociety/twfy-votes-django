@@ -1,0 +1,79 @@
+id: 6753
+name: High Speed Rail
+context_description: new <b>high speed rail</b> infrastructure
+policy_description: MPs have voted on funding and giving permission for a new high
+  speed rail network, connecting at least London, Birmingham, the East Midlands, Sheffield,
+  Leeds, and Manchester.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-06-26
+    division_number: 35
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-26
+    division_number: 36
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-10-31
+    division_number: 117
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-28
+    division_number: 254
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-28
+    division_number: 255
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-23
+    division_number: 231
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-01-30
+    division_number: 109
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-07-15
+    division_number: 435
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-12-08
+    division_number: 144
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

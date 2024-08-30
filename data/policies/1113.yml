@@ -1,0 +1,121 @@
+id: 1113
+name: Equalise Number of Electors Per Parliamentary Constituency
+context_description: an <b>equal number of electors</b> per parliamentary constituency
+policy_description: There have been votes in Parliament on equalising the number of
+  people who elect each MP. Specific votes have been held on if there ought be exceptions
+  to rules aimed at equalising the size of constituencies for special cases such as
+  Cornwall and the Isle of Wight.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-09-06
+    division_number: 51
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-20
+    division_number: 92
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-01
+    division_number: 104
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-01
+    division_number: 106
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-02
+    division_number: 110
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 202
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 203
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 204
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-15
+    division_number: 205
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-29
+    division_number: 146
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-11-18
+    division_number: 86
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-07-14
+    division_number: 74
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-11-10
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-11-10
+    division_number: 165
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-11-10
+    division_number: 166
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

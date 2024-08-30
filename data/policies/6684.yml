@@ -1,0 +1,44 @@
+id: 6684
+name: Support for Those Unable to Afford Council Tax
+context_description: making local councils responsible for helping those in <b>financial
+  need</b> afford their <b>council tax</b> and reducing the amount spent on such support
+policy_description: There have been votes in Parliament on the question of localising
+  the systems for helping those in financial need pay council tax by abolishing the
+  council tax benefit and replacing it with local council tax reduction schemes
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-01-10
+    division_number: 414
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-11
+    division_number: 418
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-31
+    division_number: 448
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-21
+    division_number: 7
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

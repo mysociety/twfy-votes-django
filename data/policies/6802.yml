@@ -1,0 +1,35 @@
+id: 6802
+name: Heathrow Airport Expansion
+context_description: adding a <b>third runway at Heathrow Airport</b>
+policy_description: There have been votes in Parliament on expanding Heathrow Airport
+  by adding a third runway.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2008-04-02
+    division_number: 142
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-01-28
+    division_number: 26
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-06-25
+    division_number: 192
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

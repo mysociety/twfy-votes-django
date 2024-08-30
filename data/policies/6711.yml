@@ -1,0 +1,46 @@
+id: 6711
+name: Tax on Value of Expensive Homes
+context_description: an annual tax on the value of expensive homes (popularly known
+  as a <b>mansion tax</b>)
+policy_description: here have been votes in Parliament on the introduction of a new
+  property tax on expensive homes. Such a tax, popularly dubbed a "mansion tax", would
+  introduce a requirement for those with residential properties worth over a certain
+  amount to pay a fraction of the property's value (or a fraction of its value over
+  a certain amount) to the Government each year.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-03-12
+    division_number: 179
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-17
+    division_number: 211
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-01
+    division_number: 38
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-04
+    division_number: 74
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

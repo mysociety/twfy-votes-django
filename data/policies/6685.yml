@@ -1,0 +1,142 @@
+id: 6685
+name: Bankers' Bonus Tax
+context_description: a <b>banker&rsquo;s bonus tax</b>
+policy_description: There have been votes in Parliament on the level of taxation applied
+  to Banker' Bonuses. In 2009 a one-off 50% tax on on any individual discretionary
+  bonus over Â£25,000 paid to a banker was levied and there have been a number of
+  votes since on reintroducing such a tax.
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-06-22
+    division_number: 304
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-05
+    division_number: 314
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-13
+    division_number: 325
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-13
+    division_number: 348
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-12
+    division_number: 365
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-09
+    division_number: 394
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-23
+    division_number: 399
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-12-14
+    division_number: 413
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-23
+    division_number: 436
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-18
+    division_number: 519
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 2
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-17
+    division_number: 3
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-03
+    division_number: 40
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-05
+    division_number: 57
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-05
+    division_number: 58
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-11-28
+    division_number: 106
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-17
+    division_number: 212
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-02-11
+    division_number: 153
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

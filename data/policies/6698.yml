@@ -1,0 +1,72 @@
+id: 6698
+name: Fixed Term Parliaments
+context_description: <b>fixed periods between parliamentary elections</b>
+policy_description: Fixed Term Parliaments involve holding general elections on a
+  regular basis, for example every five years, with some exceptions permitting early
+  elections. Without Fixed Term Parliaments a party with a majority had significant
+  influence over the timing of a general election.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-09-13
+    division_number: 61
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-01
+    division_number: 141
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-01-18
+    division_number: 175
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-13
+    division_number: 326
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-10-23
+    division_number: 61
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-06
+    division_number: 45
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-09-13
+    division_number: 66
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-09-13
+    division_number: 67
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

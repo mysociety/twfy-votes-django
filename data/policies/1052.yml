@@ -1,0 +1,127 @@
+id: 1052
+name: University tuition fees
+context_description: university <b>tuition fees</b>
+policy_description: There have been votes in Parliament on tuition fees applicable
+  to UK undergraduate students at universities in England. Subjects of specific votes
+  have been on the subjects of introducing fees, increasing to fees, and capping fees.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- education
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 1997-11-04
+    division_number: 81
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-07-01
+    division_number: 323
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 1998-07-01
+    division_number: 324
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-01-27
+    division_number: 38
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-03-31
+    division_number: 122
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-03-31
+    division_number: 123
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-03-31
+    division_number: 125
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-06-23
+    division_number: 205
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-07-19
+    division_number: 233
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-09-14
+    division_number: 242
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-09-14
+    division_number: 243
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-09
+    division_number: 150
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-09
+    division_number: 151
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-11
+    division_number: 63
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-25
+    division_number: 1
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-06-29
+    division_number: 2
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

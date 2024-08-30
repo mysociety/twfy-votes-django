@@ -1,0 +1,59 @@
+id: 6704
+name: Low Carbon Electricity Generation
+context_description: financial incentives for <b>low carbon</b> emission <b>electricity
+  generation</b> methods
+policy_description: There have been votes in Parliament relating to finanical incentives
+  designed to encourage electricity generation via methods which involve low levels
+  of carbon emissions. Matters voted on include subsidies for renewable energy generation
+  and on limiting carbon dioxide emissions from power stations.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-11-23
+    division_number: 400
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-23
+    division_number: 401
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-12-19
+    division_number: 127
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 19
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-06-04
+    division_number: 20
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-07-11
+    division_number: 206
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

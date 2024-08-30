@@ -1,0 +1,63 @@
+id: 6910
+name: Court Delays
+context_description: <b>reducing court delays</b>
+policy_description: There have been votes in Parliament on measures intended to streamline
+  and modernise elements of the justice system.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-06-09
+    division_number: 24
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-26
+    division_number: 96
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-25
+    division_number: 171
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-25
+    division_number: 172
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-25
+    division_number: 173
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-25
+    division_number: 175
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-04-26
+    division_number: 263
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

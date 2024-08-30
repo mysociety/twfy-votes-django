@@ -1,0 +1,64 @@
+id: 6677
+name: NHS Services for Private Patients
+context_description: restricting the provision of services to <b>private patients</b>
+  by the NHS
+policy_description: There have been votes in Parliament on restricting the ability
+  of NHS Trusts to generate income from private patients.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- health
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-03-16
+    division_number: 233
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-06
+    division_number: 338
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-07
+    division_number: 342
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-26
+    division_number: 377
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-01-16
+    division_number: 423
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-13
+    division_number: 488
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-13
+    division_number: 489
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

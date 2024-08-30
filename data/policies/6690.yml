@@ -1,0 +1,119 @@
+id: 6690
+name: Tax Avoidance
+context_description: measures to reduce <b>tax avoidance</b>
+policy_description: Parliament has voted on measures, including the introduction of
+  a general anti-abuse rule, aimed at tackling abusive tax avoidance.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-15
+    division_number: 201
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-01
+    division_number: 39
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-02
+    division_number: 43
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-02-11
+    division_number: 154
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-13
+    division_number: 235
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-19
+    division_number: 239
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-06-28
+    division_number: 25
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-04-18
+    division_number: 194
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-04-18
+    division_number: 195
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-11-12
+    division_number: 255
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-11-12
+    division_number: 256
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-01-20
+    division_number: 16
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-02-25
+    division_number: 35
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-07-01
+    division_number: 71
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

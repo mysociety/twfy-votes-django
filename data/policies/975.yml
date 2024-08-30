@@ -1,0 +1,119 @@
+id: 975
+name: Investigations into the Iraq war
+context_description: <strong>investigations</strong> into the Iraq war
+policy_description: A number of votes were held relating to holding investigations
+  into the US led invasion of Iraq in 2003
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2003-06-04
+    division_number: 217
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-07-16
+    division_number: 294
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-10-22
+    division_number: 335
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-10-22
+    division_number: 336
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-03-09
+    division_number: 80
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-10-31
+    division_number: 330
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-10-31
+    division_number: 331
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-06-11
+    division_number: 135
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-06-11
+    division_number: 136
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-03-25
+    division_number: 133
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-03-25
+    division_number: 134
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-03-25
+    division_number: 88
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-03-25
+    division_number: 89
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-06-24
+    division_number: 156
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-11-30
+    division_number: 99
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

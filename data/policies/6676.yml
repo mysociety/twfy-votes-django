@@ -1,0 +1,72 @@
+id: 6676
+name: NHS Commissioning
+context_description: reforming the <b>NHS</b> so GPs buy services on behalf of their
+  patients
+policy_description: There have been votes in Parliament on whether GPs should buy services
+  such as out of hours care, ambulance services and hospital care on behalf of their
+  patients.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- health
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-01-31
+    division_number: 185
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-16
+    division_number: 233
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-09
+    division_number: 268
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-07
+    division_number: 342
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-26
+    division_number: 377
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-13
+    division_number: 488
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-13
+    division_number: 489
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-10-23
+    division_number: 9
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

@@ -1,0 +1,66 @@
+id: 6715
+name: Security Sensitive Evidence in Courts
+context_description: allowing national security sensitive evidence to be put before
+  <b>courts in secret sessions</b>
+policy_description: There have been votes in Parliament on whether there should be a mechanism
+  for material deemed national security sensitive to be made available to a civil
+  court and a special advocate but not parties to the case. The mechanism is called
+  the "closed material procedure".
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-12-18
+    division_number: 125
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-04
+    division_number: 169
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-04
+    division_number: 170
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-04
+    division_number: 172
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-07
+    division_number: 177
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-17
+    division_number: 64
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-17
+    division_number: 65
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

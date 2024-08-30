@@ -1,0 +1,50 @@
+id: 6744
+name: Secure Tenancies for Life
+context_description: phasing out <b>secure tenancies for life</b>
+policy_description: There have been votes in Parliament on phasing out secure lifetime
+  tenancies and requiring tenancies be for a fixed term and do not get automatically
+  renewed.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 104
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 105
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 106
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-12
+    division_number: 160
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-12
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

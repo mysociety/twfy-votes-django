@@ -1,0 +1,63 @@
+id: 1050
+name: Hunting ban
+context_description: the <b>hunting ban</b>
+policy_description: A vote for a hunting ban is a vote against people being allowed
+  to hunt wild animals (primarily foxes) with hounds.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- social
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2002-03-18
+    division_number: 197
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-03-18
+    division_number: 198
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-03-18
+    division_number: 199
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-06-30
+    division_number: 259
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-06-30
+    division_number: 260
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-06-30
+    division_number: 261
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2004-09-15
+    division_number: 250
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

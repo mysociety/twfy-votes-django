@@ -1,0 +1,84 @@
+id: 996
+name: Transparancy of Parliament
+context_description: a <b>transparent Parliament</b>
+policy_description: There have been number of votes in Parliament on how transparently
+  Parliament is run, particularly in respect of MPs' expenses.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2007-04-20
+    division_number: 94
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-04-20
+    division_number: 95
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-18
+    division_number: 119
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-18
+    division_number: 120
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-18
+    division_number: 121
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-18
+    division_number: 122
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-05-18
+    division_number: 123
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2008-07-03
+    division_number: 253
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-04-30
+    division_number: 106
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2009-04-30
+    division_number: 109
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

@@ -1,0 +1,93 @@
+id: 811
+name: Smoking bans
+context_description: <b>smoking bans</b>
+policy_description: Smoking Bans - Over the years there have been votes in Parliament
+  on banning smoking in restaurants, public buildings, pubs, and in cars with children
+  present.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- social
+- health
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 1999-05-04
+    division_number: 164
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-04-14
+    division_number: 162
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-03-18
+    division_number: 148
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-02-14
+    division_number: 163
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-02-14
+    division_number: 164
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-02-14
+    division_number: 165
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2006-02-14
+    division_number: 166
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-13
+    division_number: 70
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-22
+    division_number: 303
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-02-10
+    division_number: 207
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-02-11
+    division_number: 152
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

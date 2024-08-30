@@ -1,0 +1,43 @@
+id: 6746
+name: Publicly Owned Railways
+context_description: a <b>publicly owned railway system</b>
+policy_description: There have been votes in Parliament on the public ownership of
+  the railways, including on keeping the rail infrastructure public, and permitting
+  train operating companies to be publicly-owned.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2014-10-29
+    division_number: 65
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-19
+    division_number: 167
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-03-23
+    division_number: 228
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-09-12
+    division_number: 63
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

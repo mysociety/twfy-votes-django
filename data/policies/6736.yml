@@ -1,0 +1,41 @@
+id: 6736
+name: MPs' Veto Over Laws Only Affecting Their Part of the UK
+context_description: <b>a veto for MPs</b> from England, Wales and Northern Ireland
+  <b>over laws specifically impacting their part of the UK</b>
+policy_description: ' That English MPs have not been able vote on matters which have
+  been devolved to other parts of the UK, but Scottish, Welsh and Northern Ireland
+  MPs can vote on those same matters when the UK Parliament is legislating solely
+  for England has been considered by some to be unfair. There have been votes in Parliament
+  on how to give MPs from England, Wales and Northern Ireland a fairer say over matters
+  which only affect their parts of the UK. In respect of votes on matters only affecting
+  England this is often described as the "English Votes on English Laws" question. '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2015-10-22
+    division_number: 84
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-10-22
+    division_number: 85
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-10-22
+    division_number: 87
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

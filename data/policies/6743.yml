@@ -1,0 +1,49 @@
+id: 6743
+name: Charging Market Rent to High Earners in Council Homes
+context_description: charging a <b>market rent to high earners renting a council home</b>
+policy_description: Parliament has voted on whether high earners should be required
+  to pay a market rent for council homes.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 104
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 105
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-02
+    division_number: 106
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-12
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-03
+    division_number: 260
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

@@ -1,0 +1,49 @@
+id: 6888
+name: Air Quality
+context_description: improving <b>air quality</b>
+policy_description: There have been votes in Parliament on targets for
+  the levels of particulate matter in the air.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 213
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 215
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 86
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 87
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 88
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

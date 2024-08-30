@@ -1,0 +1,99 @@
+id: 6681
+name: Income Tax Additional Rate
+context_description: increasing the tax rate applied to <b>income over &pound;150,000</b>
+policy_description: 'There have been votes in Parliament on the rate of income tax
+  which applies to income over &pound;150,000. This is the top income tax band known
+  as the additional rate. '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-03-26
+    division_number: 503
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-26
+    division_number: 506
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-11-28
+    division_number: 105
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 196
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-15
+    division_number: 201
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-03-25
+    division_number: 236
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-02
+    division_number: 32
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-11-05
+    division_number: 73
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-04
+    division_number: 168
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-23
+    division_number: 179
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-23
+    division_number: 180
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-03-25
+    division_number: 187
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

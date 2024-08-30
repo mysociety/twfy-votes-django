@@ -1,15 +1,80 @@
-import datetime
 from enum import StrEnum
 
-from pydantic import BaseModel, computed_field
+
+class PolicyStrength(StrEnum):
+    """
+    This is the strength of the relationship between the motion and the policy.
+    Labelled strong and weak for historical purposes - but the precise meaning of that in a policy
+    is defined by strength meaning at the policy level.
+    """
+
+    WEAK = "weak"
+    STRONG = "strong"
+
+
+class StrengthMeaning(StrEnum):
+    """
+    We have changed what strong and weak means overtime.
+    This is for keeping track of a policy's current conversion status.
+    """
+
+    CLASSIC = "classic"  # old public whip style
+    SIMPLIFIED = "simplified"  # Only strong votes count for big stats, weak votes are informative
+
+
+class PolicyDirection(StrEnum):
+    """
+    This is the relatonship between the motion and the policy.
+    Agree means that if the motion passes it's good for the policy.
+    """
+
+    AGREE = "agree"
+    AGAINST = "against"
+    NEUTRAL = "neutral"
 
 
 class ChamberSlug(StrEnum):
     COMMONS = "commons"
     LORDS = "lords"
     SCOTLAND = "scotland"
-    WALES = "wales"
+    WALES = "senedd"
     NI = "ni"
+    PUBLIC_BILL_COMMITTEE = "pbc"
+
+
+class PolicyStatus(StrEnum):
+    ACTIVE = "active"
+    CANDIDATE = "candidate"
+    DRAFT = "draft"
+    REJECTED = "rejected"
+    RETIRED = "retired"
+
+
+class DecisionType(StrEnum):
+    DIVISION = "division"
+    AGREEMENT = "agreement"
+
+
+class PolicyGroupSlug(StrEnum):
+    HEALTH = "health"
+    MISC = "misc"
+    SOCIAL = "social"
+    REFORM = "reform"
+    FOREIGNPOLICY = "foreignpolicy"
+    ENVIRONMENT = "environment"
+    EDUCATION = "education"
+    TAXATION = "taxation"
+    BUSINESS = "business"
+    TRANSPORT = "transport"
+    HOUSING = "housing"
+    HOME = "home"
+    JUSTICE = "justice"
+    WELFARE = "welfare"
+
+
+class AyeNo(StrEnum):
+    AYE = "aye"
+    NO = "no"
 
 
 class VotePosition(StrEnum):
@@ -27,7 +92,6 @@ class VoteType(StrEnum):
     Enum for different types of parlimentary vote.
     Not all of these are formal descriptions.
     Converging on 'stages' rather than readings across Parliament.
-
     """
 
     AMENDMENT = "amendment"
@@ -59,82 +123,3 @@ class VoteType(StrEnum):
 
     def display_name(self):
         return self.replace("_", " ").title()
-
-
-class ManualMotion(BaseModel):
-    chamber: ChamberSlug
-    division_date: datetime.date
-    division_number: int
-    manual_motion: str
-
-
-class GovernmentParties(BaseModel):
-    chamber: list[str]
-    party: list[str]
-    start_date: datetime.date
-    end_date: datetime.date
-
-
-class Chamber(BaseModel):
-    slug: ChamberSlug
-
-    @computed_field
-    @property
-    def member_name(self) -> str:
-        match self.slug:
-            case ChamberSlug.COMMONS:
-                return "MPs"
-            case ChamberSlug.LORDS:
-                return "Lords"
-            case ChamberSlug.SCOTLAND:
-                return "MSPs"
-            case ChamberSlug.WALES:
-                return "MSs"
-            case ChamberSlug.NI:
-                return "AMs"
-            case _:
-                raise ValueError(f"Invalid house slug {self.slug}")
-
-    @computed_field
-    @property
-    def name(self) -> str:
-        match self.slug:
-            case ChamberSlug.COMMONS:
-                return "House of Commons"
-            case ChamberSlug.LORDS:
-                return "House of Lords"
-            case ChamberSlug.SCOTLAND:
-                return "Scottish Parliament"
-            case ChamberSlug.WALES:
-                return "Senedd"
-            case ChamberSlug.NI:
-                return "Northern Ireland Assembly"
-            case _:
-                raise ValueError(f"Invalid house slug {self.slug}")
-
-    def pw_alias(self):
-        # Alias for internal debate storage
-        match self.slug:
-            case ChamberSlug.COMMONS:
-                return "debate"
-            case _:
-                return self.twfy_alias()
-
-    def twfy_alias(self):
-        # Alias for internal debate storage
-        match self.slug:
-            case ChamberSlug.COMMONS:
-                return "debates"
-            case ChamberSlug.LORDS:
-                return "lords"
-            case ChamberSlug.SCOTLAND:
-                return "sp"
-            case ChamberSlug.WALES:
-                return "senedd"
-            case ChamberSlug.NI:
-                return "ni"
-            case _:
-                raise ValueError(f"Invalid house slug {self.slug}")
-
-    def twfy_debate_link(self, gid: str) -> str:
-        return f"https://www.theyworkforyou.com/{self.twfy_alias()}/?id={gid}"

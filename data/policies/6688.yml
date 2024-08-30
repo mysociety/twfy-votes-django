@@ -1,0 +1,91 @@
+id: 6688
+name: Use of UK Military Forces In Combat Abroad
+context_description: use of <b>UK military forces</b> in combat operations overseas
+policy_description: 'There have been votes in Parliament on the use of UK Military
+  Forces in Afghanistan, Iraq and Syria.  '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2002-11-25
+    division_number: 6
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-02-26
+    division_number: 96
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-03-18
+    division_number: 117
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-03-18
+    division_number: 118
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-09-09
+    division_number: 60
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-21
+    division_number: 235
+  alignment: agree
+  strength: strong
+  notes: ignore:strong_without_power
+- decision:
+    chamber_slug: commons
+    date: 2013-08-29
+    division_number: 69
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-08-29
+    division_number: 70
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-09-26
+    division_number: 53
+  alignment: agree
+  strength: strong
+  notes: ignore:strong_without_power
+- decision:
+    chamber_slug: commons
+    date: 2015-12-02
+    division_number: 138
+  alignment: against
+  strength: strong
+  notes: ignore:strong_without_power
+- decision:
+    chamber_slug: commons
+    date: 2015-12-02
+    division_number: 139
+  alignment: agree
+  strength: strong
+  notes: ignore:strong_without_power
+agreement_links: []

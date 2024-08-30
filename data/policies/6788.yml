@@ -1,0 +1,64 @@
+id: 6788
+name: Increase the State Pension Age for Women More Slowly
+context_description: <b>increasing the state pension age for women more slowly</b>
+policy_description: There have been votes in Parliament on the speed of the increase
+  in the state pension age for women. The increase was in pursuit of a policy of moving
+  to the same state pension age for men and women.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-06-08
+    division_number: 287
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-20
+    division_number: 299
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-18
+    division_number: 367
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-18
+    division_number: 368
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-01-07
+    division_number: 159
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-11-30
+    division_number: 100
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-11-29
+    division_number: 50
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

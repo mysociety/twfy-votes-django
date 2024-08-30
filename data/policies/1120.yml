@@ -1,0 +1,56 @@
+id: 1120
+name: Civil Service Redundancy Payments
+context_description: capping <b>civil service redundancy payments</b>
+policy_description: There have been votes in Parliament on introducing a cap on civil
+  service redundancy payments.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-09-07
+    division_number: 54
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-09-07
+    division_number: 55
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-13
+    division_number: 71
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-13
+    division_number: 72
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-13
+    division_number: 73
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-09-30
+    division_number: 120
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

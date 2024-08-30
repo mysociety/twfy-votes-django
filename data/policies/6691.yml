@@ -1,0 +1,128 @@
+id: 6691
+name: Incentives for Companies to Invest in Assets
+context_description: stronger tax <b>incentives for companies to invest</b> in assets
+policy_description: The tax incentive for companies to invest in assets (eg. new equipment)
+  is determined by the "annual investment allowance" - the amount spent on investing
+  assets in a year which companies (or self-employed individuals) can deduct from
+  their profits prior to the calculation of corporation tax.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-06-08
+    division_number: 2
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-29
+    division_number: 237
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-29
+    division_number: 239
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 256
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-04-26
+    division_number: 257
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-07-05
+    division_number: 317
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-03-26
+    division_number: 503
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-25
+    division_number: 196
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-04-15
+    division_number: 201
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-07-02
+    division_number: 43
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 241
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 242
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-04-01
+    division_number: 243
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2014-07-02
+    division_number: 32
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-04-19
+    division_number: 264
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-24
+    division_number: 7
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

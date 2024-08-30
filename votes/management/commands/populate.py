@@ -4,8 +4,8 @@ from votes.populate import import_register
 
 
 class Command(BaseCommand):
-    help = "Generate CSV file of GBGW 2022 events"
-    message = "Generating a CSV of areas for 2022 GBGW events"
+    help = "Upload data"
+    message = "Uploading data"
 
     def add_arguments(self, parser):
         parser.add_argument(

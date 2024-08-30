@@ -1,0 +1,72 @@
+id: 842
+name: Voting age
+context_description: a lower <b>voting age</b>
+policy_description: There have been votes in Parliament on reducing the voting age
+  from eighteen to sixteen for local government elections, for elections to the Westminster
+  and European Parliaments and for the referendum on the United Kingdom's membership
+  of the European Union.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2004-03-09
+    division_number: 81
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2005-11-29
+    division_number: 109
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-09-07
+    division_number: 57
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-17
+    division_number: 125
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-12-07
+    division_number: 142
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-12-08
+    division_number: 144
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-07-20
+    division_number: 50
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-01-17
+    division_number: 160
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

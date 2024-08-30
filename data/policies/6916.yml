@@ -1,0 +1,43 @@
+id: 6916
+name: Removal of Trespassers Intending to Reside on Land
+context_description: making it easier to <b>remove those trespassing on land</b> with
+  an intent to reside there
+policy_description: There have been votes in Parliament on the circumstances, in England,
+  in which the police can order trespassers intending to reside on land to leave.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-03-16
+    division_number: 238
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-03-16
+    division_number: 239
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-05
+    division_number: 39
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-07-05
+    division_number: 44
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

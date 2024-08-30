@@ -1,0 +1,70 @@
+id: 6696
+name: Police and Crime Commissioners
+context_description: the introduction of elected <b>Police and Crime Commissioners</b>
+policy_description: Elected Police and Crime Commissioners are individuals responsible
+  for the strategic direction and oversight of the police in England and Wales.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-09-08
+    division_number: 57
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-13
+    division_number: 152
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-12-13
+    division_number: 154
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-30
+    division_number: 242
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-03-31
+    division_number: 249
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-05-23
+    division_number: 285
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-09-12
+    division_number: 345
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-07-04
+    division_number: 42
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

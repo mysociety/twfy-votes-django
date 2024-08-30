@@ -1,0 +1,36 @@
+id: 6758
+name: Merging Police and Fire Services under Police and Crime Commissioners
+context_description: <b>merging police and fire services</b> under Police and Crime
+  Commissioners
+policy_description: There have been votes in Parliament on whether to give Police
+  and Crime Commissioners responsibility for fire services.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2016-04-26
+    division_number: 251
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-26
+    division_number: 252
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-04-26
+    division_number: 253
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

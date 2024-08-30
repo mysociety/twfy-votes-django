@@ -7,7 +7,10 @@ import rich
 
 class ImportOrder(IntEnum):
     DOWNLOAD = 1
+    CHAMBERS = 9
     LOOKUPS = 10
+    DECISIONS = 15
+    POLICIES = 20
 
 
 class AcceptsQuiet(Protocol):

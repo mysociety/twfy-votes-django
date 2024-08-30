@@ -1,0 +1,49 @@
+id: 6692
+name: Rail Fares
+context_description: slowing the rise in <b>rail fares</b>
+policy_description: 'There have been votes in Parliament on the subject of regulating,
+  and capping, rail fares. '
+notes: ''
+status: retired
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2012-01-11
+    division_number: 420
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-05-16
+    division_number: 1
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-05
+    division_number: 56
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-09
+    division_number: 132
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-09-04
+    division_number: 74
+  alignment: agree
+  strength: weak
+  notes: ''
+agreement_links: []

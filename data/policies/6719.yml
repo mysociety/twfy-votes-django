@@ -1,0 +1,58 @@
+id: 6719
+name: Regulation of Lawyer's Fees in No-Win No-Fee Cases
+context_description: limits on success <b>fees</b> paid to lawyers in <b>no-win no
+  fee cases</b>
+policy_description: There have been votes in Parliament on whether there should be greater
+  regulation on the level of success fees payable under no-win no-fee arrangements
+  for legal representation.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-11-02
+    division_number: 389
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-11-02
+    division_number: 390
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-17
+    division_number: 515
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-04-17
+    division_number: 516
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2012-09-12
+    division_number: 64
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-03-13
+    division_number: 182
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

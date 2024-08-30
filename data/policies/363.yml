@@ -1,0 +1,50 @@
+id: 363
+name: Introducing foundation hospitals
+context_description: introducing <b>foundation hospitals</b>
+policy_description: Foundation Hospitals are hospitals run by NHS Foundation Trusts.
+  An NHS Foundation Trust is part of the NHS in England and Wales given financial
+  and managerial independence from the Department of Health
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- health
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2003-05-07
+    division_number: 177
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-05-07
+    division_number: 178
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-07-08
+    division_number: 280
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-11-19
+    division_number: 381
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-11-19
+    division_number: 388
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

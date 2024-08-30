@@ -1,0 +1,77 @@
+id: 6887
+name: Biodiversity
+context_description: improving <b>biodiversity</b>
+policy_description: There have been votes in Parliament on conserving and
+  enhancing biodiversity.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 213
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-26
+    division_number: 214
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-26
+    division_number: 15
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-26
+    division_number: 16
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-26
+    division_number: 18
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 87
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 88
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 90
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-10-20
+    division_number: 92
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

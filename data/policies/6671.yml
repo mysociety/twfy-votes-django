@@ -1,0 +1,91 @@
+id: 6671
+name: Central Government Funding for Local Councils
+context_description: reducing central government <b>funding of local government</b>
+policy_description: 'There have been votes in Parliament on the level of funding for
+  local councils. '
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-06-29
+    division_number: 12
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-02-09
+    division_number: 198
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-02-13
+    division_number: 163
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-02-10
+    division_number: 151
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-02-10
+    division_number: 192
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-02-22
+    division_number: 166
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-02-07
+    division_number: 117
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2018-03-28
+    division_number: 134
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-02-05
+    division_number: 322
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-01-25
+    division_number: 211
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-02-23
+    division_number: 231
+  alignment: against
+  strength: weak
+  notes: ''
+agreement_links: []

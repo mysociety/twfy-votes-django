@@ -1,0 +1,56 @@
+id: 1049
+name: The Iraq war
+context_description: the <b>Iraq war</b>
+policy_description: A number of votes were held on if United Kingdom should take part
+  in the US invasion of Iraq which began in March 2003.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2002-09-24
+    division_number: 319
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2002-11-25
+    division_number: 6
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-02-26
+    division_number: 96
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-02-26
+    division_number: 97
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-03-18
+    division_number: 117
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2003-03-18
+    division_number: 118
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

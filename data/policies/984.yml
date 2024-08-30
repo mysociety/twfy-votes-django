@@ -1,0 +1,65 @@
+id: 984
+name: Trident Nuclear Weapons System Replacement
+context_description: replacing <b>Trident</b> with a new nuclear weapons system
+policy_description: The UK's Trident nuclear weapons system, comprising missile armed
+  submarines, provides a continuous at-sea nuclear deterrent. There have been votes
+  on if the system should be replaced with a new nuclear deterrent when Trident reaches
+  the end of its lifespan.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2007-03-14
+    division_number: 77
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2007-03-14
+    division_number: 78
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-01-20
+    division_number: 133
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-06-04
+    division_number: 3
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2015-11-24
+    division_number: 131
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-05-26
+    division_number: 3
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-07-18
+    division_number: 46
+  alignment: agree
+  strength: strong
+  notes: 'ignore:strong_without_power'
+agreement_links: []

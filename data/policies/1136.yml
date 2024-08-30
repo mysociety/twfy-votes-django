@@ -1,0 +1,77 @@
+id: 1136
+name: fewer MPs in the House of Commons
+context_description: <b>fewer MPs</b> in the House of Commons
+policy_description: There have been votes in Parliament on reducing the number of
+  MPs in the House of Commons and reviewing the boundaries of parliamentary constituencies.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2010-09-06
+    division_number: 51
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-09-06
+    division_number: 53
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-20
+    division_number: 86
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-10-20
+    division_number: 91
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-11-01
+    division_number: 104
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2013-01-29
+    division_number: 146
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-10-19
+    division_number: 70
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2016-11-18
+    division_number: 86
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2020-06-02
+    division_number: 53
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

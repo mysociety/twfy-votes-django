@@ -1,0 +1,50 @@
+id: 1109
+name: Encouragement of Occupational Pensions
+context_description: encouraging <b>occupational pensions</b>
+policy_description: A vote to encourage occupational pensions is a vote to promote
+  workplace pension schemes for example by making them tax efficient and easy for
+  employers to run and for employees to understand.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: true
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2004-03-02
+    division_number: 68
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-03-08
+    division_number: 103
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2010-06-28
+    division_number: 11
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-20
+    division_number: 299
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-18
+    division_number: 368
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

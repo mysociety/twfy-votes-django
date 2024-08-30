@@ -1,0 +1,63 @@
+id: 6897
+name: State Pension Age
+context_description: <b>increasing the state pension age</b>
+policy_description: There have been votes in Parliament on increasing the state pension
+  age
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2011-06-08
+    division_number: 287
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-06-20
+    division_number: 299
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-18
+    division_number: 367
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2011-10-18
+    division_number: 368
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-16
+    division_number: 109
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-11-16
+    division_number: 110
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-02-02
+    division_number: 183
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []
