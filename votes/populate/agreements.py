@@ -6,7 +6,7 @@ import rich
 from ruamel.yaml import YAML
 
 from ..consts import ChamberSlug
-from ..models import Agreement, Chamber
+from ..models.decisions import Agreement, Chamber
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

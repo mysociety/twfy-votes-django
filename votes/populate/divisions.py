@@ -6,7 +6,7 @@ import pandas as pd
 import rich
 
 from ..consts import AyeNo, ChamberSlug
-from ..models import Chamber, Division
+from ..models.decisions import Chamber, Division
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

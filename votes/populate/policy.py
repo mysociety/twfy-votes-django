@@ -18,7 +18,7 @@ from ..consts import (
     PolicyStrength,
     StrengthMeaning,
 )
-from ..models import (
+from ..models.decisions import (
     Agreement,
     Chamber,
     Division,
