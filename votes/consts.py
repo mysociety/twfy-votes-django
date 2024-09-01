@@ -123,3 +123,10 @@ class VoteType(StrEnum):
 
     def display_name(self):
         return self.replace("_", " ").title()
+
+
+class OrganisationType(StrEnum):
+    CHAMBER = "chamber"
+    PARTY = "party"
+    METRO = "metro"
+    UNKNOWN = "unknown"

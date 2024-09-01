@@ -440,7 +440,9 @@ class TypedModelBase(models.base.ModelBase):
 
         pydantic_fields["model_config"] = ConfigDict(validate_assignment=True)
         pydantic_fields["__base__"] = DjangoAdjustedBaseModel
-        pydantic_fields = {k: v for k, v in pydantic_fields.items() if v is not None}
+        pydantic_fields = {
+            k: v for k, v in pydantic_fields.items() if v not in [(None, None), None]
+        }
         pydantic_model_class = create_model(name, **pydantic_fields)
         dct["_inner_pydantic_class"] = pydantic_model_class
 

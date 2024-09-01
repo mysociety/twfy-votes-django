@@ -7,6 +7,7 @@ import rich
 
 class ImportOrder(IntEnum):
     DOWNLOAD = 1
+    PEOPLE = 5
     CHAMBERS = 9
     LOOKUPS = 10
     DECISIONS = 15
