@@ -41,7 +41,6 @@ class ChamberSlug(StrEnum):
     SCOTLAND = "scotland"
     WALES = "senedd"
     NI = "ni"
-    PUBLIC_BILL_COMMITTEE = "pbc"
 
     @classmethod
     def from_parlparse(cls, parlparse: str, *, passthrough: bool = False) -> str:

@@ -10,7 +10,6 @@ member_name_lookup = {
     ChamberSlug.SCOTLAND: "MSPs",
     ChamberSlug.WALES: "MSs",
     ChamberSlug.NI: "AMs",
-    ChamberSlug.PUBLIC_BILL_COMMITTEE: "MPs",
 }
 
 chamber_name_lookup = {
@@ -19,7 +18,6 @@ chamber_name_lookup = {
     ChamberSlug.SCOTLAND: "Scottish Parliament",
     ChamberSlug.WALES: "Senedd",
     ChamberSlug.NI: "Northern Ireland Assembly",
-    ChamberSlug.PUBLIC_BILL_COMMITTEE: "Public Bill Committee",
 }
 
 
