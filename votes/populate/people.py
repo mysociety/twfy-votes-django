@@ -41,6 +41,12 @@ def resolve_date(
             raise ValueError(f"Unexpected date {date}")
 
 
+def get_effective_party(party_slug: str | None) -> str:
+    if party_slug == "labourco-operative":
+        return "labour"
+    return party_slug or ""
+
+
 @import_register.register("people", ImportOrder.PEOPLE)
 def import_popolo(quiet: bool = False):
     popolo_source = Path("data", "source", "people.json")
@@ -102,6 +108,7 @@ def import_popolo(quiet: bool = False):
                 start_date=resolve_date(membership.start_date, FixedDate.PAST),
                 end_date=resolve_date(membership.end_date, FixedDate.FUTURE),
                 party_slug=membership.on_behalf_of_id or "",
+                effective_party_slug=get_effective_party(membership.on_behalf_of_id),
                 on_behalf_of_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
                 organization_id=org_slug_lookup.get(membership.organization_id or ""),
                 area_name=area_name,
