@@ -58,6 +58,18 @@ def minus_one_date(date: datetime.date) -> datetime.date:
     return date - pd.Timedelta(days=1)
 
 
+def post_org_or_self_org(m: PopoloMembership):
+    post = m.post()
+    if post is None:
+        org = m.organization_id
+    else:
+        org = post.organization_id
+
+    if org is None:
+        raise ValueError(f"No organization for membership {m}")
+    return org
+
+
 def membership_on_date(popolo: Popolo) -> pd.DataFrame:
     """
     From the popolo file create a dataframe of memberships on any given date
@@ -65,9 +77,9 @@ def membership_on_date(popolo: Popolo) -> pd.DataFrame:
 
     data = [
         {
-            "chamber": ChamberSlug.from_parlparse(m.organization_id, passthrough=True)
-            if m.organization_id
-            else "",
+            "chamber": ChamberSlug.from_parlparse(
+                post_org_or_self_org(m), passthrough=True
+            ),
             "start_date": resolve_date(m.start_date, FixedDate.PAST),
             "end_date": resolve_date(m.end_date, FixedDate.FUTURE),
         }
@@ -185,13 +197,11 @@ def import_popolo(quiet: bool = False):
                 end_date=resolve_date(membership.end_date, FixedDate.FUTURE),
                 party_slug=membership.on_behalf_of_id or "",
                 effective_party_slug=get_effective_party(membership.on_behalf_of_id),
-                on_behalf_of_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
-                organization_id=org_slug_lookup.get(
+                party_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
+                chamber_id=org_slug_lookup.get(
                     ChamberSlug.from_parlparse(
-                        membership.organization_id, passthrough=True
+                        post_org_or_self_org(membership), passthrough=True
                     )
-                    if membership.organization_id
-                    else ""
                 ),
                 area_name=area_name,
                 post_label=post_label,

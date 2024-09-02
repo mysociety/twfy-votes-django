@@ -49,12 +49,12 @@ class Membership(DjangoVoteModel):
     end_date: datetime.date
     party_slug: str
     effective_party_slug: str
-    on_behalf_of_id: Dummy[Optional[int]] = None
-    on_behalf_of: DoNothingForeignKey[Organization] = field(
+    party_id: Dummy[Optional[int]] = None
+    party: DoNothingForeignKey[Organization] = field(
         default=None, null=True, related_name="party_memberships"
     )
-    organization_id: Dummy[Optional[int]] = None
-    organization: DoNothingForeignKey[Organization] = field(
+    chamber_id: Dummy[Optional[int]] = None
+    chamber: DoNothingForeignKey[Organization] = field(
         default=None, null=True, related_name="org_memberships"
     )
     post_label: str
