@@ -134,11 +134,37 @@ def membership_on_date(popolo: Popolo) -> pd.DataFrame:
     return final
 
 
+def adjust_overlapping_time_ranges(popolo: Popolo, quiet: bool = False) -> Popolo:
+    """
+    Calculating down the line depend on consecutive time ranges rather than an overlap on the end date
+    Ideally addressed at source.
+    """
+    count = 0
+    for person in popolo.persons:
+        person = person.self_or_redirect()
+        memberships = person.memberships()
+        memberships.sort(key=lambda m: m.start_date)
+        for i, membership in enumerate(memberships[:-1]):
+            next_membership = memberships[i + 1]
+            if membership.end_date == next_membership.start_date:
+                if membership.organization_id != next_membership.organization_id:
+                    continue
+                membership.end_date = membership.end_date - datetime.timedelta(days=1)  # type: ignore
+                count += 1
+
+    if not quiet:
+        rich.print(f"Adjusted [blue]{count}[/blue] overlapping time ranges")
+
+    return popolo
+
+
 @import_register.register("people", ImportOrder.PEOPLE)
 def import_popolo(quiet: bool = False):
     popolo_source = Path("data", "source", "people.json")
 
     popolo = Popolo.from_path(popolo_source)
+
+    popolo = adjust_overlapping_time_ranges(popolo, quiet=quiet)
 
     to_create = []
     for person in popolo.persons:
