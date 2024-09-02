@@ -8,6 +8,7 @@ from typing_extensions import dataclass_transform
 
 from .core import AsyncDuckResponse, ConnectedDuckQuery
 from .funcs import unnest
+from .response import ResponseType
 from .types import BaseModelLikeType
 
 T = TypeVar("T")
@@ -76,7 +77,7 @@ class BaseQuery:
     async def run(self, duck: ConnectedDuckQuery[AsyncDuckResponse]):
         return await duck.compile(self, variables=self.params).run()
 
-    def compile(self, duck: ConnectedDuckQuery[AsyncDuckResponse]) -> AsyncDuckResponse:
+    def compile(self, duck: ConnectedDuckQuery[ResponseType]) -> ResponseType:
         return duck.compile(self, variables=self.params)
 
     async def pipe_records_to(
