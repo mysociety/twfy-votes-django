@@ -83,6 +83,7 @@ class Division(DjangoVoteModel):
     abstain_total: int
     majority_vote: AyeNo
     voting_cluster: str = ""
+    total_possible_members: int
 
 
 class Agreement(DjangoVoteModel):

@@ -5,11 +5,43 @@ from django.conf import settings
 import pandas as pd
 import rich
 
+from twfy_votes.helpers.duck import DuckQuery
+
 from ..consts import AyeNo, ChamberSlug
 from ..models.decisions import Chamber, Division
 from .register import ImportOrder, import_register
 
+duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
+
+
 BASE_DIR = Path(settings.BASE_DIR)
+
+
+@duck.as_source
+class pw_divisions:
+    source = BASE_DIR / "data" / "source" / "divisions.parquet"
+
+
+@duck.as_alias
+class org_membership_count:
+    alias_for = "postgres_db.votes_orgmembershipcount"
+
+
+@duck.as_query
+class divisions_with_total_membership:
+    query = """
+        SELECT
+            pw_divisions.*,
+            org_membership_count.count as total_possible_members
+        FROM
+            pw_divisions
+        LEFT JOIN org_membership_count on
+            (pw_divisions.division_date between org_membership_count.start_date
+            and org_membership_count.end_date
+            and pw_divisions.chamber = org_membership_count.chamber_slug)
+        WHERE
+            pw_divisions.chamber != 'pbc'
+        """
 
 
 def add_ellipsis(text: str, max_length: int = 255) -> str:
@@ -35,17 +67,13 @@ def division_from_row(
         abstain_total=row["both_total"],
         absent_total=row["absent_total"],
         majority_vote=AyeNo(row["majority_vote"]),
+        total_possible_members=row["total_possible_members"],
     )
 
 
 @import_register.register("divisions", group=ImportOrder.DECISIONS)
 def import_divisions(quiet: bool = False):
-    divisions_file = BASE_DIR / "data" / "source" / "divisions.parquet"
-
-    if not divisions_file.exists():
-        raise FileNotFoundError(f"Could not find divisions file at {divisions_file}")
-
-    df = pd.read_parquet(divisions_file)
+    df = DuckQuery.connect().compile(duck).df()
 
     chamber_lookup = {x.slug: x.id for x in Chamber.objects.all() if x.id}
     to_create = [
