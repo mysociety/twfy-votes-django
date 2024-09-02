@@ -3,15 +3,16 @@ from __future__ import annotations
 import datetime
 
 from ..consts import (
-    AyeNo,
     ChamberSlug,
     PolicyDirection,
     PolicyGroupSlug,
     PolicyStatus,
     PolicyStrength,
     StrengthMeaning,
+    VotePosition,
 )
 from .base_model import DjangoVoteModel
+from .people import Membership, Person
 from .typed_django.models import (
     DoNothingForeignKey,
     Dummy,
@@ -71,20 +72,79 @@ class GovernmentParty(DjangoVoteModel):
 class Division(DjangoVoteModel):
     key: str
     chamber_slug: ChamberSlug
-    chamber_id: Dummy[int] = 0
+    chamber_id: Dummy[int]
     chamber: DoNothingForeignKey[Chamber] = related_name("divisions")
     date: datetime.date
     division_number: int
     division_name: str
     source_gid: str
     debate_gid: str
-    yes_total: int
-    no_total: int
-    absent_total: int
-    abstain_total: int
-    majority_vote: AyeNo
     voting_cluster: str = ""
     total_possible_members: int
+
+
+class DivisionBreakdown(DjangoVoteModel):
+    division_id: Dummy[int]
+    division: DoNothingForeignKey[Division] = related_name("breakdowns")
+    vote_participant_count: int
+    total_possible_members: int
+    for_motion: int
+    against_motion: int
+    neutral_motion: int
+    absent_motion: int
+    signed_votes: int
+    motion_majority: int
+    for_motion_percentage: float
+    motion_result_int: int
+
+
+class DivisionsIsGovBreakdown(DjangoVoteModel):
+    is_gov: bool
+    division_id: Dummy[int]
+    division: DoNothingForeignKey[Division] = related_name("is_gov_breakdowns")
+    vote_participant_count: int
+    total_possible_members: int
+    for_motion: int
+    against_motion: int
+    neutral_motion: int
+    absent_motion: int
+    signed_votes: int
+    motion_majority: int
+    for_motion_percentage: float
+    motion_result_int: int
+
+
+class DivisionPartyBreakdown(DjangoVoteModel):
+    party_id: Dummy[int]
+    party: DoNothingForeignKey[GovernmentParty] = related_name("party_breakdowns")
+    party_slug: str
+    division_id: Dummy[int]
+    division: DoNothingForeignKey[Division] = related_name("party_breakdowns")
+    vote_participant_count: int
+    total_possible_members: int
+    for_motion: int
+    against_motion: int
+    neutral_motion: int
+    absent_motion: int
+    signed_votes: int
+    motion_majority: int
+    for_motion_percentage: float
+    motion_result_int: int
+
+
+class Vote(DjangoVoteModel):
+    division_id: Dummy[int]
+    division: DoNothingForeignKey[Division] = related_name("votes")
+    vote: VotePosition
+    effective_vote: VotePosition
+    membership_id: Dummy[int]
+    membership: DoNothingForeignKey[Membership] = related_name("votes")
+    person_id: Dummy[int]
+    person: DoNothingForeignKey[Person] = related_name("votes")
+    effective_party_slug: str
+    is_gov: bool
+    effective_vote_float: float
+    diff_from_party_average: float
 
 
 class Agreement(DjangoVoteModel):

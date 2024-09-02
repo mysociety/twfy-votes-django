@@ -7,7 +7,7 @@ import rich
 
 from twfy_votes.helpers.duck import DuckQuery
 
-from ..consts import AyeNo, ChamberSlug
+from ..consts import ChamberSlug
 from ..models.decisions import Chamber, Division
 from .register import ImportOrder, import_register
 
@@ -62,11 +62,6 @@ def division_from_row(
         division_name=add_ellipsis(row["division_title"]),
         date=row["division_date"],
         division_number=row["division_number"],
-        yes_total=row["yes_total"],
-        no_total=row["no_total"],
-        abstain_total=row["both_total"],
-        absent_total=row["absent_total"],
-        majority_vote=AyeNo(row["majority_vote"]),
         total_possible_members=row["total_possible_members"],
     )
 
