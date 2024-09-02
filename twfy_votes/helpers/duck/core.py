@@ -203,7 +203,9 @@ class DuckQuery:
 
         return item
 
-    def to_parquet(self, dest) -> Callable[[Type[DuckViewType]], Type[DuckViewType]]:
+    def to_parquet(
+        self, dest: Path
+    ) -> Callable[[Type[DuckViewType]], Type[DuckViewType]]:
         """
         Render this view to parquet path.
         """
