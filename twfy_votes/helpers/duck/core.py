@@ -274,6 +274,12 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
         self.response_type = response_type
         self.connection = connection
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def compile(
         self,
         query: str | DuckQuery | Type[DuckView] | DuckViewInstance,
@@ -300,6 +306,9 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
         if len(self.queries) > 0:
             raise ValueError("Can only use 'compile' on a fresh or empty query.")
         return self.response_type(self.connection, _query, self.data_sources)  # type: ignore
+
+    def close(self):
+        self.connection.close()
 
     def compile_queue(self, variables: dict[str, Any] = {}) -> ResponseType:
         _query = self.construct_query(variables)
