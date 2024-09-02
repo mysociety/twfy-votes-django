@@ -26,6 +26,7 @@ def populate_government_parties(quiet: bool = False):
             for chamber in row["chamber"]:
                 item = GovernmentParty(
                     label=row["label"],
+                    chamber_slug=chamber,
                     chamber_id=chamber_ids_from_slug[chamber],
                     party=party,
                     start_date=row["start_date"],

@@ -8,23 +8,23 @@ party = ["labour"]
 [[government]]
 label = "Conservative-Liberal Democrat Coalition"
 chamber = ["commons", "lords"]
-start_date = "2010-05-01"
+start_date = "2010-05-02"
 end_date = "2015-05-01"
 party = ["conservative", "liberal-democrat"]
 
 [[government]]
 label = "Conservative Governments (various)"
 chamber = ["commons", "lords"]
-start_date = "2015-05-01"
+start_date = "2015-05-02"
 end_date = "2024-07-04"
 party = ["conservative"]
 
 [[government]]
-label = "Labour Government (2024-("
+label = "Labour Government (2024-)"
 chamber = ["commons", "lords"]
-start_date = "2015-05-01"
-end_date = "2025-01-01"
-party = ["conservative"]
+start_date = "2024-07-05"
+end_date = "2030-01-01"
+party = ["labour"]
 
 [[government]]
 label = "Scottish Labour/Liberal Democrat Coalition"
@@ -44,20 +44,12 @@ party = ["scottish-national-party"]
 label = "SNP-Green Coalition"
 chamber = ["scotland"]
 start_date = "2021-05-06"
-end_date = "2026-01-01"
-party = ["scottish-national-party", "green"]
-
-
-[[government]]
-label = "SNP-Green Coalition"
-chamber = ["scotland"]
-start_date = "2021-05-06"
-end_date = "2024-04-25"
+end_date = "2024-04-24"
 party = ["scottish-national-party", "green"]
 
 [[government]]
-label = "SNP-Green Coalition"
+label = "SNP Government (2024-)"
 chamber = ["scotland"]
 start_date = "2024-04-25"
 end_date = "2026-01-01"
-party = ["scottish-national-party",]
+party = ["scottish-national-party"]

@@ -60,6 +60,7 @@ class Chamber(DjangoVoteModel):
 
 class GovernmentParty(DjangoVoteModel):
     label: str
+    chamber_slug: ChamberSlug
     chamber_id: Dummy[int] = 0
     chamber: DoNothingForeignKey[Chamber] = related_name("government_parties")
     party: str
