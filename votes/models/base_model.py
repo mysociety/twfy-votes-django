@@ -9,6 +9,15 @@ from .typed_django.models import ModelType, TypedModel
 
 @contextmanager
 def disable_constraints(table_name: str):
+    """
+    Postgres specific context manager to disable foreign key constraints.
+
+    We do this because we're generally importing whole database tables from elsewhere.
+    So by definition, we can preserve foreign key relationships.
+
+    We don't want to get into complicated checks of differences between tables, just dump,
+    reimport and then re-enable constraints.
+    """
     try:
         # Disable foreign key constraints
         with connection.cursor() as cursor:
@@ -61,6 +70,15 @@ class DjangoVoteModel(TypedModel, abstract=True):
 
     @classmethod
     def disable_constraints(cls):
+        """
+        Postgres specific context manager to disable foreign key constraints.
+
+        We do this because we're generally importing whole database tables from elsewhere.
+        So by definition, we can preserve foreign key relationships.
+
+        We don't want to get into complicated checks of differences between tables, just dump,
+        reimport and then re-enable constraints.
+        """
         return disable_constraints(cls._meta.db_table)
 
     @classmethod
