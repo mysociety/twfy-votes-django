@@ -11,6 +11,9 @@ class ImportOrder(IntEnum):
     CHAMBERS = 9
     LOOKUPS = 10
     DECISIONS = 15
+    PRE_BREAKDOWNS = 16
+    BREAKDOWNS = 17
+    VOTES = 18
     POLICIES = 20
 
 
