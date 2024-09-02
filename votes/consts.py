@@ -100,7 +100,7 @@ class AyeNo(StrEnum):
 class VotePosition(StrEnum):
     AYE = "aye"
     NO = "no"
-    ABSTENTION = "abstention"
+    ABSTAIN = "abstain"
     ABSENT = "absent"
     TELLNO = "tellno"
     TELLAYE = "tellaye"

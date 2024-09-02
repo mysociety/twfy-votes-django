@@ -30,10 +30,13 @@ class pw_vote_deduped:
     SELECT
         division_id,
         person_id,
-        last(vote) as vote,
+        CASE WHEN last(vote) = 'both' THEN 'abstain' ELSE last(vote) END as vote,
         last(membership_id) as membership_id
     FROM
-        (select * from pw_vote order by membership_id)
+        (select *
+            from pw_vote
+        where vote != 'absent' and division_id not like '%cy-senedd'
+        order by membership_id)
     GROUP BY
         division_id,
         person_id
@@ -153,7 +156,7 @@ class calculate_votes:
     """
 
 
-@import_register.register("votes_with_parties", group=ImportOrder.PRE_BREAKDOWNS)
+@import_register.register("votes_pre_breakdown", group=ImportOrder.PRE_BREAKDOWNS)
 def import_votes(quiet: bool = False):
     # better on memory to write straight out as parquet, close duckdb and read in the parquet
     with DuckQuery.connect() as query:
