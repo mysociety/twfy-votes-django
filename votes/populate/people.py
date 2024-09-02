@@ -2,14 +2,15 @@ import datetime
 from pathlib import Path
 from typing import overload
 
+import pandas as pd
 import rich
 from mysoc_validator import Popolo
 from mysoc_validator.models.dates import ApproxDate, FixedDate
 from mysoc_validator.models.popolo import Membership as PopoloMembership
 from mysoc_validator.models.popolo import Person as PopoloPerson
 
-from ..consts import OrganisationType
-from ..models.people import Membership, Organization, Person
+from ..consts import ChamberSlug, OrganisationType
+from ..models.people import Membership, Organization, OrgMembershipCount, Person
 from .register import ImportOrder, import_register
 
 
@@ -47,6 +48,80 @@ def get_effective_party(party_slug: str | None) -> str:
     return party_slug or ""
 
 
+def minus_one_date(date: datetime.date) -> datetime.date:
+    """
+    Give one day before an ISO date
+    """
+    # special case for 9999 - don't need to do day before
+    if date == "9999-12-31":
+        return date
+    return date - pd.Timedelta(days=1)
+
+
+def membership_on_date(popolo: Popolo) -> pd.DataFrame:
+    """
+    From the popolo file create a dataframe of memberships on any given date
+    """
+
+    data = [
+        {
+            "chamber": ChamberSlug.from_parlparse(m.organization_id, passthrough=True)
+            if m.organization_id
+            else "",
+            "start_date": resolve_date(m.start_date, FixedDate.PAST),
+            "end_date": resolve_date(m.end_date, FixedDate.FUTURE),
+        }
+        for m in popolo.memberships
+        if isinstance(m, PopoloMembership)
+    ]
+
+    df = pd.DataFrame(data)
+
+    # We want to create a new dataframe with value, date, chamber
+    # we are converting the start and end dates into a list of events
+    # if there is a start date, there is a value of 1
+    # if there is an end date, there is a value of -1
+
+    # we are going to use the melt function to do this
+    ndf = pd.melt(
+        df,
+        id_vars=["chamber"],
+        value_vars=["start_date", "end_date"],
+        var_name="str_event",
+        value_name="date",
+    ).sort_values(["chamber", "date"])
+
+    ndf["event"] = ndf["str_event"].apply(lambda x: 1 if x == "start_date" else -1)
+
+    def get_range_counts(df: pd.DataFrame) -> pd.DataFrame:
+        # remove none values - our end events that aren't interesting
+        df = df[df["date"].notna()].copy(deep=True)
+        # use cum sum to get the number of members at any given time
+        # obvs this is wrong in the early days
+        df["members_count"] = df["event"].cumsum()
+        # reduce to unique dates - get the last members count for each date
+        df = df.drop_duplicates("date", keep="last")
+        # reexpress this as ranges e.g. start_date, end_date, members_count
+        df["end_date"] = (
+            df["date"].shift(-1, fill_value=FixedDate.FUTURE).apply(minus_one_date)
+        )
+        df = df[["date", "end_date", "members_count"]]
+        df = df.rename(columns={"date": "start_date"})
+        return df
+
+    dfs = []
+
+    for chamber, chamber_df in ndf.groupby("chamber"):
+        if chamber in list(ChamberSlug):
+            range_df = get_range_counts(chamber_df)
+            range_df["chamber"] = chamber
+            dfs.append(range_df)
+
+    final = pd.concat(dfs)
+
+    return final
+
+
 @import_register.register("people", ImportOrder.PEOPLE)
 def import_popolo(quiet: bool = False):
     popolo_source = Path("data", "source", "people.json")
@@ -73,9 +148,10 @@ def import_popolo(quiet: bool = False):
 
     to_create = []
 
+    # make sure our internal slug matches our enum rather than the longer form in the popolo file
     for org in popolo.organizations:
         item = Organization(
-            slug=org.id,
+            slug=ChamberSlug.from_parlparse(org.id, passthrough=True),
             name=org.name,
             classification=OrganisationType(org.classification)
             if org.classification
@@ -110,7 +186,13 @@ def import_popolo(quiet: bool = False):
                 party_slug=membership.on_behalf_of_id or "",
                 effective_party_slug=get_effective_party(membership.on_behalf_of_id),
                 on_behalf_of_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
-                organization_id=org_slug_lookup.get(membership.organization_id or ""),
+                organization_id=org_slug_lookup.get(
+                    ChamberSlug.from_parlparse(
+                        membership.organization_id, passthrough=True
+                    )
+                    if membership.organization_id
+                    else ""
+                ),
                 area_name=area_name,
                 post_label=post_label,
             )
@@ -121,5 +203,24 @@ def import_popolo(quiet: bool = False):
         Membership.objects.all().delete()
         Membership.objects.bulk_create(to_create, batch_size=50000)
 
+    count_data = membership_on_date(popolo)
+
+    to_create = []
+
+    for _, row in count_data.iterrows():
+        item = OrgMembershipCount(
+            chamber_slug=row["chamber"],
+            chamber_id=org_slug_lookup[row["chamber"]],
+            start_date=row["start_date"],
+            end_date=row["end_date"],
+            count=row["members_count"],
+        )
+
+        to_create.append(item)
+
+    with OrgMembershipCount.disable_constraints():
+        OrgMembershipCount.objects.all().delete()
+        OrgMembershipCount.objects.bulk_create(to_create, batch_size=10000)
+
     if not quiet:
-        rich.print(f"Created [green]{len(to_create)}[/green] memberships")
+        rich.print(f"Created [green]{len(to_create)}[/green] membership counts")

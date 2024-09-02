@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from ..consts import OrganisationType
+from ..consts import ChamberSlug, OrganisationType
 from .base_model import DjangoVoteModel
 from .typed_django.models import (
     DoNothingForeignKey,
@@ -26,6 +26,15 @@ class Organization(DjangoVoteModel):
     classification: OrganisationType = OrganisationType.UNKNOWN
     org_memberships: DummyOneToMany["Membership"] = related_name("organization")
     party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
+
+
+class OrgMembershipCount(DjangoVoteModel):
+    chamber_slug: ChamberSlug
+    chamber_id: Dummy[int] = 0
+    chamber: DoNothingForeignKey[Organization] = related_name("org_membership_counts")
+    start_date: datetime.date
+    end_date: datetime.date
+    count: int
 
 
 class Membership(DjangoVoteModel):

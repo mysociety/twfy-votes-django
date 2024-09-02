@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import StrEnum
 
 
@@ -40,6 +42,25 @@ class ChamberSlug(StrEnum):
     WALES = "senedd"
     NI = "ni"
     PUBLIC_BILL_COMMITTEE = "pbc"
+
+    @classmethod
+    def from_parlparse(cls, parlparse: str, *, passthrough: bool = False) -> str:
+        match parlparse:
+            case "house-of-commons":
+                return cls.COMMONS
+            case "house-of-lords":
+                return cls.LORDS
+            case "scottish-parliament":
+                return cls.SCOTLAND
+            case "welsh-parliament":
+                return cls.WALES
+            case "northern-ireland-assembly":
+                return cls.NI
+            case _:
+                if passthrough:
+                    return parlparse
+                else:
+                    raise ValueError(f"Unknown parlparse chamber {parlparse}")
 
 
 class PolicyStatus(StrEnum):
