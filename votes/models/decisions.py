@@ -81,6 +81,12 @@ class Division(DjangoVoteModel):
     debate_gid: str
     voting_cluster: str = ""
     total_possible_members: int
+    votes: DummyOneToMany[Vote] = related_name("division")
+    overall_breakdown: DummyOneToMany[DivisionBreakdown] = related_name("division")
+    party_breakdowns: DummyOneToMany[DivisionPartyBreakdown] = related_name("division")
+    is_gov_breakdowns: DummyOneToMany[DivisionsIsGovBreakdown] = related_name(
+        "division"
+    )
 
 
 class DivisionBreakdown(DjangoVoteModel):

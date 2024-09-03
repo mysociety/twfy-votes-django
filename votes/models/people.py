@@ -18,6 +18,13 @@ class Person(DjangoVoteModel):
     name: str
     memberships: DummyOneToMany["Membership"] = related_name("person")
 
+    @classmethod
+    def current(cls):
+        """
+        Those with a membership that is current.
+        """
+        return cls.objects.filter(memberships__end_date__gte=datetime.date.today())
+
 
 class Organization(DjangoVoteModel):
     id: PrimaryKey = None
