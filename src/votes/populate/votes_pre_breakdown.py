@@ -10,6 +10,7 @@ from twfy_votes.helpers.duck import DuckQuery
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)
+votes_with_absences = Path(BASE_DIR, "data", "compiled", "votes_with_absences.parquet")
 votes_with_parties = Path(BASE_DIR, "data", "compiled", "votes_with_parties.parquet")
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
@@ -20,17 +21,39 @@ class pw_vote:
     source = Path(BASE_DIR, "data", "source", "votes.parquet")
 
 
+@duck.as_macro
+class reduce_votes:
+    """
+    Reduce a list of votes to a single value.
+    Prefer 'tellno' to 'no' and 'tellaye' to 'aye'.
+    """
+
+    args = ["votes"]
+    macro = """
+        case
+            when array_contains(list(votes), 'tellno') then 'tellno'
+            when array_contains(list(votes), 'tellaye') then 'tellaye'
+            when array_contains(list(votes), 'both') then 'abstain'
+            when array_contains(list(votes), 'no') then 'no'
+            when array_contains(list(votes), 'aye') then 'aye'
+            else last(votes)
+        end
+    """
+
+
 @duck.as_view
 class pw_vote_deduped:
     """
-    Remove duplicate votes under different memberships for the same person - preferring the later membership
+    Remove duplicate votes under different memberships for the same person - preferring the later membership.
+
+    So the problem here is we *are* removing duplicate votes, but sometimes there is a duplicate tellno no.
     """
 
     query = """
     SELECT
         division_id,
         person_id,
-        CASE WHEN last(vote) = 'both' THEN 'abstain' ELSE last(vote) END as vote,
+        reduce_votes(vote) as vote,
         last(membership_id) as membership_id
     FROM
         (select *
@@ -122,6 +145,35 @@ class government_parties:
     """
 
 
+@duck.to_parquet(dest=votes_with_absences)
+class pw_vote_with_absences:
+    """
+    Creates an 'absent' vote record for each mp for each division they were absent for.
+    """
+
+    query = """
+    select
+        pw_division.key as division_id,
+        pdm.id as membership_id,
+        pdm.person_id as person_id,
+        case when vote is null then 'absent' else vote end as vote
+    from
+        pw_division
+    join
+        pd_membership as pdm on
+            (pw_division.date between pdm.start_date
+             and pdm.end_date
+             and pw_division.chamber_slug = pdm.chamber_slug)
+    left join
+        pw_vote_deduped as pw_vote on (pw_vote.division_id = pw_division.key and pw_vote.membership_id = pdm.id)
+    """
+
+
+@duck.as_source
+class calc_vote_with_absences:
+    source = votes_with_absences
+
+
 @duck.to_parquet(dest=votes_with_parties)
 class calculate_votes:
     """
@@ -133,12 +185,11 @@ class calculate_votes:
         pw_vote.* EXCLUDE (person_id),
         get_effective_vote(vote) as effective_vote,
         pw_vote.person_id as person_id,
-         -- pd_membership.party_slug as party_slug,
         pd_membership.effective_party_slug as effective_party_slug,
         CASE WHEN government_parties.is_gov is NULL THEN 0 ELSE 1 END AS is_gov,
         total_possible_members
     FROM
-        pw_vote_deduped as pw_vote
+        calc_vote_with_absences as pw_vote
     JOIN
         pd_membership on (pw_vote.membership_id = pd_membership.id)
     JOIN

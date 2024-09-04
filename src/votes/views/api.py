@@ -47,6 +47,8 @@ class DivisionsIsGovBreakdownSchema(ModelSchema):
 
 
 class VoteSchema(ModelSchema):
+    person: PersonSchema
+
     class Meta:
         model = Vote
         exclude = ["id"]

@@ -1,4 +1,5 @@
 import datetime
+from itertools import groupby
 from pathlib import Path
 from typing import overload
 
@@ -134,6 +135,47 @@ def membership_on_date(popolo: Popolo) -> pd.DataFrame:
     return final
 
 
+def adjust_very_overlapping_time_ranges(popolo: Popolo, quiet: bool = False) -> Popolo:
+    """
+    These I think are outright errors but need more investigation.
+    About 4 lots and a 300 historic MPs (who cares) whose previous membership overruns by days
+    This later on causes issues with the membership counts, and duplicate divisions.
+    """
+    count = 0
+    for person in popolo.persons:
+        if not isinstance(person, PopoloPerson):
+            continue
+        grouped_membership = [
+            (post_org_or_self_org(m), m)
+            for m in person.memberships()
+            if isinstance(m, PopoloMembership)
+        ]
+        grouped_membership.sort(key=lambda x: x[0])
+
+        for org, memberships in groupby(grouped_membership, key=lambda x: x[0]):
+            memberships = list(memberships)
+            memberships.sort(key=lambda x: x[1].start_date)
+
+            for index, (org, m) in enumerate(memberships):
+                if index == 0:
+                    continue
+                previous = memberships[index - 1][1]
+
+                if previous.end_date >= m.start_date:
+                    proposed_end_date = resolve_date(
+                        m.start_date, default=FixedDate.PAST
+                    ) - datetime.timedelta(days=1)
+                    if proposed_end_date < previous.start_date:
+                        continue
+                    previous.end_date = proposed_end_date
+                    count += 1
+
+    if not quiet:
+        rich.print(f"Adjusted [blue]{count}[/blue] very overlapping time ranges")
+
+    return popolo
+
+
 def adjust_overlapping_time_ranges(popolo: Popolo, quiet: bool = False) -> Popolo:
     """
     Calculating down the line depend on consecutive time ranges rather than an overlap on the end date
@@ -165,6 +207,7 @@ def import_popolo(quiet: bool = False):
     popolo = Popolo.from_path(popolo_source)
 
     popolo = adjust_overlapping_time_ranges(popolo, quiet=quiet)
+    popolo = adjust_very_overlapping_time_ranges(popolo, quiet=quiet)
 
     to_create = []
     for person in popolo.persons:
@@ -213,6 +256,9 @@ def import_popolo(quiet: bool = False):
 
     for membership in popolo.memberships:
         if isinstance(membership, PopoloMembership):
+            chamber_slug = ChamberSlug.from_parlparse(
+                post_org_or_self_org(membership), passthrough=True
+            )
             post = membership.post()
             post_label = post.role if post else ""
             area_name = post.area.name if post else ""
@@ -224,11 +270,8 @@ def import_popolo(quiet: bool = False):
                 party_slug=membership.on_behalf_of_id or "",
                 effective_party_slug=get_effective_party(membership.on_behalf_of_id),
                 party_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
-                chamber_id=org_slug_lookup.get(
-                    ChamberSlug.from_parlparse(
-                        post_org_or_self_org(membership), passthrough=True
-                    )
-                ),
+                chamber_id=org_slug_lookup.get(chamber_slug),
+                chamber_slug=chamber_slug,
                 area_name=area_name,
                 post_label=post_label,
             )

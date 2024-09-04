@@ -52,7 +52,7 @@ class pw_votes_with_party_difference:
             when 'no' then 0
             when 'abstain' then 0.5
         end as effective_vote_float,
-        COALESCE(abs(effective_vote_float - for_motion_percentage), 0) as diff_from_party_average
+        abs(effective_vote_float - for_motion_percentage) as diff_from_party_average
     FROM
         cm_votes_with_people
     JOIN

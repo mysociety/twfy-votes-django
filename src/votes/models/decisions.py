@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import datetime
+from typing import Optional
+
+from django.db import models
 
 from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
@@ -9,6 +12,7 @@ from twfy_votes.helpers.typed_django.models import (
     DummyOneToMany,
     ManyToMany,
     TextField,
+    field,
     related_name,
 )
 
@@ -150,8 +154,8 @@ class Vote(DjangoVoteModel):
     person: DoNothingForeignKey[Person] = related_name("votes")
     effective_party_slug: str
     is_gov: bool
-    effective_vote_float: float
-    diff_from_party_average: float
+    effective_vote_float: Optional[float] = field(models.FloatField, null=True)
+    diff_from_party_average: Optional[float] = field(models.FloatField, null=True)
 
 
 class Agreement(DjangoVoteModel):
