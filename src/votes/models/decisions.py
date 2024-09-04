@@ -208,6 +208,6 @@ class PolicyDivisionLink(BasePolicyDecisionLink):
 
 class PolicyAgreementLink(BasePolicyDecisionLink):
     policy_id: Dummy[int] = 0
-    policy: DoNothingForeignKey[Policy] = related_name("decision_links")
+    policy: DoNothingForeignKey[Policy] = related_name("agreement_links")
     decision_id: Dummy[int] = 0
-    decision: DoNothingForeignKey[Agreement] = related_name("decision_links")
+    decision: DoNothingForeignKey[Agreement] = related_name("agreement_links")

@@ -4,7 +4,6 @@ from typing import Literal
 from django.http import HttpRequest
 
 from ninja import ModelSchema, NinjaAPI
-from ninja.orm import create_schema
 
 from ..models.decisions import (
     Agreement,
@@ -13,6 +12,8 @@ from ..models.decisions import (
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
     Policy,
+    PolicyAgreementLink,
+    PolicyDivisionLink,
     PolicyGroup,
     Vote,
 )
@@ -86,13 +87,36 @@ class AgreementSchema(ModelSchema):
 class PolicyGroupSchema(ModelSchema):
     class Meta:
         model = PolicyGroup
+        exclude = ["id"]
         fields = "__all__"
 
 
-PolicySchema = create_schema(
-    Policy,
-    depth=1,
-)
+class PolicyAgreementLinkSchema(ModelSchema):
+    decision: AgreementSchema
+
+    class Meta:
+        model = PolicyAgreementLink
+        exclude = ["id", "policy", "notes"]
+        fields = "__all__"
+
+
+class PolicyDivisionLinkSchema(ModelSchema):
+    decision: DivisionSchema
+
+    class Meta:
+        model = PolicyDivisionLink
+        exclude = ["id", "policy", "notes"]
+        fields = "__all__"
+
+
+class PolicySchema(ModelSchema):
+    groups: list[PolicyGroupSchema]
+    division_links: list[PolicyDivisionLinkSchema]
+    agreement_links: list[PolicyAgreementLinkSchema]
+
+    class Meta:
+        model = Policy
+        fields = "__all__"
 
 
 @api.get(
