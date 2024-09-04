@@ -1,8 +1,9 @@
 import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Type, cast
 
 from django.conf import settings
+from django.db import models
 
 import rich
 from ruamel.yaml import YAML
@@ -11,6 +12,7 @@ from twfy_votes.policy.models import (
     PartialPolicy,
 )
 
+from ..models.base_model import disable_constraints
 from ..models.decisions import (
     Agreement,
     Chamber,
@@ -18,6 +20,7 @@ from ..models.decisions import (
     Policy,
     PolicyAgreementLink,
     PolicyDivisionLink,
+    PolicyGroup,
 )
 from .register import ImportOrder, import_register
 
@@ -74,6 +77,27 @@ def populate_policies(quiet: bool = False) -> None:
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] policies")
+
+    # Now we need to create the policy group connections - access the ThroughModel
+
+    ThroughModel = cast(Type[models.Model], Policy.groups.through)  # type: ignore
+    group_id_lookup = PolicyGroup.id_from_slug("slug")
+    to_create = []
+
+    for partial in partials:
+        for group in partial.groups:
+            to_create.append(
+                ThroughModel(
+                    policy_id=partial.id, policygroup_id=group_id_lookup[group]
+                )
+            )
+
+    with disable_constraints(ThroughModel._meta.db_table):
+        ThroughModel.objects.all().delete()
+        ThroughModel.objects.bulk_create(to_create, batch_size=1000)
+
+    if not quiet:
+        rich.print(f"Created [green]{len(to_create)}[/green] policy group connection")
 
     division_links = []
     agreement_links = []
