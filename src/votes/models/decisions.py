@@ -2,6 +2,16 @@ from __future__ import annotations
 
 import datetime
 
+from twfy_votes.helpers.typed_django.models import (
+    DoNothingForeignKey,
+    Dummy,
+    DummyManyToMany,
+    DummyOneToMany,
+    ManyToMany,
+    TextField,
+    related_name,
+)
+
 from ..consts import (
     ChamberSlug,
     PolicyDirection,
@@ -13,15 +23,6 @@ from ..consts import (
 )
 from .base_model import DjangoVoteModel
 from .people import Membership, Person
-from .typed_django.models import (
-    DoNothingForeignKey,
-    Dummy,
-    DummyManyToMany,
-    DummyOneToMany,
-    ManyToMany,
-    TextField,
-    related_name,
-)
 
 
 class Chamber(DjangoVoteModel):

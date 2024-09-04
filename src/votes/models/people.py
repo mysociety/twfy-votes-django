@@ -1,9 +1,7 @@
 import datetime
 from typing import Optional
 
-from ..consts import ChamberSlug, OrganisationType
-from .base_model import DjangoVoteModel
-from .typed_django.models import (
+from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
     Dummy,
     DummyOneToMany,
@@ -11,6 +9,9 @@ from .typed_django.models import (
     field,
     related_name,
 )
+
+from ..consts import ChamberSlug, OrganisationType
+from .base_model import DjangoVoteModel
 
 
 class Person(DjangoVoteModel):

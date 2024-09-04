@@ -4,7 +4,7 @@ from typing import Self
 
 from django.db import connection
 
-from .typed_django.models import ModelType, TypedModel
+from twfy_votes.helpers.typed_django.models import ModelType, TypedModel
 
 
 @contextmanager
