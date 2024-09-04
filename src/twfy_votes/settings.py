@@ -15,7 +15,7 @@ from pathlib import Path
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
     DEBUG=(bool, False),
@@ -101,7 +101,7 @@ if BUILD_DIR.exists() is False:
     BUILD_DIR.mkdir()
 
 STATICFILES_DIRS = [
-    BASE_DIR / "votes" / "static",
+    BASE_DIR / "src" / "votes" / "static",
     BASE_DIR / "build",
     ("bootstrap", BASE_DIR / "vendor" / "bootstrap" / "scss"),
     ("bootstrap", BASE_DIR / "vendor" / "bootstrap" / "js"),

@@ -7,5 +7,3 @@ urlpatterns = [
     path("", core.HomePageView.as_view(), name="home"),
     path("", api.urls),
 ]
-
-print(urlpatterns)

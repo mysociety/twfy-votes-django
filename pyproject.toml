@@ -1,7 +1,12 @@
 [tool.poetry]
 name = "twfy-votes"
 version = "0.1.0"
-package-mode = false
+description = "Django app for storing and querying TheyWorkForYou votes"
+authors = ["Alex Parsons <alex.parsons@mysociety.org>"]
+packages = [
+    { include = "votes", from = "src" },
+    { include = "twfy_votes", from = "src" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
