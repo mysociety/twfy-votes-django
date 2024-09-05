@@ -36,6 +36,13 @@ django-ninja = "^1.3.0"
 ruff = "^0.6.2"
 pgcli = "^4.1.0"
 pandas-stubs = "^2.2.2.240807"
+pytest = "^8.3.2"
+pytest-django = "^4.9.0"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "twfy_votes.settings"
+filterwarnings = "ignore::DeprecationWarning"
+
 
 [tool.ruff]
 extend-exclude = ["migrations"]
