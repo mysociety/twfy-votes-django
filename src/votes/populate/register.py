@@ -13,7 +13,8 @@ class ImportOrder(IntEnum):
     DECISIONS = 15
     PRE_BREAKDOWNS = 16
     BREAKDOWNS = 17
-    VOTES = 18
+    DIVISION_ANALYSIS = 18
+    VOTES = 19
     POLICIES = 20
 
 
