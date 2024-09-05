@@ -41,6 +41,7 @@ class divisions_with_total_membership:
             and pw_divisions.chamber = org_membership_count.chamber_slug)
         WHERE
             pw_divisions.chamber != 'pbc'
+            and division_id not like '%cy-senedd'
         """
 
 
