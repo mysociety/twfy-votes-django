@@ -150,3 +150,7 @@ class OrganisationType(StrEnum):
     PARTY = "party"
     METRO = "metro"
     UNKNOWN = "unknown"
+
+
+class TagType(StrEnum):
+    GOV_CLUSTERS = "gov_clusters"

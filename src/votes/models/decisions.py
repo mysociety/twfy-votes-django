@@ -23,6 +23,7 @@ from ..consts import (
     PolicyStatus,
     PolicyStrength,
     StrengthMeaning,
+    TagType,
     VotePosition,
 )
 from .base_model import DjangoVoteModel
@@ -92,6 +93,13 @@ class Division(DjangoVoteModel):
     is_gov_breakdowns: DummyOneToMany[DivisionsIsGovBreakdown] = related_name(
         "division"
     )
+
+
+class DivisionTag(DjangoVoteModel):
+    division_id: Dummy[int]
+    division: DoNothingForeignKey[Division] = related_name("analyses")
+    tag_type: TagType
+    analysis_data: str
 
 
 class DivisionBreakdown(DjangoVoteModel):
