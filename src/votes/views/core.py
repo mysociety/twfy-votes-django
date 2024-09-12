@@ -17,8 +17,3 @@ class NotFoundPageView(TitleMixin, TemplateView):
             status=404,
             **response_kwargs,
         )
-
-
-class HomePageView(TitleMixin, TemplateView):
-    page_title = ""
-    template_name = "votes/home.html"
