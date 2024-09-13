@@ -204,7 +204,7 @@ class DuckQuery:
         return item
 
     def to_parquet(
-        self, dest: Path
+        self, dest: Path, *, reuse_as_source: bool = False
     ) -> Callable[[Type[DuckViewType]], Type[DuckViewType]]:
         """
         Render this view to parquet path.
@@ -212,12 +212,17 @@ class DuckQuery:
 
         def inner(item: Type[DuckViewType]) -> Type[DuckViewType]:
             query = getattr(item, "query", None)
+            name = get_name(item)
 
             if query is None:
                 raise ValueError("Class must have a query method")
 
             self.queries.append(query)
             self.queries.append(f"COPY ({query}) TO '{dest}' (FORMAT 'parquet')")
+
+            if reuse_as_source:
+                query = query_to_view(source_to_query(dest), name=name)
+                self.queries.append(query)
 
             return item
 
@@ -281,6 +286,13 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
 
     def __exit__(self, exc_type, exc_value, traceback):
         self.close()
+
+    def get_view(self, name: str | Type[DuckView]) -> ResponseType:
+        if isinstance(name, str):
+            view_name = name
+        else:
+            view_name = get_name(name)
+        return self.compile(query=f"SELECT * FROM {view_name}")
 
     def compile(
         self,
