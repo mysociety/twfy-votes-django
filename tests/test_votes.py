@@ -1,4 +1,4 @@
-from django.test.client import Client as TestClient
+from django.test.client import Client
 
 import pytest
 
@@ -12,7 +12,7 @@ class BaseTestResponse:
     must_not_contain: list[str] = []
     has_json: bool = False
 
-    def test_present(self, client: TestClient):
+    def test_present(self, client: Client):
         response = client.get(self.url)
         assert response.status_code == self.status_code
 
@@ -22,7 +22,7 @@ class BaseTestResponse:
         for item in self.must_not_contain:
             assert item not in response.content.decode(), f"Unexpected {item}"
 
-    def test_json(self, client: TestClient):
+    def test_json(self, client: Client):
         if not self.has_json:
             return
         response = client.get(self.url + ".json")
@@ -104,19 +104,19 @@ class TestAgreementInfo(BaseTestResponse):
     has_json = True
 
 
-def test_valid_policy_xml(client: TestClient):
+def test_valid_policy_xml(client: Client):
     response = client.get("/twfy-compatible/policies/6679.xml")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/xml"
 
 
-def test_vote_popolo(client: TestClient):
+def test_vote_popolo(client: Client):
     response = client.get("/twfy-compatible/popolo/6679.json")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
 
 
-def test_vote_participants_2005(client: TestClient):
+def test_vote_participants_2005(client: Client):
     response = client.get("/decisions/division/commons/2005-11-22/105.json")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
@@ -126,7 +126,7 @@ def test_vote_participants_2005(client: TestClient):
     assert data["breakdowns"][0]["total_possible_members"] == 646
 
 
-def test_vote_participants_2015(client: TestClient):
+def test_vote_participants_2015(client: Client):
     response = client.get("/decisions/division/commons/2015-12-08/145.json")
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "application/json"
@@ -136,7 +136,7 @@ def test_vote_participants_2015(client: TestClient):
     assert data["breakdowns"][0]["total_possible_members"] == 650
 
 
-def test_all_popolo_policies(client: TestClient):
+def test_all_popolo_policies(client: Client):
     """
     Check all popolo policies are valid for the commons active list.
     This one takes a bit of time, but catches all errors that would stump the
