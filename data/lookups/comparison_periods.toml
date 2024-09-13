@@ -1,0 +1,34 @@
+[[period]]
+slug = "ALL_TIME"
+description = "All time"
+chamber_slug = "commons"
+start_date = "1900-01-01"
+end_date = "2100-01-01"
+
+[[period]]
+slug = "LABOUR_1997"
+description = "Labour 1997-2010"
+chamber_slug = "commons"
+start_date = "1997-05-01"
+end_date = "2010-05-01"
+
+[[period]]
+slug = "COALITION_2010"
+description = "Coalition 2010-2015"
+chamber_slug = "commons"
+start_date = "2010-05-02"
+end_date = "2015-05-01"
+
+[[period]]
+slug = "CONSERVATIVE_2015"
+description = "Conservative 2015-2024"
+chamber_slug = "commons"
+start_date = "2015-05-02"
+end_date = "2024-07-04"
+
+[[period]]
+slug = "LABOUR_2024"
+description = "Labour 2024-"
+chamber_slug = "commons"
+start_date = "2024-07-05"
+end_date = "2100-01-01"

@@ -34,6 +34,7 @@ class Chamber(DjangoVoteModel):
     slug: ChamberSlug
     member_plural: str
     name: str
+    comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
 
     @property
     def pw_alias(self):
@@ -73,6 +74,19 @@ class GovernmentParty(DjangoVoteModel):
     party: str
     start_date: datetime.date
     end_date: datetime.date
+
+
+class PolicyComparisonPeriod(DjangoVoteModel):
+    slug: str
+    description: str
+    start_date: datetime.date
+    end_date: datetime.date
+    chamber_slug: ChamberSlug
+    chamber_id: Dummy[int] = 0
+    chamber: DoNothingForeignKey[Chamber] = related_name("comparison_periods")
+
+    def is_valid_date(self, date: datetime.date) -> bool:
+        return self.start_date <= date <= self.end_date
 
 
 class Division(DjangoVoteModel):
