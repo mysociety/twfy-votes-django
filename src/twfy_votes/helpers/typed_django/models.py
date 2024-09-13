@@ -119,6 +119,12 @@ class DummyManager(models.Manager, Generic[ModelType]):
     def __class_getitem__(cls, item: Any) -> Any:
         return item
 
+    def all(self) -> models.QuerySet[ModelType]: ...
+
+    def filter(self, *args: Any, **kwargs: Any) -> models.QuerySet[ModelType]: ...
+
+    def get(self, *args: Any, **kwargs: Any) -> ModelType: ...
+
 
 AllowJustAnnotated = object()
 
