@@ -10,6 +10,7 @@ class ImportOrder(IntEnum):
     PEOPLE = 5
     CHAMBERS = 9
     LOOKUPS = 10
+    API_VOTES = 14
     DECISIONS = 15
     PRE_BREAKDOWNS = 16
     BREAKDOWNS = 17

@@ -22,12 +22,17 @@ class pw_divisions:
     source = BASE_DIR / "data" / "source" / "divisions.parquet"
 
 
+@duck.as_source
+class api_divisions:
+    source = BASE_DIR / "data" / "compiled" / "api_divisions.parquet"
+
+
 @duck.as_alias
 class org_membership_count:
     alias_for = "postgres_db.votes_orgmembershipcount"
 
 
-@duck.as_query
+@duck.as_view
 class divisions_with_total_membership:
     query = """
         SELECT
@@ -42,6 +47,21 @@ class divisions_with_total_membership:
         WHERE
             pw_divisions.chamber != 'pbc'
             and division_id not like '%cy-senedd'
+        """
+
+
+@duck.as_view
+class api_divisions_with_total_membership:
+    query = """
+        SELECT
+            api_divisions.*,
+            org_membership_count.count as total_possible_members
+        FROM
+            api_divisions
+        LEFT JOIN org_membership_count on
+            (CAST(api_divisions.division_date as DATE) between org_membership_count.start_date
+            and org_membership_count.end_date
+            and api_divisions.chamber = org_membership_count.chamber_slug)
         """
 
 
@@ -69,7 +89,12 @@ def division_from_row(
 
 @import_register.register("divisions", group=ImportOrder.DECISIONS)
 def import_divisions(quiet: bool = False):
-    df = DuckQuery.connect().compile(duck).df()
+    with DuckQuery.connect() as cduck:
+        cduck.compile(duck).run()
+        df = cduck.compile("SELECT * from divisions_with_total_membership").df()
+        votes_api_df = cduck.compile(
+            "SELECT * from api_divisions_with_total_membership"
+        ).df()
 
     chamber_lookup = {x.slug: x.id for x in Chamber.objects.all() if x.id}
     to_create = [
@@ -77,10 +102,22 @@ def import_divisions(quiet: bool = False):
         for _, row in df.iterrows()
     ]
 
+    api_to_create = [
+        division_from_row(row, chamber_id_lookup=chamber_lookup)
+        for _, row in votes_api_df.iterrows()
+    ]
+
+    # remove any api divisions that are already in the main divisions based on key
+    api_to_create = [
+        x for x in api_to_create if x.key not in [y.key for y in to_create]
+    ]
+
     to_create = Division.get_lookup_manager("key").add_ids(to_create)
     with Division.disable_constraints():
         Division.objects.all().delete()
         Division.objects.bulk_create(to_create, batch_size=10000)
+        Division.objects.bulk_create(api_to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] divisions")
+        rich.print(f"Imported [green]{len(api_to_create)}[/green] api divisions")

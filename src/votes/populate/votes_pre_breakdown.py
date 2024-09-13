@@ -174,6 +174,46 @@ class calc_vote_with_absences:
     source = votes_with_absences
 
 
+@duck.as_source
+class api_votes:
+    source = Path(BASE_DIR, "data", "compiled", "api_votes.parquet")
+
+
+@duck.as_view
+class api_votes_minus_duplicates:
+    """
+    only rows where there isn't a division_id that is used in calc_vote_with_absences
+    """
+
+    query = """
+    select
+        *
+    from
+        api_votes
+    where
+        division_id not in (select division_id from calc_vote_with_absences)
+    """
+
+
+@duck.as_view
+class joined_votes:
+    """
+    Join the two vote tables together
+    """
+
+    query = """
+    select
+        *
+    from
+        calc_vote_with_absences
+    union
+    select
+        *
+    from
+        api_votes_minus_duplicates
+    """
+
+
 @duck.to_parquet(dest=votes_with_parties)
 class calculate_votes:
     """
@@ -189,7 +229,7 @@ class calculate_votes:
         CASE WHEN government_parties.is_gov is NULL THEN 0 ELSE 1 END AS is_gov,
         total_possible_members
     FROM
-        calc_vote_with_absences as pw_vote
+        joined_votes as pw_vote
     JOIN
         pd_membership on (pw_vote.membership_id = pd_membership.id)
     JOIN
