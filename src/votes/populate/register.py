@@ -17,6 +17,8 @@ class ImportOrder(IntEnum):
     DIVISION_ANALYSIS = 18
     VOTES = 19
     POLICIES = 20
+    PREP_POLICYCALC = 25
+    POLICYCALC = 30
 
 
 class AcceptsQuiet(Protocol):
