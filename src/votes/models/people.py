@@ -66,6 +66,10 @@ class Membership(DjangoVoteModel):
     party: DoNothingForeignKey[Organization] = field(
         default=None, null=True, related_name="party_memberships"
     )
+    effective_party_id: Dummy[Optional[int]] = None
+    effective_party: DoNothingForeignKey[Organization] = field(
+        default=None, null=True, related_name="effective_party_memberships"
+    )
     chamber_id: Dummy[Optional[int]] = None
     chamber: DoNothingForeignKey[Chamber] = field(
         default=None, null=True, related_name="org_memberships"
