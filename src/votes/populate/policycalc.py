@@ -13,6 +13,8 @@ from tqdm import tqdm
 
 from twfy_votes.helpers.duck import DuckQuery
 from twfy_votes.helpers.duck.templates import EnforceIntJinjaQuery
+from votes.models.decisions import Policy
+from votes.policy_generation.scoring import ScoreFloatPair
 
 from .register import ImportOrder, import_register
 
@@ -108,13 +110,13 @@ class agreement_count:
         person_id,
         policy_id,
         -- count agreement where strength is strong and alignment is agree
-        count(*) filter (where strong_int = 1 and agree_int = 1) as num_strong_agree_agreements,
+        count(*) filter (where strong_int = 1 and agree_int = 1) as num_strong_agreements_same,
         -- count agreement where strength is weak and alignment is agree
-        count(*) filter (where strong_int = 0 and agree_int = 1) as num_weak_agree_agreements,
+        count(*) filter (where strong_int = 0 and agree_int = 1) as num_agreements_same,
         -- count agreement where strength is strong and alignment is disagree
-        count(*) filter (where strong_int = 1 and agree_int = 0) as num_strong_disagree_agreements,
+        count(*) filter (where strong_int = 1 and agree_int = 0) as num_strong_agreements_different,
         -- count agreement where strength is weak and alignment is disagree
-        count(*) filter (where strong_int = 0 and agree_int = 0) as num_weak_disagree_agreements
+        count(*) filter (where strong_int = 0 and agree_int = 0) as num_agreements_different
     from
         policy_collective_relevant
     join
@@ -146,10 +148,13 @@ class policy_alignment:
         policy_divisions.division_number as division_number,
         policy_divisions.division_year as division_year,
         pw_vote.effective_vote as mp_vote,
+        -- ok, effective_vote_int should be 1 for agree, -1 for disagree
+        -- agree_int is 1 for 'policy agrees with vote', 0 for 'policy disagrees with vote'
+        -- so aligned with policy is (1,1) or (-1,0) and not aligned is (1,0) or (-1,1)
         (case when pw_vote.effective_vote_int = 1 and agree_int = 1 
-                or pw_vote.effective_vote_int = -1 and agree_int = 1 then 1 else 0 end) as answer_agreed,
+                or pw_vote.effective_vote_int = -1 and agree_int = 0 then 1 else 0 end) as answer_agreed,
         (case when pw_vote.effective_vote_int = 1 and agree_int = 0 
-                or pw_vote.effective_vote_int = -1 and agree_int = 0 then 1 else 0 end) as answer_disagreed,
+                or pw_vote.effective_vote_int = -1 and agree_int = 1 then 1 else 0 end) as answer_disagreed,
         pw_vote.abstain_int as abstained,
         pw_vote.absent_int as absent,
     FROM
@@ -222,6 +227,8 @@ class comparisons_by_policy_vote_pivot:
         sum(num_divisions_abstained) filter (where strong_int = 0) as num_votes_abstained,
         sum(num_divisions_abstained) filter (where strong_int = 1) as num_strong_votes_abstained,
         list(num_comparators) as num_comparators,
+        -- for debugging - remove for speed
+        list(division_id) as division_ids,
         min(division_year) as start_year,
         max(division_year) as end_year
     from comparisons_by_policy_vote({{ _person_id }},
@@ -269,7 +276,7 @@ class prepared_pivot_table:
     """
 
 
-if compiled_policy_dir.exists():
+if any(compiled_policy_dir.glob("*.parquet")):
 
     @duck.as_source
     class compiled_policies:  # type: ignore
@@ -394,8 +401,39 @@ def check_generated_against_current() -> list[int]:
     return df["person_id"].unique().tolist()
 
 
+def score_generation_func():
+    policies = Policy.objects.all()
+    policy_score_func = {x.id: x.get_scoring_function() for x in policies}
+
+    def get_score(row: pd.Series) -> float:
+        scoring_func = policy_score_func[row["policy_id"]]
+        return scoring_func.score(
+            votes_same=ScoreFloatPair(
+                row["num_votes_same"], row["num_strong_votes_same"]
+            ),
+            votes_different=ScoreFloatPair(
+                row["num_votes_different"], row["num_strong_votes_different"]
+            ),
+            votes_absent=ScoreFloatPair(
+                row["num_votes_absent"], row["num_strong_votes_absent"]
+            ),
+            votes_abstain=ScoreFloatPair(
+                row["num_votes_abstained"], row["num_strong_votes_abstained"]
+            ),
+            agreements_same=ScoreFloatPair(
+                row["num_agreements_same"], row["num_strong_agreements_same"]
+            ),
+            agreements_different=ScoreFloatPair(
+                row["num_agreements_different"],
+                row["num_strong_agreements_different"],
+            ),
+        )
+
+    return get_score
+
+
 def generate_policy_distributions(
-    update_from_hash: bool = True,
+    update_from_hash: bool = False,
     person_ids: list[int] | None = None,
     policy_ids: list[int] | None = None,
     quiet: bool = False,
@@ -406,12 +444,20 @@ def generate_policy_distributions(
     Limiting by policy_ids still regenerates all policies for affected people,
     but doesn't regenerate for people who don't have that policy.
     """
+
     duck = get_connected_duck()
+    score_from_row = score_generation_func()
 
     policy_hash_df = duck.get_view(policy_hash).df()
     policy_id_lookup = policy_hash_df.set_index(["policy_id"])["policy_hash"].to_dict()
 
     policy_dest = compiled_dir / "policies"
+    if not update_from_hash:
+        if policy_dest.exists():
+            for file in policy_dest.glob("*"):
+                file.unlink()
+            policy_dest.rmdir()
+
     policy_dest.mkdir(exist_ok=True, parents=True)
 
     relevant_df = pd.read_parquet(
@@ -424,7 +470,6 @@ def generate_policy_distributions(
     else:
         if update_from_hash:
             person_ids = check_generated_against_current()
-            print(f"limiting to people with hash differences: {person_ids}")
             relevant_df = relevant_df[relevant_df["person_id"].isin(person_ids)]
 
     if policy_ids:
@@ -439,6 +484,11 @@ def generate_policy_distributions(
     relevant_df["chamber_id"] = relevant_df["chamber_id"].astype(int)
     relevant_df["person_id"] = relevant_df["person_id"].astype(int)
 
+    # if party_id is 23 (ukip), we treat as independent (it's a weird two mp overlap that's historic)
+    relevant_df.loc[
+        (relevant_df["party_id"] == 23) & (relevant_df["chamber_id"] == 1), "party_id"
+    ] = 0
+
     count = 0
 
     for _, row in tqdm(relevant_df.iterrows(), total=len(relevant_df), disable=quiet):
@@ -452,7 +502,13 @@ def generate_policy_distributions(
             .df()
         )
 
+        list_cols = ["num_comparators", "division_ids"]
+        for col in df.columns:
+            if col not in list_cols:
+                df[col] = df[col].fillna(0)
+
         df["policy_hash"] = df["policy_id"].map(policy_id_lookup)
+        df["score"] = df.apply(score_from_row, axis=1)
 
         df.to_parquet(
             policy_dest

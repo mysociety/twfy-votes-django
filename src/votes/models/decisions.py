@@ -26,6 +26,10 @@ from ..consts import (
     TagType,
     VotePosition,
 )
+from ..policy_generation.scoring import (
+    ScoringFuncProtocol,
+    SimplifiedScore,
+)
 from .base_model import DjangoVoteModel
 from .people import Membership, Organization, Person
 
@@ -217,6 +221,13 @@ class Policy(DjangoVoteModel):
     division_links: DummyOneToMany[PolicyDivisionLink] = related_name("policy")
     agreement_links: DummyOneToMany[PolicyAgreementLink] = related_name("policy")
     policy_hash: str
+
+    def get_scoring_function(self) -> ScoringFuncProtocol:
+        match self.strength_meaning:
+            case StrengthMeaning.SIMPLIFIED:
+                return SimplifiedScore
+            case _:
+                raise ValueError(f"Invalid strength meaning {self.strength_meaning}")
 
 
 class BasePolicyDecisionLink(DjangoVoteModel, abstract=True):

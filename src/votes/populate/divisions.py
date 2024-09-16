@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -88,7 +89,7 @@ def division_from_row(
 
 
 @import_register.register("divisions", group=ImportOrder.DECISIONS)
-def import_divisions(quiet: bool = False):
+def import_divisions(quiet: bool = False, update_since: datetime.date | None = None):
     with DuckQuery.connect() as cduck:
         cduck.compile(duck).run()
         df = cduck.compile("SELECT * from divisions_with_total_membership").df()
@@ -100,11 +101,13 @@ def import_divisions(quiet: bool = False):
     to_create = [
         division_from_row(row, chamber_id_lookup=chamber_lookup)
         for _, row in df.iterrows()
+        if update_since is None or row["division_date"] >= update_since
     ]
 
     api_to_create = [
         division_from_row(row, chamber_id_lookup=chamber_lookup)
         for _, row in votes_api_df.iterrows()
+        if update_since is None or row["division_date"] >= update_since
     ]
 
     # remove any api divisions that are already in the main divisions based on key
@@ -112,9 +115,14 @@ def import_divisions(quiet: bool = False):
         x for x in api_to_create if x.key not in [y.key for y in to_create]
     ]
 
+    if update_since:
+        to_delete = Division.objects.filter(date__gte=update_since)
+    else:
+        to_delete = Division.objects.all()
+
     to_create = Division.get_lookup_manager("key").add_ids(to_create)
     with Division.disable_constraints():
-        Division.objects.all().delete()
+        to_delete.delete()
         Division.objects.bulk_create(to_create, batch_size=10000)
         Division.objects.bulk_create(api_to_create, batch_size=10000)
 
