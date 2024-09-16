@@ -32,6 +32,11 @@ class pd_memberships:
 
 
 @duck.as_alias
+class pd_org:
+    alias_for = "postgres_db.votes_organization"
+
+
+@duck.as_alias
 class policy_votes:
     alias_for = "postgres_db.votes_policydivisionlink"
 
@@ -68,7 +73,10 @@ class policy_divisions_relevant:
     query = """
     select 
         pw_division.*,
+        date_part('year',date) as division_year,
         case when policy_votes.strength = 'strong' then 1 else 0 end as strong_int,
+        case when policy_votes.alignment = 'agree' then 1 else 0 end as agree_int,
+        strong_int * 2 + agree_int as combo_int,
         policy_votes.* exclude (decision_id, id),
         policy_comparison_period.slug as period_slug,
         policy_comparison_period.id as period_id
@@ -84,9 +92,7 @@ class policy_divisions_relevant:
     """
 
 
-@duck.to_parquet(
-    dest=compiled_dir / "policy_votes_relevant.parquet", reuse_as_source=True
-)
+@duck.to_parquet(compiled_dir / "policy_votes_relevant.parquet", reuse_as_source=True)
 class votes_relevant:
     """
     Limit the votes table to just those where the division is part of policy_votes
@@ -95,12 +101,20 @@ class votes_relevant:
     query = """
     select 
         pw_vote.* exclude (division_id),
+        pd_org.id as effective_party_id,
+        -- if effective_vote is aye then 1, no then -1, otherwise 0
+        case when effective_vote = 'aye' then 1 when effective_vote = 'no' then -1 else 0 end as effective_vote_int,
+        -- when effective_vote is absent, then absent is 1
+        case when effective_vote = 'absent' then 1 else 0 end as absent_int, 
+        case when effective_vote = 'abstain' then 1 else 0 end as abstain_int,
         pw_division.id as division_id,
         pw_division.key as division_key
     from 
         pw_vote
     join
         pw_division on (pw_vote.division_id = pw_division.key)
+    join
+        pd_org on (pw_vote.effective_party_slug = pd_org.slug)
     where
         pw_division.id in (select distinct decision_id from policy_votes)
     order by
@@ -120,6 +134,8 @@ class policy_agreements_relevant:
     select 
         pw_agreement.*,
         case when policy_agreements.strength = 'strong' then 1 else 0 end as strong_int,
+        case when policy_agreements.alignment = 'agree' then 1 else 0 end as agree_int,
+        strong_int * 2 + agree_int as combo_int,
         policy_agreements.* exclude (decision_id, id),
         policy_comparison_period.slug as period_slug,
         policy_comparison_period.id as period_id
@@ -156,6 +172,7 @@ class collective_relevant:
         policy_agreements on (pw_agreement.id = policy_agreements.decision_id)
     join
         pd_memberships on (pw_agreement.date between pd_memberships.start_date and pd_memberships.end_date)
+        
     order by
         person_id, pw_agreement.date, decision_id
     """
@@ -212,7 +229,7 @@ class relevant_people:
     """
 
 
-@import_register.register("prepolicy_calc", group=ImportOrder.PREP_POLICYCALC)
+@import_register.register("prep_policycalc", group=ImportOrder.PREP_POLICYCALC)
 def run_pre_calc(quiet: bool = False):
     with DuckQuery.connect() as cduck:
         cduck.compile(duck).run()
