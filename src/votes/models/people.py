@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
@@ -12,6 +14,9 @@ from twfy_votes.helpers.typed_django.models import (
 
 from ..consts import ChamberSlug, OrganisationType
 from .base_model import DjangoVoteModel
+
+if TYPE_CHECKING:
+    from .decisions import Chamber
 
 
 class Person(DjangoVoteModel):
@@ -61,10 +66,8 @@ class Membership(DjangoVoteModel):
     party: DoNothingForeignKey[Organization] = field(
         default=None, null=True, related_name="party_memberships"
     )
-    chamber_id: Dummy[Optional[int]] = (
-        None  # note that this for the moment is *different* than ids assigned to chambers elsewhere. the parlparse internal org.
-    )
-    chamber: DoNothingForeignKey[Organization] = field(
+    chamber_id: Dummy[Optional[int]] = None
+    chamber: DoNothingForeignKey[Chamber] = field(
         default=None, null=True, related_name="org_memberships"
     )
     chamber_slug: str

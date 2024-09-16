@@ -11,6 +11,7 @@ from mysoc_validator.models.popolo import Membership as PopoloMembership
 from mysoc_validator.models.popolo import Person as PopoloPerson
 
 from ..consts import ChamberSlug, OrganisationType
+from ..models.decisions import Chamber
 from ..models.people import Membership, Organization, OrgMembershipCount, Person
 from .register import ImportOrder, import_register
 
@@ -251,6 +252,7 @@ def import_popolo(quiet: bool = False):
         rich.print(f"Created [green]{len(to_create)}[/green] organizations")
 
     org_slug_lookup = Organization.id_from_slug("slug")
+    chamber_slug_lookup = Chamber.id_from_slug("slug")
 
     to_create = []
 
@@ -270,7 +272,7 @@ def import_popolo(quiet: bool = False):
                 party_slug=membership.on_behalf_of_id or "",
                 effective_party_slug=get_effective_party(membership.on_behalf_of_id),
                 party_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
-                chamber_id=org_slug_lookup.get(chamber_slug),
+                chamber_id=chamber_slug_lookup.get(chamber_slug),
                 chamber_slug=chamber_slug,
                 area_name=area_name,
                 post_label=post_label,

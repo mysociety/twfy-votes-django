@@ -27,7 +27,7 @@ from ..consts import (
     VotePosition,
 )
 from .base_model import DjangoVoteModel
-from .people import Membership, Person
+from .people import Membership, Organization, Person
 
 
 class Chamber(DjangoVoteModel):
@@ -149,7 +149,7 @@ class DivisionsIsGovBreakdown(DjangoVoteModel):
 
 class DivisionPartyBreakdown(DjangoVoteModel):
     party_id: Dummy[int]
-    party: DoNothingForeignKey[GovernmentParty] = related_name("party_breakdowns")
+    party: DoNothingForeignKey[Organization] = related_name("party_breakdowns")
     party_slug: str
     division_id: Dummy[int]
     division: DoNothingForeignKey[Division] = related_name("party_breakdowns")
@@ -237,3 +237,12 @@ class PolicyAgreementLink(BasePolicyDecisionLink):
     policy: DoNothingForeignKey[Policy] = related_name("agreement_links")
     decision_id: Dummy[int] = 0
     decision: DoNothingForeignKey[Agreement] = related_name("agreement_links")
+
+
+class RelevantPolicyLink(DjangoVoteModel):
+    policy_id: Dummy[int] = 0
+    policy: DoNothingForeignKey[Policy] = related_name("relevant_links")
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("relevant_links")
+    period_id: Dummy[int] = 0
+    period: DoNothingForeignKey[PolicyComparisonPeriod] = related_name("relevant_links")
