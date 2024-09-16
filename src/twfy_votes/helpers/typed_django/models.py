@@ -277,8 +277,13 @@ def field(
     if model_class == blank_callable:
         return ExtraKwargs(kwargs)
     elif isinstance(model_class, type) and issubclass(model_class, models.Field):
-        klass = model_class(**kwargs)
-        klass.__original_kwargs__ = kwargs  # type: ignore
+        # convert any forwardrefs values back to strings (foreign keys accept these)
+        unpacked_kwargs = {
+            k: v.__forward_arg__ if isinstance(v, ForwardRef) else v
+            for k, v in kwargs.items()
+        }
+        klass = model_class(**unpacked_kwargs)
+        klass.__original_kwargs__ = unpacked_kwargs  # type: ignore
         return klass
     else:
         raise ValueError(f"Invalid model class {model_class}")
