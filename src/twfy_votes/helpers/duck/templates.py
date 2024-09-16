@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any, Callable, Type, TypeVar, get_type_hints
 
+import numpy as np
 from jinja2.environment import Template
 from typing_extensions import dataclass_transform
 
@@ -73,6 +74,9 @@ class BaseQuery:
 
         self.query = self.query_template
         self.params = kwargs
+        self.validate_params()
+
+    def validate_params(self): ...
 
     async def run(self, duck: ConnectedDuckQuery[AsyncDuckResponse]):
         return await duck.compile(self, variables=self.params).run()
@@ -162,3 +166,15 @@ class RawJinjaQuery(BaseQuery):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
         self.query = Template(self.query_template).render(**self.params)
+
+
+class EnforceIntJinjaQuery(RawJinjaQuery):
+    """
+    Enforce int for all params for safety
+    """
+
+    def validate_params(self):
+        super().validate_params()
+        for k, v in self.params.items():
+            if not isinstance(v, (int, np.signedinteger)):
+                raise ValueError(f"Expected int for {k}, got {type(v)}")
