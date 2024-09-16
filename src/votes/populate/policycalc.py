@@ -7,12 +7,20 @@ from pathlib import Path
 
 from django.conf import settings
 
-from twfy_votes.helpers.duck import BaseQuery, DuckQuery, RawJinjaQuery
+import pandas as pd
+import rich
+from tqdm import tqdm
+
+from twfy_votes.helpers.duck import DuckQuery
+from twfy_votes.helpers.duck.templates import EnforceIntJinjaQuery
+
+from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
 
 BASE_DIR = Path(settings.BASE_DIR)
 compiled_dir = Path(BASE_DIR, "data", "compiled")
+compiled_policy_dir = Path(compiled_dir, "policies")
 
 
 @duck.as_table
@@ -227,20 +235,28 @@ class comparisons_by_policy_vote_pivot:
 
 @duck.as_table_macro
 class joined_division_agreement_comparison:
+    """
+    Bring the division and agreement calculations together.
+    By definition, agreements don't differ, so there is no is_target to merge on
+    """
+
     args = ["_person_id", "_chamber_id", "_party_slug"]
     macro = """
     select
+        coalesce(division_comparison.period_id, agreement_comparison.period_id) as period_id,
+        coalesce(division_comparison.policy_id, agreement_comparison.policy_id) as policy_id,
+        coalesce(division_comparison.is_target, 0) as is_target,
         {{ _person_id }} as person_id,
-        {{ _chamber_id }} as chamber,
-        {{ _party_slug }} as party,
-        division_comparison.*,
-        agreement_comparison.*
+        {{ _chamber_id }} as chamber_id,
+        {{ _party_slug }} as party_id,
+        division_comparison.* exclude (period_id, policy_id, is_target),
+        agreement_comparison.* exclude (period_id, policy_id)
     from
         comparisons_by_policy_vote_pivot({{ _person_id }},
                                         {{ _chamber_id }},
                                         {{ _party_slug }}
                                         ) as division_comparison
-    left join
+    full join
         agreement_count({{ _person_id }}) as agreement_comparison using (policy_id, period_id)
     """
 
@@ -253,7 +269,93 @@ class prepared_pivot_table:
     """
 
 
-class PolicyPivotTable(RawJinjaQuery):
+if compiled_policy_dir.exists():
+
+    @duck.as_source
+    class compiled_policies:  # type: ignore
+        source = compiled_policy_dir / "*.parquet"
+
+else:
+    # create an equiv empty table with these
+    # columns person_id, period_id, policy_id, party_id, policy_hash
+
+    @duck.as_view
+    class compiled_policies:
+        query = """
+        select
+            null as person_id,
+            null as period_id,
+            null as policy_id,
+            null as party_id,
+            null as policy_hash
+        where 1 = 0
+        """
+
+
+@duck.as_source
+class relevant_person_policy_period:
+    source = compiled_dir / "relevant_person_policy_period.parquet"
+
+
+@duck.as_view
+class policy_hash:
+    """
+    This is a hash of the policy table
+    """
+
+    query = """
+    select
+        id as policy_id,
+        policy_hash
+    from
+        policies
+    """
+
+
+@duck.as_view
+class relevant_person_policy_period_with_hash:
+    """
+    This should be all possible connections of people and policies - with a hash.
+    """
+
+    query = """
+    select
+        relevant_person_policy_period.* exclude (party_id),
+        coalesce(party_id, 0) as party_id,
+        policy_hash.policy_hash
+    from
+        relevant_person_policy_period
+    join
+        policy_hash using (policy_id)
+        """
+
+
+@duck.as_view
+class compare_hash:
+    """
+    This is a hash of the comparison party table.
+    This helps us find differences between the compiled and the current.
+    """
+
+    query = """
+    select
+        rp.person_id as person_id,
+        rp.chamber_id as chamber_id,
+        rp.period_id as period_id,
+        rp.policy_id as policy_id,
+        rp.party_id as party_id,
+        rp.policy_hash as current_hash,
+        compiled_policies.policy_hash as compiled_hash,
+        current_hash != compiled_hash as hash_differs
+    from 
+        relevant_person_policy_period_with_hash as rp
+    left join
+        compiled_policies using (person_id, period_id, policy_id, party_id)
+        
+    """
+
+
+class PolicyPivotTable(EnforceIntJinjaQuery):
     """
     Retrieve all policy breakdowns and comparison breakdowns
     for a single person, given a chamber and a party.
@@ -269,64 +371,101 @@ class PolicyPivotTable(RawJinjaQuery):
     party_id: int
 
 
-class GetPersonParties(BaseQuery):
-    """
-    Get all 'real' parties that a person has been a member of in a chamber.
-    Excludes independents, etc.
-    """
-
-    query_template = """
-    select * from (
-    select distinct(party) as party from pd_memberships
-    where chamber == {{ chamber_id }}
-    and person_id == {{ person_id }}
-    )
-    {% if banned_parties %}
-    where party not in {{ banned_parties | inclause }}
-    {% endif %}
-    """
-    chamber_id: str
-    person_id: int
-    banned_parties: list[str] = [
-        "independent",
-        "speaker",
-        "deputy-speaker",
-        "independent-conservative",
-        "independent-labour",
-        "independent-ulster-unionist",
-    ]
-
-
-class PolicyDistributionQuery(BaseQuery):
-    """
-    Here we're joining with the comparison party table to limit to just the
-    'official' single comparisons used in TWFY.
-
-    Here in this app, we can store and display multiple comparisons.
-    """
-
-    query_template = """
-    select
-        policy_distributions.*,
-        policies.strength_meaning as strength_meaning
-    from 
-        policy_distributions
-    join
-        policies on (policy_distributions.policy_id = policies.id)
-    {% if single_comparisons %}
-    join
-        pw_comparison_party using (person_id, chamber, comparison_party)
-    {% endif %}
-    where
-        policy_id = {{ policy_id }}
-        and period_id = {{ period_id }}
-    """
-    policy_id: int
-    period_id: str
-    single_comparisons: bool = False
-
-
 def get_connected_duck():
     connected = DuckQuery.connect()
     connected.compile(duck).run()
     return connected
+
+
+def check_generated_against_current() -> list[int]:
+    """
+    Return a list of person_ids where the policy distributions differ from the compiled.
+    """
+    duck = get_connected_duck()
+    df = duck.get_view(compare_hash).df()
+
+    # if hash_differs isna - it should be True
+    df["hash_differs_na_or_false"] = df["hash_differs"].isna() | (
+        df["hash_differs"] == True  # noqa
+    )
+
+    # reduce to just those with hash differs
+    df = df[df["hash_differs_na_or_false"]]
+    return df["person_id"].unique().tolist()
+
+
+def generate_policy_distributions(
+    update_from_hash: bool = True,
+    person_ids: list[int] | None = None,
+    policy_ids: list[int] | None = None,
+    quiet: bool = False,
+) -> int:
+    """
+    This generates voting summaries for everyone.
+    It can be limited by person_ids or policy_ids.
+    Limiting by policy_ids still regenerates all policies for affected people,
+    but doesn't regenerate for people who don't have that policy.
+    """
+    duck = get_connected_duck()
+
+    policy_hash_df = duck.get_view(policy_hash).df()
+    policy_id_lookup = policy_hash_df.set_index(["policy_id"])["policy_hash"].to_dict()
+
+    policy_dest = compiled_dir / "policies"
+    policy_dest.mkdir(exist_ok=True, parents=True)
+
+    relevant_df = pd.read_parquet(
+        compiled_dir / "relevant_person_policy_period.parquet"
+    )
+
+    if person_ids:
+        relevant_df = relevant_df[relevant_df["person_id"].isin(person_ids)]
+
+    else:
+        if update_from_hash:
+            person_ids = check_generated_against_current()
+            print(f"limiting to people with hash differences: {person_ids}")
+            relevant_df = relevant_df[relevant_df["person_id"].isin(person_ids)]
+
+    if policy_ids:
+        # Note, this will still regenerate other policies, just exclude people who *don't* have this policy
+        relevant_df = relevant_df[relevant_df["policy_id"].isin(policy_ids)]
+    relevant_df = relevant_df.drop(
+        columns=["policy_id", "period_id", "effective_party_slug"]
+    ).drop_duplicates()
+
+    # for true independents who never had a party - setting to 0 means there is no comparison party to find
+    relevant_df["party_id"] = relevant_df["party_id"].fillna(0).astype(int)
+    relevant_df["chamber_id"] = relevant_df["chamber_id"].astype(int)
+    relevant_df["person_id"] = relevant_df["person_id"].astype(int)
+
+    count = 0
+
+    for _, row in tqdm(relevant_df.iterrows(), total=len(relevant_df), disable=quiet):
+        df = (
+            PolicyPivotTable(
+                person_id=row["person_id"],
+                chamber_id=row["chamber_id"],
+                party_id=row["party_id"],
+            )
+            .compile(duck)
+            .df()
+        )
+
+        df["policy_hash"] = df["policy_id"].map(policy_id_lookup)
+
+        df.to_parquet(
+            policy_dest
+            / f"{row['person_id']}_{row['chamber_id']}_{row['party_id']}.parquet"
+        )
+        count += len(df)
+
+    return count
+
+
+@import_register.register("policycalc", group=ImportOrder.POLICYCALC)
+def run_policy_calculations(quiet: bool = False):
+    count = generate_policy_distributions(quiet=quiet)
+
+    if not quiet:
+        rich.print(f"Generated [green]{count}[/green] policy distributions")
