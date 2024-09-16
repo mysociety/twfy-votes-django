@@ -321,6 +321,8 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
             raise ValueError("Can only use 'compile' on a fresh or empty query.")
         return self.response_type(self.connection, _query, self.data_sources)  # type: ignore
 
+    query = compile
+
     def close(self):
         self.connection.close()
 
