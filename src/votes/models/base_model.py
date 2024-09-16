@@ -44,6 +44,13 @@ class LookupManager:
 
 
 class DjangoVoteModel(TypedModel, abstract=True):
+    def __str__(self):
+        keys_to_try = ["slug", "key", "id"]
+        for key in keys_to_try:
+            if hasattr(self, key):
+                return f"{self.__class__.__name__}({getattr(self, key)})"
+        return super().__str__()
+
     @classmethod
     def id_from_slug(cls, slug_field: str) -> dict[str, int]:
         """
