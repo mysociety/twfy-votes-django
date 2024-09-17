@@ -401,9 +401,6 @@ def check_generated_against_current() -> list[int]:
 
     # reduce to just those with hash differs
     df = df[df["hash_differs_na_or_false"]]
-
-    if not df.empty:
-        df.to_csv("hash_differs.csv")
     return df["person_id"].unique().tolist()
 
 
