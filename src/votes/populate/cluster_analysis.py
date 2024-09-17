@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -107,30 +108,47 @@ def get_commons_clusters(df: pd.DataFrame, quiet: bool = True) -> "pd.Series[str
 
 
 @import_register.register("cluster_analysis", group=ImportOrder.DIVISION_ANALYSIS)
-def import_cluster_analysis(quiet: bool = False):
+def import_cluster_analysis(
+    quiet: bool = False, update_since: datetime.date | None = None
+):
     with DuckQuery.connect() as query:
         df = query.compile(duck).run()
 
+    division_id_lookup = Division.id_from_slug("key")
+    affected_divisions = (
+        Division.objects.filter(date__gte=update_since).values_list("id", flat=True)
+        if update_since
+        else None
+    )
+
     df = pd.read_parquet(division_cluster_path)
+
+    df["division_database_id"] = df["division_id"].map(division_id_lookup)
+
+    if affected_divisions:
+        df = df[df["division_database_id"].isin(affected_divisions)]
 
     clusters = get_commons_clusters(df, quiet=quiet)
 
     df["cluster"] = clusters
 
-    division_id_lookup = Division.id_from_slug("key")
-
     to_create = []
 
     for _, row in tqdm(df.iterrows(), total=len(df), disable=quiet):
+        if affected_divisions and row["division_database_id"] not in affected_divisions:
+            continue
         item = DivisionTag(
-            division_id=division_id_lookup[row["division_id"]],
+            division_id=row["division_database_id"],
             tag_type=TagType.GOV_CLUSTERS,
             analysis_data=row["cluster"],
         )
         to_create.append(item)
 
     with DivisionTag.disable_constraints():
-        DivisionTag.objects.all().delete()
+        if affected_divisions:
+            DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
+        else:
+            DivisionTag.objects.all().delete()
         DivisionTag.objects.bulk_create(to_create)
 
     if not quiet:

@@ -30,8 +30,8 @@ class Score(BaseModel):
     num_strong_votes_different: float = 0.0
     num_votes_absent: float = 0.0
     num_strong_votes_absent: float = 0.0
-    num_votes_abstained: float = 0.0
-    num_strong_votes_abstained: float = 0.0
+    num_votes_abstain: float = 0.0
+    num_strong_votes_abstain: float = 0.0
     num_agreements_same: float = 0.0
     num_strong_agreements_same: float = 0.0
     num_agreements_different: float = 0.0
@@ -57,8 +57,8 @@ class Score(BaseModel):
             "num_strong_votes_different",
             "num_votes_absent",
             "num_strong_votes_absent",
-            "num_votes_abstained",
-            "num_strong_votes_abstained",
+            "num_votes_abstain",
+            "num_strong_votes_abstain",
         ]
 
         for field in fields:
@@ -77,8 +77,8 @@ class Score(BaseModel):
             + self.num_strong_votes_same
             + self.num_strong_votes_different
             + self.num_strong_votes_absent
-            + self.num_votes_abstained
-            + self.num_strong_votes_abstained
+            + self.num_votes_abstain
+            + self.num_strong_votes_abstain
         )
 
     def reduce(self):
@@ -94,8 +94,8 @@ class Score(BaseModel):
         new.num_strong_votes_same /= total
         new.num_strong_votes_different /= total
         new.num_strong_votes_absent /= total
-        new.num_votes_abstained /= total
-        new.num_strong_votes_abstained /= total
+        new.num_votes_abstain /= total
+        new.num_strong_votes_abstain /= total
         if not isclose(new.total_votes, 1.0):
             raise ValueError(f"Total votes should be 1, not {self.total_votes}")
         return new
@@ -108,8 +108,8 @@ class Score(BaseModel):
             self.num_strong_votes_different += other.num_strong_votes_different
             self.num_votes_absent += other.num_votes_absent
             self.num_strong_votes_absent += other.num_strong_votes_absent
-            self.num_votes_abstained += other.num_votes_abstained
-            self.num_strong_votes_abstained += other.num_strong_votes_abstained
+            self.num_votes_abstain += other.num_votes_abstain
+            self.num_strong_votes_abstain += other.num_strong_votes_abstain
         else:
             raise TypeError(f"Cannot add {type(self)} and {type(other)}")
         return self
@@ -321,7 +321,7 @@ def get_scores_slow(
                             vote_assigned = True
                         else:
                             if is_abstention:
-                                member_score.num_strong_votes_abstained += 1
+                                member_score.num_strong_votes_abstain += 1
                                 vote_assigned = True
                             else:
                                 if is_absent:
@@ -336,7 +336,7 @@ def get_scores_slow(
                             vote_assigned = True
                         else:
                             if is_abstention:
-                                member_score.num_votes_abstained += 1
+                                member_score.num_votes_abstain += 1
                                 vote_assigned = True
                             else:
                                 if is_absent:
@@ -352,7 +352,7 @@ def get_scores_slow(
                             vote_assigned = True
                         else:
                             if is_abstention:
-                                other_this_vote_score.num_strong_votes_abstained += 1
+                                other_this_vote_score.num_strong_votes_abstain += 1
                                 vote_assigned = True
                             else:
                                 if is_absent:
@@ -367,7 +367,7 @@ def get_scores_slow(
                             vote_assigned = True
                         else:
                             if is_abstention:
-                                other_this_vote_score.num_votes_abstained += 1
+                                other_this_vote_score.num_votes_abstain += 1
                                 vote_assigned = True
                             else:
                                 if is_absent:
@@ -416,12 +416,6 @@ def validate_approach(
     """
 
     duck = get_connected_duck()
-
-    # if you update this you also need to do the same in policycalc.py
-    # don't calculate ukip policy_differences for commons
-    if chamber_id in [1, 2]:
-        if party_id in [23]:
-            party_id = 0
 
     # get fast approach
     df = (

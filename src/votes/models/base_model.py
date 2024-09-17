@@ -1,9 +1,12 @@
 from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Self
 
+from django.conf import settings
 from django.db import connection
 
+from twfy_votes.helpers.duck import sync_to_postgres
 from twfy_votes.helpers.typed_django.models import ModelType, TypedModel
 
 
@@ -98,3 +101,11 @@ class DjangoVoteModel(TypedModel, abstract=True):
         for item in items:
             item.id = existing_ids.get(getattr(item, slug_field), None)
         return items
+
+    @classmethod
+    def replace_with_parquet(cls, path: Path) -> int:
+        """
+        This empties the database and replaces it with the content of the parquet file.
+        There are basic tests done for column alignment.
+        """
+        return sync_to_postgres(path, cls._meta.db_table, settings.DATABASES["default"])

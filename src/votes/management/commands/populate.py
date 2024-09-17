@@ -28,7 +28,7 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--update_since",
+            "--update-since",
             type=date.fromisoformat,
             help="Update since a certain date",
             default=None,
@@ -46,6 +46,8 @@ class Command(BaseCommand):
         update_since: date | None = None,
         **options,
     ):
+        if not quiet and update_since:
+            print(f"Updating since {update_since}")
         if model:
             import_register.run_import(model, quiet, update_since)
         elif group:

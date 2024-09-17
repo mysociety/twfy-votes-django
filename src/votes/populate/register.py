@@ -94,7 +94,10 @@ class ImportRegister:
         for slug, func in tuples:
             if not quiet:
                 rich.print(f"[blue]Running {slug}[blue]")
-            func(quiet=quiet)
+            if accepts_argument(func, "update_since"):
+                func(quiet=quiet, update_since=update_since)  # type: ignore
+            elif accepts_argument(func, "quiet"):
+                func(quiet=quiet)
 
     def run_all(
         self, quiet: bool = False, update_since: datetime.date | None = None
@@ -103,7 +106,7 @@ class ImportRegister:
         groups.sort(key=lambda x: x.value)
 
         for group in groups:
-            self.run_group(group.name, quiet=quiet)
+            self.run_group(group.name, quiet=quiet, update_since=update_since)
 
 
 import_register = ImportRegister()

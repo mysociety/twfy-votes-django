@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -5,9 +6,10 @@ from django.conf import settings
 import pandas as pd
 import rich
 
-from twfy_votes.helpers.duck import DuckQuery, sync_to_postgres
+from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import VotePosition
+from ..models.decisions import Division, Vote
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)
@@ -36,6 +38,27 @@ class ps_divisions:
     alias_for = "postgres_db.votes_division"
 
 
+@duck.as_macro
+class str_to_int_vote_position:
+    """
+    See VotePosition Const
+    """
+
+    args = ["str_vote_position"]
+    macro = """
+    CASE str_vote_position
+        WHEN 'aye' THEN 1
+        WHEN 'no' THEN 2
+        WHEN 'abstain' THEN 3
+        WHEN 'absent' THEN 4
+        WHEN 'tellno' THEN 5
+        WHEN 'tellaye' THEN 6
+        WHEN 'collective' THEN 7
+        ELSE null
+    END
+    """
+
+
 @duck.to_parquet(dest=votes_with_diff)
 class pw_votes_with_party_difference:
     """
@@ -45,9 +68,11 @@ class pw_votes_with_party_difference:
     query = """
     SELECT
         row_number() over() as id,
-        cm_votes_with_people.* exclude(total_possible_members, division_id),
+        cm_votes_with_people.* exclude(total_possible_members, division_id, vote, effective_vote),
+        str_to_int_vote_position(cm_votes_with_people.vote) as vote,
+        str_to_int_vote_position(cm_votes_with_people.effective_vote) as effective_vote,
         ps_divisions.id as division_id,
-        case effective_vote
+        case cm_votes_with_people.effective_vote
             when 'aye' then 1
             when 'no' then 0
             when 'abstain' then 0.5
@@ -65,12 +90,7 @@ class pw_votes_with_party_difference:
     """
 
 
-@import_register.register("votes", group=ImportOrder.VOTES)
-def import_votes(quiet: bool = False):
-    # better on memory to write straight out as parquet, close duckdb and read in the parquet
-    with DuckQuery.connect() as query:
-        query.compile(duck).run()
-
+def create_full_table(quiet: bool = False):
     # this is such a big table we're skipping the pydantic validation step
     # doing a basic set of checks on things not imposed by types
 
@@ -86,9 +106,61 @@ def import_votes(quiet: bool = False):
 
     # now we're just sucking the data straight into the database from
     # parquet
-    count = sync_to_postgres(
-        votes_with_diff, "votes_vote", settings.DATABASES["default"]
-    )
+    start = datetime.datetime.now()
+    with Vote.disable_constraints():
+        count = Vote.replace_with_parquet(votes_with_diff)
+    end = datetime.datetime.now()
+    seconds = (end - start).total_seconds()
 
     if not quiet:
-        rich.print(f"Created [green]{count}[/green] votes in the database")
+        rich.print(
+            f"Created [green]{count}[/green] votes in the database (took {seconds:.2f}s)"
+        )
+
+
+@import_register.register("votes", group=ImportOrder.VOTES)
+def import_votes(quiet: bool = False, update_since: datetime.date | None = None):
+    # better on memory to write straight out as parquet, close duckdb and read in the parquet
+    with DuckQuery.connect() as query:
+        query.compile(duck).run()
+
+    if not update_since:
+        """
+        If not update_since, we want to create the full table.
+        """
+        create_full_table()
+        return
+
+    # get divisions since the last update
+
+    rel_division_ids = Division.objects.filter(date__gte=update_since).values_list(
+        "id", flat=True
+    )
+
+    df = pd.read_parquet(votes_with_diff)
+    df = df[df["division_id"].isin(rel_division_ids)]
+
+    to_create = []
+
+    for _, row in df.iterrows():
+        to_create.append(
+            Vote(
+                id=row["id"],
+                division_id=row["division_id"],
+                person_id=row["person_id"],
+                vote=row["vote"],
+                effective_vote=row["effective_vote"],
+                membership_id=row["membership_id"],
+                is_gov=row["is_gov"],
+                effective_vote_float=row["effective_vote_float"],
+                diff_from_party_average=row["diff_from_party_average"],
+            )
+        )
+
+    # Bulk create votes
+    with Vote.disable_constraints():
+        Vote.objects.filter(division_id__in=rel_division_ids).delete()
+        Vote.objects.bulk_create(to_create)
+
+    if not quiet:
+        rich.print(f"Imported [green]{len(to_create)}[/green] votes")

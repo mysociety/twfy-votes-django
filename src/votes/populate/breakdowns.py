@@ -1,3 +1,4 @@
+import datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -129,7 +130,7 @@ class pw_divisions_gov_with_counts:
 
 
 @import_register.register("breakdowns", group=ImportOrder.BREAKDOWNS)
-def import_breakdowns(quiet: bool = False):
+def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = None):
     # better on memory to write straight out as parquet, close duckdb and read in the parquet
     with DuckQuery.connect() as query:
         query.compile(duck).run()
@@ -148,11 +149,23 @@ def import_breakdowns(quiet: bool = False):
                 f"Created {path}, with [green]{len(df)}[/green] rows, duplicate check [green]passed[/green]"
             )
 
+    if update_since:
+        affected_divisions_ids = list(
+            Division.objects.filter(date__gte=update_since).values_list("id", flat=True)
+        )
+    else:
+        affected_divisions_ids = None
     # load into database
     division_key_to_id = Division.id_from_slug("key")
     df = pd.read_parquet(division_with_counts)
     to_create = []
     for _, row in df.iterrows():
+        # only create for new divisions
+        if (
+            affected_divisions_ids
+            and division_key_to_id[row["division_id"]] not in affected_divisions_ids
+        ):
+            continue
         to_create.append(
             DivisionBreakdown(
                 division_id=division_key_to_id[row["division_id"]],
@@ -170,7 +183,12 @@ def import_breakdowns(quiet: bool = False):
         )
 
     with DivisionBreakdown.disable_constraints():
-        DivisionBreakdown.objects.all().delete()
+        if affected_divisions_ids:
+            DivisionBreakdown.objects.filter(
+                division_id__in=affected_divisions_ids
+            ).delete()
+        else:
+            DivisionBreakdown.objects.all().delete()
         DivisionBreakdown.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
@@ -183,6 +201,12 @@ def import_breakdowns(quiet: bool = False):
     org_id_lookup = Organization.id_from_slug("slug")
 
     for _, row in df.iterrows():
+        # only create for new divisions
+        if (
+            affected_divisions_ids
+            and division_key_to_id[row["division_id"]] not in affected_divisions_ids
+        ):
+            continue
         to_create.append(
             DivisionPartyBreakdown(
                 division_id=division_key_to_id[row["division_id"]],
@@ -202,7 +226,12 @@ def import_breakdowns(quiet: bool = False):
         )
 
     with DivisionPartyBreakdown.disable_constraints():
-        DivisionPartyBreakdown.objects.all().delete()
+        if affected_divisions_ids:
+            DivisionPartyBreakdown.objects.filter(
+                division_id__in=affected_divisions_ids
+            ).delete()
+        else:
+            DivisionPartyBreakdown.objects.all().delete()
         DivisionPartyBreakdown.objects.bulk_create(to_create, batch_size=50000)
 
     if not quiet:
@@ -212,6 +241,12 @@ def import_breakdowns(quiet: bool = False):
     df = pd.read_parquet(divisions_gov_with_counts)
 
     for _, row in df.iterrows():
+        # only create for new divisions
+        if (
+            affected_divisions_ids
+            and division_key_to_id[row["division_id"]] not in affected_divisions_ids
+        ):
+            continue
         to_create.append(
             DivisionsIsGovBreakdown(
                 division_id=division_key_to_id[row["division_id"]],
@@ -230,7 +265,12 @@ def import_breakdowns(quiet: bool = False):
         )
 
     with DivisionsIsGovBreakdown.disable_constraints():
-        DivisionsIsGovBreakdown.objects.all().delete()
+        if affected_divisions_ids:
+            DivisionsIsGovBreakdown.objects.filter(
+                division_id__in=affected_divisions_ids
+            ).delete()
+        else:
+            DivisionsIsGovBreakdown.objects.all().delete()
         DivisionsIsGovBreakdown.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:

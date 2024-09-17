@@ -90,6 +90,10 @@ def division_from_row(
 
 @import_register.register("divisions", group=ImportOrder.DECISIONS)
 def import_divisions(quiet: bool = False, update_since: datetime.date | None = None):
+    if update_since:
+        timestamp = pd.Timestamp(update_since)
+    else:
+        timestamp = None
     with DuckQuery.connect() as cduck:
         cduck.compile(duck).run()
         df = cduck.compile("SELECT * from divisions_with_total_membership").df()
@@ -101,13 +105,13 @@ def import_divisions(quiet: bool = False, update_since: datetime.date | None = N
     to_create = [
         division_from_row(row, chamber_id_lookup=chamber_lookup)
         for _, row in df.iterrows()
-        if update_since is None or row["division_date"] >= update_since
+        if timestamp is None or row["division_date"] >= timestamp
     ]
 
     api_to_create = [
         division_from_row(row, chamber_id_lookup=chamber_lookup)
         for _, row in votes_api_df.iterrows()
-        if update_since is None or row["division_date"] >= update_since
+        if timestamp is None or row["division_date"] >= timestamp
     ]
 
     # remove any api divisions that are already in the main divisions based on key

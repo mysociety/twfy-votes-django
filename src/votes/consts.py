@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 
 
 class PolicyStrength(StrEnum):
@@ -97,7 +97,7 @@ class AyeNo(StrEnum):
     NO = "no"
 
 
-class VotePosition(StrEnum):
+class StrVotePosition(StrEnum):
     AYE = "aye"
     NO = "no"
     ABSTAIN = "abstain"
@@ -105,6 +105,16 @@ class VotePosition(StrEnum):
     TELLNO = "tellno"
     TELLAYE = "tellaye"
     COLLECTIVE = "collective"  # used for votes where the whole chamber votes as one
+
+
+class VotePosition(IntEnum):
+    AYE = 1
+    NO = 2
+    ABSTAIN = 3
+    ABSENT = 4
+    TELLNO = 5
+    TELLAYE = 6
+    COLLECTIVE = 7  # used for votes where the whole chamber votes as one
 
 
 class VoteType(StrEnum):

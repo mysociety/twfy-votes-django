@@ -176,6 +176,10 @@ class collective_relevant:
 
 @duck.as_view
 class relevant_parties_for_people:
+    """
+    Ukip is in here to deal with the historic bit with the very short tenure of 2 MPs in the HoC.
+    """
+
     query = """
         select
             person_id,
@@ -187,7 +191,7 @@ class relevant_parties_for_people:
         where
             effective_party_slug not in (
                                             'independent', 'speaker', 'deputy-speaker', 'independent-conservative',
-                                            'independent-labour', 'independent-ulster-unionist'
+                                            'independent-labour', 'independent-ulster-unionist', 'ukip'
                                         )
             and party_id is not null
     """

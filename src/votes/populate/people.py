@@ -286,6 +286,9 @@ def import_popolo(quiet: bool = False):
         Membership.objects.all().delete()
         Membership.objects.bulk_create(to_create, batch_size=50000)
 
+    if not quiet:
+        rich.print(f"Created [green]{len(to_create)}[/green] memberships")
+
     count_data = membership_on_date(popolo)
 
     to_create = []

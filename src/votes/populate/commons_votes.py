@@ -207,9 +207,11 @@ class DivisionSearchList(RootModel):
 
 
 @import_register.register("commons_votes_api", group=ImportOrder.API_VOTES)
-def build_parquet_for_today(quiet: bool = False):
+def build_parquet_for_today(
+    quiet: bool = False, update_since: datetime.date | None = None
+):
     today = datetime.date.today()
-    three_days_ago = today - datetime.timedelta(days=3)
+    start_date = update_since or (today - datetime.timedelta(days=3))
 
-    divisions = DivisionSearchList.from_date(start_date=three_days_ago, end_date=today)
+    divisions = DivisionSearchList.from_date(start_date=start_date, end_date=today)
     divisions.to_parquet(quiet=quiet)
