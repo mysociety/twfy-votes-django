@@ -1,5 +1,7 @@
 # twfy-votes-django
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mysociety/twfy-votes)
+
 Voting information platform.
 
 This takes the divisions data from TheyWorkForYou and votes.parliament.uk and adds layers of analysis. 
