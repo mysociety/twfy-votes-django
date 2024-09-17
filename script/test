@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Run all linting commands
+
+# check that we are in the expected directory
+cd `dirname $0`/..
+
+script/dev-command pytest . "$@"
