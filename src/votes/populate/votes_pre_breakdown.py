@@ -191,7 +191,7 @@ class api_votes_minus_duplicates:
     from
         api_votes
     where
-        division_id not in (select division_id from calc_vote_with_absences)
+        division_id::TEXT not in (select division_id from calc_vote_with_absences)
     """
 
 
