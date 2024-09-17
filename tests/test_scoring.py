@@ -1,4 +1,10 @@
-from votes.policy_generation.scoring import ScoreFloatPair, SimplifiedScore
+import pandas as pd
+
+from votes.policy_generation.scoring import ScoreFloatPair
+from votes.policy_generation.scoring import SimplifiedScore as SimplifiedScoreBase
+
+SimplifiedScore = SimplifiedScoreBase[float]
+SimplifiedScoreSeries = SimplifiedScoreBase[pd.Series]
 
 
 def test_abstain():
@@ -305,3 +311,17 @@ def test_strong_agreements_are_like_votes():
     assert (
         result == result_with_agreements
     ), "Expected score to be the same with or without strong agreements"
+
+
+def test_series_logic():
+    result = SimplifiedScoreSeries.score(
+        votes_same=ScoreFloatPair(weak=pd.Series([0.0]), strong=pd.Series([0.0])),
+        votes_different=ScoreFloatPair(weak=pd.Series([0.0]), strong=pd.Series([0.0])),
+        votes_absent=ScoreFloatPair(weak=pd.Series([0.0]), strong=pd.Series([0.0])),
+        votes_abstain=ScoreFloatPair(weak=pd.Series([0.0]), strong=pd.Series([1.0])),
+        agreements_same=ScoreFloatPair(weak=pd.Series([0.0]), strong=pd.Series([0.0])),
+        agreements_different=ScoreFloatPair(
+            weak=pd.Series([0.0]), strong=pd.Series([0.0])
+        ),
+    )
+    assert result.iloc[0] == 0.5, "Expected score to be 0.5 when all votes are abstain"

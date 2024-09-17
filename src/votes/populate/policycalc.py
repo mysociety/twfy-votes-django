@@ -3,6 +3,7 @@ This module contains the sequence of macros to
 generate a voting record for a person.
 """
 
+import datetime
 from pathlib import Path
 
 from django.conf import settings
@@ -12,8 +13,9 @@ import rich
 from tqdm import tqdm
 
 from twfy_votes.helpers.duck import DuckQuery
+from twfy_votes.helpers.duck.funcs import query_to_parquet
 from twfy_votes.helpers.duck.templates import EnforceIntJinjaQuery
-from votes.models.decisions import Policy
+from votes.models.decisions import Policy, VoteDistribution
 from votes.policy_generation.scoring import ScoreFloatPair
 
 from .register import ImportOrder, import_register
@@ -198,7 +200,7 @@ class comparisons_by_policy_vote:
         any_value(division_year) as division_year,
         sum(answer_agreed) / total as num_divisions_agreed,
         sum(answer_disagreed) / total as num_divisions_disagreed,
-        sum(abstained) / total as num_divisions_abstained,
+        sum(abstained) / total as num_divisions_abstain,
         sum(absent) / total as num_divisions_absent,
         sum(answer_agreed) + sum(answer_disagreed) + sum(abstained) + sum(absent) as num_comparators,
     from
@@ -224,8 +226,8 @@ class comparisons_by_policy_vote_pivot:
         sum(num_divisions_disagreed) filter (where strong_int = 1) as num_strong_votes_different,
         sum(num_divisions_absent) filter (where strong_int = 0) as num_votes_absent,
         sum(num_divisions_absent) filter (where strong_int = 1) as num_strong_votes_absent,
-        sum(num_divisions_abstained) filter (where strong_int = 0) as num_votes_abstained,
-        sum(num_divisions_abstained) filter (where strong_int = 1) as num_strong_votes_abstained,
+        sum(num_divisions_abstain) filter (where strong_int = 0) as num_votes_abstain,
+        sum(num_divisions_abstain) filter (where strong_int = 1) as num_strong_votes_abstain,
         list(num_comparators) as num_comparators,
         -- for debugging - remove for speed
         list(division_id) as division_ids,
@@ -276,6 +278,7 @@ class prepared_pivot_table:
     """
 
 
+# so if we load before any files exist it's ok to create
 if any(compiled_policy_dir.glob("*.parquet")):
 
     @duck.as_source
@@ -398,10 +401,21 @@ def check_generated_against_current() -> list[int]:
 
     # reduce to just those with hash differs
     df = df[df["hash_differs_na_or_false"]]
+
+    if not df.empty:
+        df.to_csv("hash_differs.csv")
     return df["person_id"].unique().tolist()
 
 
 def score_generation_func():
+    """
+    This in principle can be replaced by a vectorised approach.
+    The problem is this is at the moment applied at the person level.
+    The scoring approach is done at the policy level.
+    *in principle* different policies can have different scoring functions.
+    So it needs to be all bought together in total, split by policy, and then have scoring calculated.
+    There will be time saving associated with this, but seconds rather than minutes.
+    """
     policies = Policy.objects.all()
     policy_score_func = {x.id: x.get_scoring_function() for x in policies}
 
@@ -418,7 +432,7 @@ def score_generation_func():
                 row["num_votes_absent"], row["num_strong_votes_absent"]
             ),
             votes_abstain=ScoreFloatPair(
-                row["num_votes_abstained"], row["num_strong_votes_abstained"]
+                row["num_votes_abstain"], row["num_strong_votes_abstain"]
             ),
             agreements_same=ScoreFloatPair(
                 row["num_agreements_same"], row["num_strong_agreements_same"]
@@ -430,6 +444,22 @@ def score_generation_func():
         )
 
     return get_score
+
+
+def generate_combo_with_id(source: Path, dest: Path):
+    """
+    Create a parquet file with all the items for copying into the database
+    """
+    duck = get_connected_duck()
+    query = f"""
+    select
+        row_number() over() as id,
+        compiled_policies.* exclude (party_id),
+        case party_id when 0 then null else party_id end as party_id
+    from '{source}' as compiled_policies
+    """
+
+    duck.compile(query_to_parquet(query, dest=dest)).run()
 
 
 def generate_policy_distributions(
@@ -484,11 +514,6 @@ def generate_policy_distributions(
     relevant_df["chamber_id"] = relevant_df["chamber_id"].astype(int)
     relevant_df["person_id"] = relevant_df["person_id"].astype(int)
 
-    # if party_id is 23 (ukip), we treat as independent (it's a weird two mp overlap that's historic)
-    relevant_df.loc[
-        (relevant_df["party_id"] == 23) & (relevant_df["chamber_id"] == 1), "party_id"
-    ] = 0
-
     count = 0
 
     for _, row in tqdm(relevant_df.iterrows(), total=len(relevant_df), disable=quiet):
@@ -508,7 +533,7 @@ def generate_policy_distributions(
                 df[col] = df[col].fillna(0)
 
         df["policy_hash"] = df["policy_id"].map(policy_id_lookup)
-        df["score"] = df.apply(score_from_row, axis=1)
+        df["distance_score"] = df.apply(score_from_row, axis=1)
 
         df.to_parquet(
             policy_dest
@@ -520,8 +545,26 @@ def generate_policy_distributions(
 
 
 @import_register.register("policycalc", group=ImportOrder.POLICYCALC)
-def run_policy_calculations(quiet: bool = False):
-    count = generate_policy_distributions(quiet=quiet)
+def run_policy_calculations(
+    quiet: bool = False, update_since: datetime.date | None = None
+):
+    partial_update = update_since is not None
+
+    count = generate_policy_distributions(update_from_hash=partial_update, quiet=quiet)
 
     if not quiet:
-        rich.print(f"Generated [green]{count}[/green] policy distributions")
+        rich.print(f"Calculated [green]{count}[/green] policy distributions")
+
+    source_path = compiled_policy_dir / "*.parquet"
+    joined_path = compiled_dir / "policy_calc_to_load.parquet"
+
+    generate_combo_with_id(source_path, joined_path)
+
+    if count:
+        with VoteDistribution.disable_constraints():
+            count = VoteDistribution.replace_with_parquet(joined_path)
+
+    if not quiet:
+        rich.print(
+            f"Created [green]{count}[/green] policy distributions in the database"
+        )
