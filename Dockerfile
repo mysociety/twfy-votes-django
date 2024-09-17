@@ -15,4 +15,4 @@ RUN curl -sSL https://install.python-poetry.org | python -
 ENV PATH="/root/.local/bin:$PATH"
 WORKDIR $PYSETUP_PATH
 COPY poetry.loc[k] pyproject.toml ./
-RUN poetry install
+RUN poetry install --no-root
