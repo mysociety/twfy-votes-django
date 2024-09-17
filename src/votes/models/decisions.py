@@ -178,10 +178,15 @@ class Vote(DjangoVoteModel):
     membership: DoNothingForeignKey[Membership] = related_name("votes")
     person_id: Dummy[int]
     person: DoNothingForeignKey[Person] = related_name("votes")
-    effective_party_slug: str
     is_gov: bool
     effective_vote_float: Optional[float] = field(models.FloatField, null=True)
     diff_from_party_average: Optional[float] = field(models.FloatField, null=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # not sure why this is needed, but coming back as strin
+        self.vote = VotePosition(int(self.vote))
+        self.effective_vote = VotePosition(int(self.effective_vote))
 
 
 class Agreement(DjangoVoteModel):
@@ -250,10 +255,39 @@ class PolicyAgreementLink(BasePolicyDecisionLink):
     decision: DoNothingForeignKey[Agreement] = related_name("agreement_links")
 
 
-class RelevantPolicyLink(DjangoVoteModel):
+class VoteDistribution(DjangoVoteModel):
+    """
+    Store the breakdown of votes associated with a policy
+    and either a person or a comparison.
+    """
+
     policy_id: Dummy[int] = 0
-    policy: DoNothingForeignKey[Policy] = related_name("relevant_links")
+    policy: DoNothingForeignKey[Policy] = related_name("vote_distributions")
     person_id: Dummy[int] = 0
-    person: DoNothingForeignKey[Person] = related_name("relevant_links")
+    person: DoNothingForeignKey[Person] = related_name("vote_distributions")
     period_id: Dummy[int] = 0
-    period: DoNothingForeignKey[PolicyComparisonPeriod] = related_name("relevant_links")
+    period: DoNothingForeignKey[PolicyComparisonPeriod] = related_name(
+        "vote_distributions"
+    )
+    chamber_id: Dummy[int] = 0
+    chamber: DoNothingForeignKey[Chamber] = related_name("vote_distributions")
+    party_id: Dummy[int | None] = None
+    party: DoNothingForeignKey[Organization] = field(
+        default=None, null=True, related_name="vote_distributions"
+    )
+    is_target: int
+    num_votes_same: float
+    num_strong_votes_same: float
+    num_votes_different: float
+    num_strong_votes_different: float
+    num_votes_absent: float
+    num_strong_votes_absent: float
+    num_votes_abstain: float
+    num_strong_votes_abstain: float
+    num_agreements_same: float
+    num_strong_agreements_same: float
+    num_agreements_different: float
+    num_strong_agreements_different: float
+    start_year: int
+    end_year: int
+    distance_score: float
