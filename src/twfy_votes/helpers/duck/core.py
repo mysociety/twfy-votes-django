@@ -24,6 +24,7 @@ from .funcs import (
     get_name,
     get_postgres_attach,
     query_to_macro,
+    query_to_parquet,
     query_to_table,
     query_to_view,
     source_to_query,
@@ -217,8 +218,7 @@ class DuckQuery:
             if query is None:
                 raise ValueError("Class must have a query method")
 
-            self.queries.append(query)
-            self.queries.append(f"COPY ({query}) TO '{dest}' (FORMAT 'parquet')")
+            self.queries.append(query_to_parquet(query, dest))
 
             if reuse_as_source:
                 query = query_to_view(source_to_query(dest), name=name)

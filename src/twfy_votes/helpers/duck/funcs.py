@@ -99,6 +99,10 @@ def query_to_table(query: SQLQuery, name: str) -> TableQuery:
     return TableQuery(f"CREATE OR REPLACE TABLE {name} AS {query}")
 
 
+def query_to_parquet(query: str, dest: Path) -> SQLQuery:
+    return SQLQuery(f"COPY ({query}) TO '{dest}' (FORMAT 'parquet')")
+
+
 class TypedJinjaSql(JinjaSql):
     def get_compiled_query(self, source: str, data: dict[str, Any]) -> CompiledJinjaSQL:
         query, bind_params = self.prepare_query(source, data)
