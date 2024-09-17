@@ -99,6 +99,25 @@ class ImportRegister:
             elif accepts_argument(func, "quiet"):
                 func(quiet=quiet)
 
+    def run_group_range(
+        self,
+        start_group: str,
+        end_group: str,
+        quiet: bool = False,
+        update_since: datetime.date | None = None,
+    ) -> None:
+        start_group = ImportOrder[start_group.upper()]
+        end_group = ImportOrder[end_group.upper()]
+
+        # iterate through ImportOrder from start_group to end_group
+
+        for group in ImportOrder:
+            if group < start_group:
+                continue
+            if group > end_group:
+                break
+            self.run_group(group.name, quiet=quiet, update_since=update_since)
+
     def run_all(
         self, quiet: bool = False, update_since: datetime.date | None = None
     ) -> None:
