@@ -76,7 +76,7 @@ import ast
 import datetime
 import sys
 from decimal import Decimal
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from typing import (
     Annotated,
     Any,
@@ -227,6 +227,13 @@ def convert_to_forward_refs(
             return [_convert_type(elt) for elt in node.elts]
         elif isinstance(node, ast.Call):
             return None
+        elif isinstance(node, ast.BinOp):
+            # for union style type hints
+            # str | int
+            left = _convert_type(node.left)
+            right = _convert_type(node.right)
+            # and recombine as a union type
+            return Union[left, right]
         else:
             raise ValueError(f"Unsupported AST node type: {type(node)}")
 
@@ -236,6 +243,10 @@ def convert_to_forward_refs(
 
 def enum_to_choices(en: Type[StrEnum]) -> list[tuple[str, str]]:
     return [(enum_.value, enum_.value.title().replace("_", " ")) for enum_ in en]
+
+
+def intenum_to_choices(en: Type[IntEnum]) -> list[tuple[int, str]]:
+    return [(enum_.value, enum_.name.title().replace("_", " ")) for enum_ in en]
 
 
 class ExtraKwargs(NamedTuple):
@@ -414,6 +425,10 @@ class TypedModelBase(models.base.ModelBase):
                             max_length=255,
                             choices=enum_to_choices(field_type),
                         )
+                    )
+                elif isinstance(field_type, type) and issubclass(field_type, IntEnum):
+                    potential_fields.append(
+                        models.IntegerField(choices=intenum_to_choices(field_type))
                     )
                 else:
                     if allow_bare_annotation is False:
