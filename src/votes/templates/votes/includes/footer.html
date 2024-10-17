@@ -1,7 +1,3 @@
-{% load hub_filters %}
-
-
-
 <div class="site-footer py-5">
     <div class="container">
         <h2 class="h4 mb-3">TheyWorkForYou Votes</h2>
@@ -11,8 +7,8 @@
             </div>
             <div class="col-md-6 col-lg-5 offset-lg-1 mb-4 d-print-none">
                 <ul class="nav site-footer__nav">
-                    {% include 'votes/includes/nav-item.html' with name='home' label='About' %}
 
+                    {% include 'votes/includes/nav-item.html' with name='home' label='About' %}
                 </ul>
             </div>
         </div>
@@ -23,11 +19,16 @@
                     <div class="site-footer__org mb-3 me-4 me-xl-5">
                         <span>Run by</span>
                         <div class="d-flex align-items-center">
+                            <a class="d-print-none"
+                               href="https://www.mysociety.org"
+                               aria-label="mySociety">
 
-                            <a class="d-print-none" href="https://www.mysociety.org" aria-label="mySociety">
                                 {% include 'votes/includes/icons/mysociety-logo.html' %}
                             </a>
-                            <a class="d-none d-print-block" href="https://www.mysociety.org" aria-label="mySociety">
+                            <a class="d-none d-print-block"
+                               href="https://www.mysociety.org"
+                               aria-label="mySociety">
+
                                 {% include 'votes/includes/icons/mysociety-logo-black.html' %}
                             </a>
                         </div>
@@ -35,7 +36,9 @@
                 </div>
             </div>
             <div class="col-lg-4 mb-4">
-                <p class="fs-7 mb-0 site-footer__legals"><a href="https://www.mysociety.org">mySociety</a> is a registered charity (1076346) and a limited company (03277032).</p>
+                <p class="fs-7 mb-0 site-footer__legals">
+                    <a href="https://www.mysociety.org">mySociety</a> is a registered charity (1076346) and a limited company (03277032).
+                </p>
             </div>
             <div class="col-lg-3 mb-4">
                 <ul class="site-footer__socials d-print-none">

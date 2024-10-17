@@ -11,6 +11,8 @@ $color-tcc-kingfisher-blue: #21a8e0;
 $color-tcc-windermere-blue: #202448;
 $color-tcc-ben-nevis-grey: #1d1d1b;
 
+$color-twfy-green: #4b7e45;
+
 $color-darker-seafoam: #068670; // like seafoam-green, but 4.51 contrast with #fff
 
 $color-facebook-blue: #1877f2;
@@ -19,7 +21,7 @@ $color-threads-black: #000;
 $color-linkedin-blue: #0a66c2;
 $color-whatsapp-green: #25d366;
 
-$white:    #fff;
+$white: #fff;
 $gray-100: #f8f9fa;
 $gray-200: #e9ecef;
 $gray-300: #dee2e6;
@@ -29,7 +31,7 @@ $gray-600: #6c757d;
 $gray-700: #495057;
 $gray-800: #343a40;
 $gray-900: #212529;
-$black:    #000;
+$black: #000;
 
 $red: darken($color-tcc-robin-red, 10%);
 
@@ -55,12 +57,12 @@ $green-700: darken($color-tcc-heart-green, 25%);
 $green-800: darken($color-tcc-heart-green, 45%);
 $green-900: darken($color-tcc-heart-green, 55%);
 
-$teal: $color-tcc-seafoam-green;
-$teal-100: mix($white, $color-tcc-seafoam-green, 80%);
-$teal-200: mix($white, $color-tcc-seafoam-green, 60%);
-$teal-300: mix($white, $color-tcc-seafoam-green, 40%);
-$teal-400: mix($white, $color-tcc-seafoam-green, 20%);
-$teal-500: $color-tcc-seafoam-green;
+$teal: $color-twfy-green;
+$teal-100: mix($white, $color-twfy-green, 80%);
+$teal-200: mix($white, $color-twfy-green, 60%);
+$teal-300: mix($white, $color-twfy-green, 40%);
+$teal-400: mix($white, $color-twfy-green, 20%);
+$teal-500: $color-twfy-green;
 $teal-600: $color-darker-seafoam;
 $teal-700: mix($color-tcc-sherwood-forest-green, $color-darker-seafoam, 50%);
 $teal-800: $color-tcc-sherwood-forest-green;
@@ -122,8 +124,7 @@ $grid-breakpoints: (
   sm: 576px,
   md: 768px,
   lg: 992px,
-  xl: 1200px
-) !default;
+  xl: 1200px) !default;
 //
 
 // Grid containers
@@ -136,7 +137,12 @@ $grid-breakpoints: (
 
 // Typography
 
-$font-family-sans-serif: "Public Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+$font-family-sans-serif: "Public Sans",
+  sans-serif,
+  "Apple Color Emoji",
+  "Segoe UI Emoji",
+  "Segoe UI Symbol",
+  "Noto Color Emoji";
 
 $font-size-base: 1rem;
 $font-size-sm: $font-size-base * .875;
@@ -211,7 +217,7 @@ $nav-tabs-link-active-border-color: $gray-500 $gray-500 $nav-tabs-link-active-bg
 
 $navbar-padding-y: $spacer * 1.5;
 
-$navbar-brand-font-size: 1em;
+$navbar-brand-font-size: 2em;
 $navbar-brand-padding-y: 0;
 
 $navbar-toggler-padding-y: 0.5rem;

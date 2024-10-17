@@ -22,15 +22,16 @@ duckdb = "^1.0.0"
 httpx = "^0.27.2"
 ruamel-yaml = "^0.18.6"
 rich = ">=12.0.0"
-jinja2 = ">=2.5,<3.0"
+jinja2 = "^3.1.4"
 aioduckdb = "^0.1.0"
-jinjasql = "^0.1.8"
+jinjasql = { git = "https://github.com/yakhu/jinjasql.git", rev = "f8c62d1bea97d0320bb3676f4f83bd2357ccfe55" }
 markupsafe = "2.0.1"
 tqdm = "^4.66.5"
 typer = "^0.12.5"
 mysoc-validator = "^0.2.1"
 trogon = "^0.5.0"
 django-ninja = "^1.3.0"
+markdown = "^3.7"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.6.2"
@@ -38,11 +39,18 @@ pgcli = "^4.1.0"
 pandas-stubs = "^2.2.2.240807"
 pytest = "^8.3.2"
 pytest-django = "^4.9.0"
+djlint = "^1.35.2"
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "twfy_votes.settings"
 filterwarnings = "ignore::DeprecationWarning"
 
+[tool.djlint]
+blank_line_after_tag = "endblock"
+blank_line_before_tag = "load,extends,include,block"
+format_js = true
+format_css = true
+custom_blocks = "markdown,switch"
 
 [tool.ruff]
 extend-exclude = ["migrations"]
@@ -57,19 +65,19 @@ select = [
 ]
 ignore = [
     # line too long, sorted with formatter where it can be
-    "E501", 
+    "E501",
 ]
 
 
 [tool.ruff.lint.isort]
 known-first-party = ["hub"]
 section-order = [
-  "future",
-  "standard-library",
-  "django",
-  "third-party",
-  "first-party",
-  "local-folder"
+    "future",
+    "standard-library",
+    "django",
+    "third-party",
+    "first-party",
+    "local-folder",
 ]
 
 [tool.ruff.lint.isort.sections]

@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Optional
 
+from django.urls import reverse
+
 from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
     Dummy,
@@ -24,12 +26,28 @@ class Person(DjangoVoteModel):
     name: str
     memberships: DummyOneToMany["Membership"] = related_name("person")
 
+    def votes_url(self):
+        return reverse("person_votes", kwargs={"person_id": self.id})
+
     @classmethod
     def current(cls):
         """
         Those with a membership that is current.
         """
         return cls.objects.filter(memberships__end_date__gte=datetime.date.today())
+
+    def membership_in_chamber_on_date(
+        self, chamber_slug: ChamberSlug, date: datetime.date
+    ) -> Membership:
+        membership = self.memberships.filter(
+            chamber_slug=chamber_slug, start_date__lte=date, end_date__gte=date
+        ).first()
+        if membership:
+            return membership
+        else:
+            raise ValueError(
+                f"{self.name} was not a member of {chamber_slug} on {date}"
+            )
 
 
 class Organization(DjangoVoteModel):

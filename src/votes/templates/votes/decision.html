@@ -1,0 +1,90 @@
+{% extends "votes/base.html" %}
+
+{% block innercontent %}
+    <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.division_number }}</h1>
+    <h2>{{ decision.division_name|safe }}</h2>
+    <p>
+        <a href="{{ decision.twfy_link }}">View vote in TheyWorkForYou</a>
+    </p>
+    <h2>Analysis</h2>
+    <h3>Result</h3>
+    {% switch decision.overall_breakdowns.first.motion_result %}
+        {% case "Success" %}
+        <p>✅Motion passed.</p>
+        {% case "Failure" %}
+        <p>❌Motion failed.</p>
+        {% case "Tie" %}
+        <p>🤝Motion tied (failed).</p>
+    {% endswitch %}
+    <h3>Parliamentary dynamics</h3>
+    {% with decision.voting_cluster as dc %}
+        <strong>{{ dc.desc }}</strong>
+        {% switch decision.voting_cluster.tag %}
+            {% case "opp_strong_aye_gov_strong_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
+                This usually suggests an important point of principle, or that it would have substantive effects if passed.
+            {% endmarkdown %}
+            {% case "gov_strong_aye_opp_strong_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
+                This usually suggests an important point of principle, that even if the government is likely to win, it is significant public signal of opposition.
+            {% endmarkdown %}
+            {% case "gov_aye_opp_lean_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the government is proposing a motion,
+                but there is division amoung opposition MPS in opposing it (but generally, leaning against).
+            {% endmarkdown %}
+            {% case "opp_aye_weak_gov_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the opposition is proposing a motion,
+                but there isn't complete high turnout in the government voting against.
+                The government will still typically win these, but the lower turnout on both sides is reflected in the lower stakes of the vote.
+            {% endmarkdown %}
+            {% case "gov_aye_opp_weak_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the government is proposing a motion,
+                but opposition is less strongly opposing it (low turnout).
+                This is usually a sign that the government will win the vote regardless, in principle opposition parties are against it,
+                but that it's not a significant enough issue to send a signal of strong opposition (versus other use of {{ decision.chamber.members_plural }} time).
+            {% endmarkdown %}
+            {% case "gov_no_opp_lean_no" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where the government is voting against a motion, and *generally* opposition MPs are also voting against it.
+                This might reflect a vote bought by a smaller opposition party, or a group of government party rebels.
+            {% endmarkdown %}
+            {% case "low_participation" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where there is low participation from both sides.
+                This might be non-contencious or procedural motions in the early stages of member proposed bills.
+            {% endmarkdown %}
+            {% case "cross_party_aye" %}
+            {% markdown %}
+                This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
+                There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/oppoistion lines.
+            {% endmarkdown %}
+        {% endswitch %}
+    {% endwith %}
+    <h2>Voting breakdown</h2>
+    {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
+    <h2>Party voting breakdown</h2>
+    {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
+    <h2>Voting list</h2>
+    {% style_df decision.votes_df "Party alignment" %}
+{% endblock innercontent %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}

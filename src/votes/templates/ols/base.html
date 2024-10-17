@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>
+
+            {% block title %}{{ settings.site_name }}{% endblock %}
+
+        </title>
+        <link rel="stylesheet"
+              href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;700&display=swap"
+              rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap"
+              rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+              rel="stylesheet"
+              integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+              crossorigin="anonymous">
+        <link rel="stylesheet" href="{{ url_for('static', path='css/main.css') }}">
+    </head>
+    <body>
+        <div class="ms-header">
+            <nav class="ms-header__row">
+                <a class="ms-header__logo" href="https://www.mysociety.org">mySociety</a>
+            </nav>
+        </div>
+        <header class="site-header">
+            <div class="container">
+
+                {% block extra_site_link
+                    %}
+                {% endblock %}
+
+                <h1>
+
+                    {% block title_link %}<a href="/">{{ settings.site_name }}</a>{% endblock %}
+
+                </h1>
+                <div class="nav-position">
+                    <nav role="navigation" class="site-nav nav-collapse">
+                        <ul>
+
+                            {% block top_links %}
+                                <li>
+                                    <a class="page-scroll" href="{{ url_for("decisions") }}">Decisions</a>
+                                </li>
+                                <li>
+                                    <a class="page-scroll" href="{{ url_for("policies") }}">Policies</a>
+                                </li>
+                                <li>
+                                    <a class="page-scroll"
+                                       href="{{ url_for('people', people_option='current') }}">People</a>
+                                </li>
+                            {% endblock %}
+
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </header>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+                integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+                crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+                integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+                crossorigin="anonymous"></script>
+        <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+        <div class="page-wrapper">
+            <div class="page">
+                <div class="main-content-column-full-width">
+                    <main role="main" class="main-content">
+
+                        {% block content %}{% endblock %}
+
+                    </main>
+                </div>
+            </div>
+        </div>
+        <div class="mysoc-footer" role="contentinfo">
+            <div class="page">
+                <div class="row">
+                    <div class="col-sm-5">
+                        <h2 class="mysoc-footer__site-name">
+                            <a href="https://mysociety.org?utm_source=whatdotheyknow.com&amp;utm_content=footer+logo&amp;utm_medium=link&amp;utm_campaign=mysoc_footer"
+                               class="mysoc-footer__org__logo mysoc-footer__org__logo--mysociety">mySociety</a>
+                        </h2>
+                        <div class="mysoc-footer__site-description">
+                            <p>
+                                mySociety is a not-for-profit social enterprise, based in the UK but working with partners
+                                internationally.
+                                We build and share digital technologies that help people be active citizens, across the
+                                three areas of
+                                Democracy, Transparency, and Community.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <nav class="mysoc-footer__links">
+                            <ul>
+                                <li id="menu-item-20940"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-20940">
+                                    <a href="https://www.mysociety.org/about/">About</a>
+                                </li>
+                                <li id="menu-item-21111"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-21111">
+                                    <a href="https://www.mysociety.org/about/careers/">Careers</a>
+                                </li>
+                                <li id="menu-item-20944"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-20944">
+                                    <a href="https://www.mysociety.org/contact/">Contact</a>
+                                </li>
+                            </ul>
+                            <ul>
+                                <li id="menu-item-20979"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-20979">
+                                    <a href="https://www.mysociety.org/press/">Press</a>
+                                </li>
+                                <li id="menu-item-28489"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-28489">
+                                    <a href="https://www.mysociety.org/privacy/">Privacy&nbsp;policy</a>
+                                </li>
+                                <li id="menu-item-21144"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-21144">
+                                    <a href="https://www.mysociety.org/subscribe/">Subscribe</a>
+                                </li>
+                                <li id="menu-item-38518"
+                                    class="menu-item menu-item-type-post_type menu-item-object-page menu-item-38518">
+                                    <a href="https://www.mysociety.org/united-nations-sustainable-development-goals/">Sustainable
+                                    Development</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="mysoc-footer__donate">
+                            <p>Your donations keep this site and others like it running</p>
+                            <a href="https://mysociety.org/donate?utm_source=research.mysociety.org&amp;utm_content=footer+donate+now&amp;utm_medium=link&amp;utm_campaign=mysoc_footer"
+                               class="mysoc-footer__donate__button">Donate now</a>
+                        </div>
+                    </div>
+                </div>
+                <hr class="mysoc-footer__divider" role="presentation">
+                <div class="row">
+                    <div class="col-sm-9">
+                        <div class="mysoc-footer__legal">
+                            <p>
+                                mySociety is a registered charity in England and Wales (1076346) and a limited company
+                                (03277032). We
+                                provide commercial services through our wholly owned subsidiary <a href="https://www.societyworks.org">SocietyWorks Ltd</a> (05798215).
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <ul class="mysoc-footer__badges">
+                            <li role="presentation">
+                                <a href="https://github.com/mysociety/"
+                                   class="mysoc-footer__badge mysoc-footer__badge--github">Github</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="https://twitter.com/mysociety"
+                                   class="mysoc-footer__badge mysoc-footer__badge--twitter"
+                                   onclick="if (ga) { ga('send','event','Outbound Link','Twitter Exit','Footer link',1) };">@mysociety</a>
+                            </li>
+                            <li role="presentation">
+                                <a href="https://www.facebook.com/mySociety/"
+                                   class="mysoc-footer__badge mysoc-footer__badge--facebook"
+                                   onclick="if (ga) { ga('send','event','Outbound Link','Facebook Exit','Footer link',1) };">mySociety</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function() {
+                $('table').DataTable({
+                    paging: false
+                });
+            });
+        </script>
+
+        {% block code %}
+        {% endblock %}
+
+    </body>
+</html>

@@ -3,33 +3,29 @@
 {% load static %}
 
 {% block css %}
-    <link rel="stylesheet" type="text/x-scss" href="{% static 'css/home.scss' %}">
+    <link rel="stylesheet"
+          type="text/x-scss"
+          href="{% static 'css/home.scss' %}">
 {% endblock %}
 
 {% block content %}
-
-<div class="py-5 bg-green-100">
-    <div class="container mt-n4">
-        <h1 class="display-3 mb-3">TheyWorkForYou Votes</h1>
-        <p class="fs-4 mb-4" style="max-width: 30em;">Analysis of voting information</p>
-
-        <p><a href="{% url 'api-1.0.0:openapi-view' %}">API Docs</a></p>
+    <div class="py-5 bg-green-100">
+        <div class="container mt-n4">
+            <h1 class="display-3 mb-3">TheyWorkForYou Votes</h1>
+            <p class="fs-4 mb-4" style="max-width: 30em;">Analysis of voting information</p>
+            <p>
+                <a href="{% url 'api-1.0.0:openapi-view' %}">API Docs</a>
+            </p>
+        </div>
     </div>
-</div>
-
-
-
-
-<div class="homepage-map-section">
-    <div class="container">
-        <div class="row">
-
-            <div class="col-lg-6 pt-5 pb-6">
-                <h2 class="mb-4 h1">How your representatives vote</h2>
-                <p class="mb-4 fs-5" style="max-width: 28em;">This site produces automated analysis of Parliamentary voting.</p>
+    <div class="homepage-map-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 pt-5 pb-6">
+                    <h2 class="mb-4 h1">How your representatives vote</h2>
+                    <p class="mb-4 fs-5" style="max-width: 28em;">This site produces automated analysis of Parliamentary voting.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
 {% endblock %}

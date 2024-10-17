@@ -1,0 +1,23 @@
+{% extends "votes/base.html" %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}
+
+{% block innercontent %}
+    <h1>Decisions in {{ search.chamber.name }}</h1>
+    <p>{{ search.decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }} (table)</p>
+    {% style_df search.decisions_df %}
+{% endblock innercontent %}

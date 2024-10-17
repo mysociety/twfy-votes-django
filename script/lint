@@ -7,3 +7,4 @@ cd `dirname $0`/..
 
 script/dev-command ruff check . --fix
 script/dev-command ruff format  .
+djlint src/votes/templates --reformat --quiet

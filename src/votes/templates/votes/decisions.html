@@ -1,0 +1,24 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block innercontent %}
+    <h1>Decisions</h1>
+    <p>
+        Decisions includes:
+        <p>
+            <ul>
+                <li>Divisions - where representatives record differences of opinion.</li>
+                <li>Agreements - when a decision is made without a vote.</li>
+            </ul>
+            {% for c in chambers %}
+                <h2>{{ c.name }}</h2>
+                <ul>
+                    {% for year in c.year_range %}
+                        <li>
+                            <a href="{% url 'decisions_list' c.slug year %}">{{ year }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        {% endblock innercontent %}

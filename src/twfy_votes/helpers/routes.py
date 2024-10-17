@@ -1,7 +1,23 @@
+import re
+from datetime import date
 from typing import Any, Callable, Optional, Type, TypeVar
 
-from django.urls import URLPattern, URLResolver, path
+from django.urls import URLPattern, URLResolver, path, register_converter
 from django.views.generic import View
+
+
+class ISODateConverter:
+    regex = r"\d{4}-\d{2}-\d{2}"
+
+    def to_python(self, value: str) -> date:
+        return date.fromisoformat(value)
+
+    def to_url(self, value: date) -> str:
+        return value.isoformat()
+
+
+register_converter(ISODateConverter, "date")
+
 
 ViewClass = TypeVar("ViewClass", bound=Type[View])
 
@@ -23,6 +39,12 @@ class RouteApp:
     ) -> Callable[[ViewClass], ViewClass]:
         if kwargs is None:
             kwargs = {}
+
+        # need to convert any {year:int} to <int:year>
+        route = re.sub(r"{(\w+):(\w+)}", r"<\2:\1>", route)
+
+        # and any just plain {year} to <year>
+        route = re.sub(r"{(\w+)}", r"<\1>", route)
 
         def inner(view: ViewClass) -> ViewClass:
             path_item = path(
