@@ -2,7 +2,7 @@
 
 {% block innercontent %}
     <h1>Decisions in {{ search.chamber.name }}</h1>
-    <p>{{ decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }}</p>
+    <p>{{ search.decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }}</p>
     {% regroup search.decisions by date.month as decisions_by_date %}
     {% for month, month_decisions in decisions_by_date %}
         <h2>{{ month|month_name }}</h2>

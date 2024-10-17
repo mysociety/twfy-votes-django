@@ -202,6 +202,7 @@ class Division(DjangoVoteModel):
             {
                 "Grouping": x.party.name,
                 f"{self.chamber.member_plural} on date": x.vote_participant_count,
+                "Vote participant count": x.signed_votes,
                 "For motion": x.for_motion,
                 "Against motion": x.against_motion,
                 "Neutral motion": x.neutral_motion,
@@ -222,6 +223,7 @@ class Division(DjangoVoteModel):
         overall_breakdown_dict = {
             "Grouping": f"All {self.chamber.member_plural}",
             f"{self.chamber.member_plural} on date": overall_breakdown.vote_participant_count,
+            "Vote participant count": overall_breakdown.signed_votes,
             "For motion": overall_breakdown.for_motion,
             "Against motion": overall_breakdown.against_motion,
             "Neutral motion": overall_breakdown.neutral_motion,
@@ -235,6 +237,7 @@ class Division(DjangoVoteModel):
             {
                 "Grouping": "Government" if x.is_gov else "Opposition",
                 f"{self.chamber.member_plural} on date": x.vote_participant_count,
+                "Vote participant count": x.signed_votes,
                 "For motion": x.for_motion,
                 "Against motion": x.against_motion,
                 "Neutral motion": x.neutral_motion,
