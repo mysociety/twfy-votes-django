@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import calendar
 import datetime
 from typing import Literal
@@ -6,10 +8,18 @@ from django.views.generic import TemplateView
 
 from twfy_votes.helpers.routes import RouteApp
 
-from ..consts import PolicyStatus
-from ..models.decisions import Agreement, Chamber, Division, Policy, Vote
-from ..models.people import Person
-from .helper_models import DivisionSearch
+from ..consts import ChamberSlug, PolicyStatus
+from ..models.decisions import (
+    Agreement,
+    Chamber,
+    Division,
+    Policy,
+    PolicyComparisonPeriod,
+    PolicyDivisionLink,
+    Vote,
+)
+from ..models.people import Organization, Person
+from .helper_models import ChamberPolicyGroup, DivisionSearch, PolicyCollection
 from .mixins import TitleMixin
 
 app = RouteApp(app_name="votes")
@@ -19,6 +29,21 @@ app = RouteApp(app_name="votes")
 class HomePageView(TitleMixin, TemplateView):
     page_title = ""
     template_name = "votes/home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # we want the last three votes for each chamber
+        context["chambers"] = Chamber.with_votes()
+        # get last commons votes
+        context["commons_votes"] = Division.objects.filter(
+            chamber__slug=ChamberSlug.COMMONS
+        ).order_by("-date", "-division_number")[:5]
+        # get the year of the last vote in all chambers
+        context["last_dates"] = [
+            (x, x.last_decision_date()) for x in context["chambers"]
+        ]
+
+        return context
 
 
 @app.route("people/{filter:str}", name="people")
@@ -86,9 +111,16 @@ class DivisionPageView(TitleMixin, TemplateView):
         **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        context["decision"] = Division.objects.get(
+        decision = Division.objects.get(
             chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
         )
+        context["decision"] = decision
+        context["relevant_policies"] = [
+            x.policy
+            for x in PolicyDivisionLink.objects.filter(
+                decision=decision
+            ).prefetch_related("policy")
+        ]
         return context
 
 
@@ -129,7 +161,7 @@ class DecisionsListPageView(TitleMixin, TemplateView):
             chamber=chamber, date__range=(start_date, end_date)
         )
         decisions = list(relevent_divisions) + list(relevant_agreements)
-        decisions.sort(key=lambda x: x.date)
+        decisions.sort(key=lambda x: x.date, reverse=True)
         return DivisionSearch(
             start_date=start_date,
             end_date=end_date,
@@ -176,9 +208,10 @@ class PoliciesPageView(TitleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # get chambers
-        context["chambers"] = Chamber.objects.all()
+        context["chambers"] = Chamber.with_votes()
         # get policy statuses
-        context["statuses"] = PolicyStatus
+        do_not_display = [PolicyStatus.RETIRED, PolicyStatus.REJECTED]
+        context["statuses"] = [x for x in PolicyStatus if x not in do_not_display]
         return context
 
 
@@ -222,25 +255,76 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
         self, chamber_slug: str, status_slug: str, group_slug: str, **kwargs
     ):
         context = super().get_context_data(**kwargs)
-        context["policies"] = Policy.objects.filter(
-            chamber__slug=chamber_slug, status=status_slug, groups=group_slug
-        )
+        context["chamber"] = Chamber.objects.get(slug=chamber_slug)
+        context["status"] = PolicyStatus(status_slug)
+        if group_slug == "all":
+            policies = Policy.objects.filter(
+                chamber__slug=chamber_slug, status=status_slug
+            ).prefetch_related("groups")
+        else:
+            policies = Policy.objects.filter(
+                chamber__slug=chamber_slug, status=status_slug, groups__slug=group_slug
+            ).prefetch_related("groups")
+        # get unique of all groups
+        groups = set()
+        for policy in policies:
+            print(policy)
+            groups.update(policy.groups.all())
+        policy_collection: list[ChamberPolicyGroup] = []
+        for group in groups:
+            group_policies = [
+                policy for policy in policies if group in policy.groups.all()
+            ]
+            policy_collection.append(
+                ChamberPolicyGroup(name=group, policies=group_policies)
+            )
+
+        context["policy_collection"] = policy_collection
+
         return context
 
 
 @app.route(
-    "policy/{policy_id:int}/{person_id:int}/{party_slug:str}", name="policy_people"
+    "person/{person_id:int}/policies/{chamber_slug:str}/{party_slug:str}/{period_slug:str}",
+    name="person_policy",
 )
-class PolicyPeoplePageView(TitleMixin, TemplateView):
-    page_title = "Policy People"
-    template_name = "votes/policy_people.html"
+class PersonPoliciesView(TitleMixin, TemplateView):
+    page_title = "Person Policies"
+    template_name = "votes/person_policies.html"
 
     def get_context_data(
-        self, policy_id: int, person_id: int, party_slug: str, **kwargs
+        self,
+        person_id: int,
+        chamber_slug: str,
+        party_slug: str,
+        period_slug: str,
+        **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        context["policy"] = Policy.objects.get(id=policy_id)
-        context["person"] = Person.objects.get(id=person_id)
-        context["party"] = party_slug
-        # needs extra stuff to get the real details
+        person = Person.objects.get(id=person_id)
+        chamber = Chamber.objects.get(slug=chamber_slug)
+        party = Organization.objects.get(slug=party_slug)
+        period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
+
+        valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
+
+        # add logic to show drafts here for admin user
+
+        distributions = list(
+            person.vote_distributions.filter(
+                chamber=chamber,
+                period=period,
+                party=party,
+                policy__status__in=valid_status,
+            ).prefetch_related("policy")
+        )
+
+        collection = PolicyCollection.from_distributions(distributions)
+
+        context["person"] = person
+        context["chamber"] = chamber
+        context["period"] = period
+        context["party"] = party
+        context["collection"] = collection
+
         return context

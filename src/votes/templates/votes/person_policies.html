@@ -1,0 +1,31 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>{{ person.name }}</h1>
+    <p>Being compared with {{ party.name }} in {{ chamber.name }}</p>
+    <p>This list contains candidate policies that have not been finalised for feeding into TheyWorkForYou.</p>
+    {% for group in collection %}
+        {% if group|length > 0 %}
+            <h2>{{ group.name }}</h2>
+            {% style_df group.as_df %}
+        {% endif %}
+    {% endfor %}
+{% endblock content.inner %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}

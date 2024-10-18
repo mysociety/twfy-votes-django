@@ -1,0 +1,15 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>People</h1>
+    <p>This is just a very long list as a temporary navigation structure.</p>
+    <ul>
+        {% for person in people %}
+            <li>
+                <a href="{% url 'person' person.id %}">{{ person.id }} - {{ person.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content.inner %}

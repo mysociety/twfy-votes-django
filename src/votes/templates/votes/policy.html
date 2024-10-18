@@ -1,0 +1,38 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>{{ policy.name.title }}</h1>
+    <p>Status: {{ policy.status.title }}</p>
+    <p>
+        Groups:
+        {% for group in policy.groups.all %}
+            {{ group.description }}
+            {% if not forloop.last %},{% endif %}
+        {% endfor %}
+    </p>
+    {% if policy.highlightable %}<p>Policy may be highlighted in absence of interested votes.</p>{% endif %}
+    <h2>Description</h2>
+    <p>{{ policy.policy_description }}</p>
+    <p>[Person name] voted for/against {{ policy.context_description|safe }}</p>
+    <h2>Decisions</h2>
+    <p>Decisions may be read as agreeing with the policy, or being against the policy.</p>
+    <p>{% style_df policy.decision_df %}</p>
+{% endblock content.inner %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}

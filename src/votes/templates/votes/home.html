@@ -12,7 +12,6 @@
     <div class="py-5 bg-green-100">
         <div class="container mt-n4">
             <h1 class="display-3 mb-3">TheyWorkForYou Votes</h1>
-            <p class="fs-4 mb-4" style="max-width: 30em;">Analysis of voting information</p>
             <p>
                 <a href="{% url 'api-1.0.0:openapi-view' %}">API Docs</a>
             </p>
@@ -24,6 +23,36 @@
                 <div class="col-lg-6 pt-5 pb-6">
                     <h2 class="mb-4 h1">How your representatives vote</h2>
                     <p class="mb-4 fs-5" style="max-width: 28em;">This site produces automated analysis of Parliamentary voting.</p>
+                    <ul>
+                        <li>
+                            <a class="page-scroll" href="{% url 'decisions' %}">Decisions</a> - Decisions made collectively in the UK's
+                            Parliaments and Assemblies.
+                        </li>
+                        <li>
+                            <a class="page-scroll" href="{% url 'decisions' %}">Policies</a> - Grouping of decisions into related
+                            policies.
+                        </li>
+                        <li>
+                            <a class="page-scroll" href="{% url 'people' 'all' %}">People</a> - Members of the
+                            UK's Parliaments and Assemblies.
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 pt-5 pb-6">
+                    <h2 class="mb-4 h1">Recent Commons votes</h2>
+                    <ul>
+                        {% for division in commons_votes %}
+                            <li>
+                                <a href="{{ division.url }}">{{ division.safe_decision_name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <p>See latest for:</p>
+                    {% for chamber, date in last_dates %}
+                        {% if date %}
+                            <a href="{% url 'decisions_list' chamber.slug date.year %} ">{{ chamber.name }}</a>
+                        {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

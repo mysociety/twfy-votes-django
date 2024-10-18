@@ -1,0 +1,32 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>Policies</h1>
+    <p>Policies are collections of votes that are linked thematically.</p>
+    <p>These power TheyWorkForYou's voting records.</p>
+    Status:
+    <ul>
+        <li>
+            <b>ACTIVE</b> - Policies that are shown in TheyWorkForYou
+        </li>
+        <li>
+            <b>CANDIDATE</b> - Policies that have in principle been approved, but need final wording checks and are not live
+            yet.
+        </li>
+        <li>
+            <b>DRAFT</b> - Incomplete policies that need more work to meet standards for publication.
+        </li>
+    </ul>
+    {% for chamber in chambers %}
+        <h3>{{ chamber.name }}</h3>
+        <ul>
+            {% for p in statuses %}
+                <li>
+                    <a href="{% url 'policy_collection' chamber.slug p 'all' %}">{{ p.name.title }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock content.inner %}

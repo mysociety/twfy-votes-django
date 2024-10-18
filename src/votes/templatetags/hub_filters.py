@@ -4,7 +4,7 @@ from typing import Any
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
-from django.template import Library, Node, TemplateSyntaxError, VariableDoesNotExist
+from django.template import Library, Node
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
@@ -111,8 +111,12 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
 
     df = df.rename(columns=nice_headers)
 
-    styled_df = df.style.hide(axis="index").format(  # type: ignore
-        formatter={x: format_percentage for x in percentage_columns}  # type: ignore
+    styled_df = (
+        df.style.hide(axis="index")
+        .format(  # type: ignore
+            formatter={x: format_percentage for x in percentage_columns}  # type: ignore
+        )
+        .format(precision=2)
     )
 
     return mark_safe(styled_df.to_html())  # type: ignore
@@ -159,100 +163,3 @@ class MarkdownNode(Node):
 
         text = markdown.markdown(markdown_text, extensions=["toc"])
         return text
-
-
-@register.tag(name="switch")
-def do_switch(parser, token):
-    bits = token.contents.split()
-    tag_name = bits[0]
-    if len(bits) != 2:
-        raise TemplateSyntaxError("'%s' tag requires one argument" % tag_name)
-    variable = parser.compile_filter(bits[1])
-
-    class BlockTagList(object):
-        def __init__(self, *names):
-            self.names = set(names)
-
-        def __contains__(self, token_contents):
-            name = token_contents.split()[0]
-            return name in self.names
-
-    # Skip over everything before the first {% case %} tag
-    parser.parse(BlockTagList("case", "endswitch"))
-
-    cases = []
-    token = parser.next_token()
-    got_case = False
-    got_else = False
-
-    while token.contents != "endswitch":
-        # Capture content inside case and endcase tags
-        nodelist = parser.parse(BlockTagList("case", "else", "endswitch", "endcase"))
-
-        if got_else:
-            raise TemplateSyntaxError("'else' must be last tag in '%s'." % tag_name)
-
-        contents = token.contents.split()
-        token_name, token_args = contents[0], contents[1:]
-
-        if token_name == "case":
-            # Capture tests and map them to filters
-            tests = map(parser.compile_filter, token_args)
-            case = (tests, nodelist)
-            got_case = True
-        elif token_name == "else":
-            # Handle the {% else %} tag
-            case = (None, nodelist)
-            got_else = True
-        elif token_name == "endcase":
-            # Explicitly ignore the {% endcase %} tag
-            token = parser.next_token()
-            continue
-
-        cases.append(case)
-        token = parser.next_token()
-
-    if not got_case:
-        raise TemplateSyntaxError("'%s' must have at least one 'case'." % tag_name)
-
-    return SwitchNode(variable, cases)
-
-
-class SwitchNode(Node):
-    def __init__(self, variable, cases):
-        self.variable = variable
-        self.cases = cases
-
-    def __repr__(self):
-        return "<Switch node>"
-
-    def __iter__(self):
-        for tests, nodelist in self.cases:
-            for node in nodelist:
-                yield node
-
-    def get_nodes_by_type(self, nodetype):
-        nodes = []
-        if isinstance(self, nodetype):
-            nodes.append(self)
-        for tests, nodelist in self.cases:
-            nodes.extend(nodelist.get_nodes_by_type(nodetype))
-        return nodes
-
-    def render(self, context):
-        try:
-            value_missing = False
-            value = self.variable.resolve(context, True)
-        except VariableDoesNotExist:
-            value_missing = None
-
-        for tests, nodelist in self.cases:
-            if tests is None:
-                return nodelist.render(context)
-            elif not value_missing:
-                for test in tests:
-                    test_value = test.resolve(context, True)
-                    if value == test_value:
-                        return nodelist.render(context)
-        else:
-            return ""

@@ -1,8 +1,10 @@
 <nav class="navbar navbar-expand-sm bg-green-100">
     <div class="container">
-        <a class="navbar-brand"
-           href="{% url 'home' %}"
-           aria-label="TheyWorkForYou Votes">TheyWorkForYou Votes</a>
+        {% if not request.resolver_match.url_name == 'home' %}
+            <a class="navbar-brand"
+               href="{% url 'home' %}"
+               aria-label="TheyWorkForYou Votes">TheyWorkForYou Votes</a>
+        {% endif %}
         <button class="navbar-toggler"
                 type="button"
                 data-bs-toggle="collapse"
@@ -15,8 +17,9 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto flex-wrap justify-content-end">
 
-                {% include 'votes/includes/nav-item.html' with name='home' label='Home' %}
                 {% include 'votes/includes/nav-item.html' with name='decisions' label='Decisions' %}
+                {% include 'votes/includes/nav-item.html' with name='people' label='People' url_param='all' %}
+                {% include 'votes/includes/nav-item.html' with name='policies' label='Policies' %}
                 {% if user.is_authenticated %}
 
                     {% include 'votes/includes/nav-item.html' with name='my_account' label='Account' %}

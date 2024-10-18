@@ -1,0 +1,19 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>{{ person.name }}</h1>
+    <h2>Options</h2>
+    <ul>
+        <li>
+            <a href="{% url 'person_votes' person.id %}">All recorded votes.</a>
+        </li>
+        {% for record in person.policy_distribution_groups %}
+            <li>
+                <a href="{% url 'person_policy' person.id record.chamber.slug record.party.slug record.period.slug.lower %}">Voting
+                record comparison with {{ record.party.name }} ({{ record.period.description }})</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content.inner %}

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import datetime
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
 from django.urls import reverse
+
+import numpy as np
+import pandas as pd
 
 from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
@@ -18,16 +22,51 @@ from ..consts import ChamberSlug, OrganisationType
 from .base_model import DjangoVoteModel
 
 if TYPE_CHECKING:
-    from .decisions import Chamber
+    from .decisions import Chamber, PolicyComparisonPeriod, Vote, VoteDistribution
+
+
+@dataclass
+class DistributionGroup:
+    party: Organization
+    chamber: Chamber
+    period: PolicyComparisonPeriod
+
+    def key(self):
+        return f"{self.party.id}-{self.chamber.id}-{self.period.id}"
 
 
 class Person(DjangoVoteModel):
     id: PrimaryKey = None
     name: str
     memberships: DummyOneToMany["Membership"] = related_name("person")
+    votes: DummyOneToMany[Vote] = related_name("person")
+    vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
 
     def votes_url(self):
         return reverse("person_votes", kwargs={"person_id": self.id})
+
+    def policy_distribution_groups(self):
+        print("here")
+        groups: list[DistributionGroup] = []
+        distributions = self.vote_distributions.all().prefetch_related(
+            "period", "chamber", "party"
+        )
+        # iterate through this and create unique groups
+
+        existing_keys = []
+
+        for distribution in distributions:
+            group = DistributionGroup(
+                party=distribution.party,
+                chamber=distribution.chamber,
+                period=distribution.period,
+            )
+            print(group)
+            if group.key() not in existing_keys:
+                groups.append(group)
+                existing_keys.append(group.key())
+
+        return groups
 
     @classmethod
     def current(cls):
@@ -48,6 +87,34 @@ class Person(DjangoVoteModel):
             raise ValueError(
                 f"{self.name} was not a member of {chamber_slug} on {date}"
             )
+
+    def votes_df(self) -> pd.DataFrame:
+        from .decisions import UrlColumn
+
+        data = [
+            {
+                "Date": v.division.date,
+                "Division": UrlColumn(
+                    url=v.division.url(), text=v.division.division_name
+                ),
+                "Vote": v.vote_desc(),
+                "Party alignment": (
+                    1
+                    - (
+                        v.diff_from_party_average
+                        if v.diff_from_party_average is not None
+                        else np.nan
+                    )
+                ),
+            }
+            for v in self.votes.all()
+            if v.division is not None
+        ]
+
+        # sort by data decending
+        data = sorted(data, key=lambda x: x["Date"], reverse=True)
+
+        return pd.DataFrame(data=data)
 
 
 class Organization(DjangoVoteModel):

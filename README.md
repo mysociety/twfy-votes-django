@@ -51,4 +51,11 @@ If adjusting at the policy generation approach you might also want to look `scri
 
 # Development
 
-This uses ruff for linting and formatting - see `script/lint`.
+This uses ruff for linting and formatting., and djlint for django templates - see `script/lint`.
+
+# To do
+
+- reimpliment reports
+- person/policy view (equiv of old publid whip view)
+- twfy api view
+- new motions import

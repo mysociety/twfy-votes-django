@@ -57,6 +57,8 @@ class DecisionProtocol(Protocol):
 
     def motion_uses_powers(self) -> str: ...
 
+    def safe_decision_name(self) -> str: ...
+
     def url(self) -> str: ...
 
     def twfy_link(self) -> str: ...
@@ -76,6 +78,26 @@ class Chamber(DjangoVoteModel):
     member_plural: str
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
+
+    def last_decision_date(self) -> Optional[datetime.date]:
+        last_division = Division.objects.filter(chamber=self).order_by("-date").first()
+        last_agreement = (
+            Agreement.objects.filter(chamber=self).order_by("-date").first()
+        )
+
+        match (last_division, last_agreement):
+            case (None, None):
+                return None
+            case (None, last_agreement):
+                return last_agreement.date
+            case (last_division, None):
+                return last_division.date
+            case (last_division, last_agreement):
+                return max(last_division.date, last_agreement.date)
+
+    @classmethod
+    def with_votes(cls):
+        return cls.objects.all().exclude(slug=ChamberSlug.NI)
 
     def year_range(self) -> list[int]:
         """
@@ -160,6 +182,12 @@ class Division(DjangoVoteModel):
     )
     tags: DummyManyToMany[DivisionTag] = related_name("division")
 
+    def single_breakdown(self):
+        ob = self.overall_breakdowns.first()
+        if ob:
+            return ob
+        raise ValueError("No overall breakdown found")
+
     def voting_cluster(self) -> dict[str, str]:
         lookup = {
             "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
@@ -195,7 +223,7 @@ class Division(DjangoVoteModel):
         )
 
     def safe_decision_name(self) -> str:
-        return self.key
+        return self.division_name
 
     def party_breakdown_df(self) -> pd.DataFrame:
         data = [
@@ -428,6 +456,48 @@ class Policy(DjangoVoteModel):
     agreement_links: DummyOneToMany[PolicyAgreementLink] = related_name("policy")
     policy_hash: str
 
+    def url(self) -> str:
+        return reverse("policy", args=[self.id])
+
+    def decision_df(self) -> pd.DataFrame:
+        """ """
+        division_data = [
+            {
+                "month": x.decision.date.strftime("%Y-%m"),
+                "decision": UrlColumn(
+                    url=x.decision.url(), text=x.decision.safe_decision_name()
+                ),
+                "alignment": x.alignment,
+                "strength": x.strength,
+                "decision type": "Division",
+                "uses powers": x.decision.motion_uses_powers(),
+                "voting cluster": x.decision.voting_cluster()["desc"],
+                "participant count": x.decision.single_breakdown().signed_votes,
+            }
+            for x in self.division_links.all()
+        ]
+
+        agreement_data = [
+            {
+                "month": x.decision.date.strftime("%Y-%m"),
+                "decision": UrlColumn(
+                    url=x.decision.url(), text=x.decision.safe_decision_name()
+                ),
+                "alignment": x.alignment,
+                "strength": x.strength,
+                "decision type": "Agreement",
+                "uses powers": x.decision.motion_uses_powers(),
+                "voting cluster": x.decision.voting_cluster()["desc"],
+                "participant count": 0,
+            }
+            for x in self.agreement_links.all()
+        ]
+
+        df = pd.DataFrame(data=division_data + agreement_data)
+        # sort by month
+        df = df.sort_values(by="month")
+        return df
+
     def get_scoring_function(self) -> ScoringFuncProtocol:
         match self.strength_meaning:
             case StrengthMeaning.SIMPLIFIED:
@@ -492,3 +562,25 @@ class VoteDistribution(DjangoVoteModel):
     start_year: int
     end_year: int
     distance_score: float
+
+    @property
+    def verbose_score(self) -> str:
+        match self.distance_score:
+            case s if 0 <= s <= 0.05:
+                return "Consistently voted for"
+            case s if 0.05 < s <= 0.15:
+                return "Almost always voted for"
+            case s if 0.15 < s <= 0.4:
+                return "Generally voted for"
+            case s if 0.4 < s <= 0.6:
+                return "Voted a mixture of for and against"
+            case s if 0.6 < s <= 0.85:
+                return "Generally voted against"
+            case s if 0.85 < s <= 0.95:
+                return "Almost always voted against"
+            case s if 0.95 < s <= 1:
+                return "Consistently voted against"
+            case s if s == -1:
+                return "No data available"
+            case _:
+                raise ValueError("Score must be between 0 and 1")

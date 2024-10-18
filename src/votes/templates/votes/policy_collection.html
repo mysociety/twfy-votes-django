@@ -1,0 +1,17 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>Policies - {{ chamber.name }} - {{ status.title }}</h1>
+    {% for grouped_policies in policy_collection %}
+        <h3>{{ grouped_policies.name.description }}</h3>
+        <ul>
+            {% for policy in grouped_policies.policies %}
+                <li>
+                    <a href="{% url 'policy' policy.id %}">{{ policy.id }} - {{ policy.name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock content.inner %}

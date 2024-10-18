@@ -215,6 +215,8 @@ def import_popolo(quiet: bool = False):
         if isinstance(person, PopoloPerson):
             all_names = person.names
             all_names.sort(key=lambda x: x.start_date, reverse=True)
+            # limit down to note = "Main"
+            all_names = [n for n in all_names if n.note == "Main"]
             latest_name = all_names[0].nice_name()
 
             item = Person(id=int_id(person.id), name=latest_name)
@@ -235,9 +237,11 @@ def import_popolo(quiet: bool = False):
         item = Organization(
             slug=ChamberSlug.from_parlparse(org.id, passthrough=True),
             name=org.name,
-            classification=OrganisationType(org.classification)
-            if org.classification
-            else OrganisationType.UNKNOWN,
+            classification=(
+                OrganisationType(org.classification)
+                if org.classification
+                else OrganisationType.UNKNOWN
+            ),
         )
 
         to_create.append(item)

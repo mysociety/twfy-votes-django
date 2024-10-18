@@ -1,5 +1,13 @@
 {% extends "votes/base.html" %}
 
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>{{ person.name }}</h1>
+    <h2>Votes</h2>
+    {% style_df person.votes_df "Party alignment" %}
+{% endblock content.inner %}
+
 {% block extracss %}
     <link rel="stylesheet"
           href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
@@ -15,9 +23,3 @@
         });
     </script>
 {% endblock extrajs %}
-
-{% block content.inner %}
-    <h1>Decisions in {{ search.chamber.name }}</h1>
-    <p>{{ search.decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }} (table)</p>
-    {% style_df search.decisions_df %}
-{% endblock content.inner %}
