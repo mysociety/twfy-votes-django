@@ -35,3 +35,5 @@ if ! grep ^DEVENV .env ; then
         esac
     done
 fi
+
+mkdir -p data/{source,compiled}
