@@ -19,7 +19,7 @@ jobs:
           app: web
           run: |
             script/setup
-            script/populate
+            script/populate --all
             script/test
      
     
