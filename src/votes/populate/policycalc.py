@@ -524,6 +524,9 @@ def generate_policy_distributions(
             .df()
         )
 
+        if len(df) == 0:
+            raise ValueError("No policy calc information returned")
+
         list_cols = ["num_comparators", "division_ids"]
         for col in df.columns:
             if col not in list_cols:
