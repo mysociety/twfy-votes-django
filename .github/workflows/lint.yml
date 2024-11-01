@@ -16,7 +16,7 @@ jobs:
           python-version: '3.11' 
       - name: run ruff linter and formatter
         run: |
-          pip install ruff==0.6.2 djlint==1.34.4
+          pip install ruff==0.6.2 djlint==1.35.4
           ruff check .
           ruff format . --check
           djlint src/votes/templates --reformat --quiet
