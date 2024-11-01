@@ -1,6 +1,6 @@
-<h1>{{ policy_report.policy.name.title() }} ({{ policy_report.policy.id }})</h1>
+<h1>{{ policy_report.policy.name.title }} ({{ policy_report.policy.id }})</h1>
 <p>
-    <a href="{{ policy_report.policy.url(request) }}">Link to policy</a>
+    <a href="{{ policy_report.policy.url }}">Link to policy</a>
 </p>
 {% if policy_report.policy_issues|length > 0 %}
     <h2>Policy-level issues</h2>
@@ -16,13 +16,13 @@
 {% endif %}
 {% if policy_report.division_issues|length > 0 %}
     <h2>Division-level issues</h2>
-    <p>{{ policy_report.len_division_issues() }} divisions with issues.</p>
-    {% for issue, divisions in policy_report.division_issues.items() %}
+    <p>{{ policy_report.len_division_issues }} divisions with issues.</p>
+    {% for issue, divisions in policy_report.division_issues.items %}
         <h3>{{ issue }}</h3>
         <ul>
             {% for division in divisions %}
                 <li>
-                    <a href="{{ division.url(request) }}">{{ division.division_name }}</a> ({{ division.key }})
+                    <a href="{{ division.url }}">{{ division.division_name }}</a> ({{ division.key }})
                 </li>
             {% endfor %}
         </ul>

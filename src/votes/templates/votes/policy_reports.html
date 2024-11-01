@@ -1,0 +1,17 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>Policies - all current issues</h1>
+    <p>Policy level issues: {{ policy_level_errors }}</p>
+    <p>Division level issues: {{ division_level_errors }}</p>
+    <p>Policy level warnings: {{ policy_level_warnings }}</p>
+    {% for policy_report in policy_reports %}
+        {% if policy_report.has_issues_or_warnings %}
+            <hr />
+
+            {% include "votes/includes/_policy_report_include.html" %}
+        {% endif %}
+    {% endfor %}
+{% endblock content.inner %}

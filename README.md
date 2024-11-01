@@ -55,7 +55,6 @@ This uses ruff for linting and formatting., and djlint for django templates - se
 
 # To do
 
-- reimpliment reports
 - person/policy view (equiv of old publid whip view)
 - twfy api view
 - new motions import

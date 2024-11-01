@@ -1,0 +1,9 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    {{ policy_report.model_dump }}
+
+    {% include "votes/includes/_policy_report_include.html" %}
+{% endblock content.inner %}

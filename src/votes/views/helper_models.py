@@ -5,16 +5,23 @@ from dataclasses import dataclass
 from itertools import groupby
 
 import pandas as pd
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from twfy_votes.helpers.routes import RouteApp
 
-from ..consts import PolicyGroupSlug
+from ..consts import (
+    IssueType,
+    PolicyGroupSlug,
+    PolicyStatus,
+    PolicyStrength,
+    PowersAnalysis,
+)
 from ..models.decisions import (
     Agreement,
     Chamber,
     Division,
     Policy,
+    PolicyDivisionLink,
     PolicyGroup,
     UrlColumn,
     VoteDistribution,
@@ -191,3 +198,137 @@ class PairedPolicy:
         if own_score > 0.6 and other_score < 0.4:
             return True
         return False
+
+
+class PolicyReport(BaseModel):
+    """
+    Catalog issues with a policy
+    """
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    policy: Policy
+    division_issues: dict[IssueType, list[Division]] = Field(default_factory=dict)
+    policy_issues: list[IssueType] = Field(default_factory=list)
+    policy_warnings: list[IssueType] = Field(default_factory=list)
+
+    def model_dump(self):
+        from .api import DivisionSchema, PolicySchema
+
+        data = {}
+        data["policy"] = PolicySchema.from_orm(self.policy).model_dump()
+        data["division_issues"] = {
+            k.value: [DivisionSchema.from_orm(x).model_dump() for x in v]
+            for k, v in self.division_issues.items()
+        }
+        data["policy_issues"] = [x.value for x in self.policy_issues]
+        data["policy_warnings"] = [x.value for x in self.policy_warnings]
+
+        return data
+
+    def add_from_division_issue(
+        self, division_link: PolicyDivisionLink, issue: IssueType
+    ):
+        """
+        Add an issue to the list of issues for this division
+        """
+        ignore_format = f"ignore:{issue}"
+        if ignore_format in division_link.notes:
+            return False
+
+        if issue not in self.division_issues:
+            self.division_issues[issue] = []
+        self.division_issues[issue].append(division_link.decision)
+        return True
+
+    def add_policy_issue(self, issue: IssueType, warning: bool = False):
+        """
+        Add an issue to the list of issues for this policy
+        """
+        ignore_format = f"ignore:{issue}"
+        if ignore_format in self.policy.notes:
+            return False
+
+        if warning:
+            if issue not in self.policy_warnings:
+                self.policy_warnings.append(issue)
+        else:
+            if issue not in self.policy_issues:
+                self.policy_issues.append(issue)
+        return True
+
+    def len_division_issues(self) -> int:
+        return sum([len(x) for x in self.division_issues.values()])
+
+    def has_issues(self) -> bool:
+        return len(self.policy_issues) > 0 or len(self.division_issues) > 0
+
+    def has_issues_or_warnings(self) -> bool:
+        return (
+            len(self.policy_issues) > 0
+            or len(self.division_issues) > 0
+            or len(self.policy_warnings) > 0
+        )
+
+    @classmethod
+    def fetch_multiple(
+        cls,
+        statuses: list[PolicyStatus],
+    ):
+        """
+        Run checks on policies.
+        """
+
+        policies = Policy.objects.filter(status__in=statuses).all()
+        return [cls.from_policy(policy=policy) for policy in policies]
+
+    @classmethod
+    def from_policy(cls, policy: Policy) -> PolicyReport:
+        """
+        Score policy for identified issues
+        """
+
+        report = PolicyReport(policy=policy)
+        strong_count = 0
+        strong_without_power = 0
+        for division in policy.division_links.all():
+            # Test for overlap of strong votes and no powers
+            uses_powers = (
+                division.decision.motion_uses_powers() == PowersAnalysis.USES_POWERS
+            )
+            if division.strength == PolicyStrength.STRONG:
+                strong_count += 1
+            if division.strength == PolicyStrength.STRONG:
+                """
+                # not enabled until motion detectioni s turned back on
+                vma = division.decision.vote_motion_analysis
+                vote_type = vma.vote_type if vma else "Unknown"
+                if (
+                    "queen's speech" in division.decision.division_name.lower()
+                    or vote_type == VoteType.GOVERNMENT_AGENDA
+                ):
+                    if report.add_from_division_issue(
+                        division_link=division, issue=IssueType.STRONG_VOTE_GOV_AGENDA
+                    ):
+                        strong_without_power += 1
+                """
+
+            if division.strength == PolicyStrength.STRONG and not uses_powers:
+                if report.add_from_division_issue(
+                    division_link=division, issue=IssueType.STRONG_WITHOUT_POWER
+                ):
+                    strong_without_power += 1
+            if (
+                "opposition" in division.decision.division_name.lower()
+                and division.strength == PolicyStrength.STRONG
+            ):
+                report.add_from_division_issue(
+                    division_link=division, issue=IssueType.STRONG_WITHOUT_POWER
+                )
+        if strong_count == 0:
+            report.add_policy_issue(issue=IssueType.NO_STRONG_VOTES)
+        elif strong_count - strong_without_power == 0:
+            report.add_policy_issue(issue=IssueType.NO_STRONG_VOTES_AFTER_POWER_CHANGE)
+        if strong_count == 1:
+            report.add_policy_issue(issue=IssueType.ONLY_ONE_STRONG_VOTE, warning=True)
+        return report

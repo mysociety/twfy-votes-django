@@ -5,6 +5,7 @@ from django.http import HttpRequest
 
 from ninja import ModelSchema, NinjaAPI
 
+from ..consts import PolicyStatus
 from ..models.decisions import (
     Agreement,
     Division,
@@ -18,6 +19,7 @@ from ..models.decisions import (
     Vote,
 )
 from ..models.people import Person
+from .helper_models import PolicyReport
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
 
@@ -194,6 +196,19 @@ def get_policy_by_id(request: HttpRequest, policy_id: int):
     return Policy.objects.get(id=policy_id)
 
 
-# /policies/report
+@api.get("/policy/{policy_id}/report.json")
+def get_policy_report_by_id(request: HttpRequest, policy_id: int):
+    policy = Policy.objects.get(id=policy_id)
+    return PolicyReport.from_policy(policy).model_dump()
+
+
+@api.get("/policies/reports.json")
+def get_all_policy_reports(request: HttpRequest):
+    reports = PolicyReport.fetch_multiple([PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE])
+
+    data = [x.model_dump() for x in reports]
+    return data
+
+
 # /person/{person_id}/records/{chamber_slug}/{party_id}
 # /twfy-compatible/popolo/{policy_id}.json

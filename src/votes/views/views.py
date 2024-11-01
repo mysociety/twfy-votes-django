@@ -19,7 +19,12 @@ from ..models.decisions import (
     Vote,
 )
 from ..models.people import Organization, Person
-from .helper_models import ChamberPolicyGroup, DivisionSearch, PolicyCollection
+from .helper_models import (
+    ChamberPolicyGroup,
+    DivisionSearch,
+    PolicyCollection,
+    PolicyReport,
+)
 from .mixins import TitleMixin
 
 app = RouteApp(app_name="votes")
@@ -218,7 +223,24 @@ class PoliciesPageView(TitleMixin, TemplateView):
 @app.route("policies/reports", name="policies_reports")
 class PoliciesReportsPageView(TitleMixin, TemplateView):
     page_title = "Policies Reports"
-    template_name = "votes/policies_reports.html"
+    template_name = "votes/policy_reports.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        reports = PolicyReport.fetch_multiple(
+            statuses=[PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
+        )
+
+        context["policy_reports"] = reports
+        context["policy_level_errors"] = sum([len(x.policy_issues) for x in reports])
+        context["policy_level_warnings"] = sum(
+            [len(x.policy_warnings) for x in reports]
+        )
+        context["division_level_errors"] = sum(
+            [x.len_division_issues() for x in reports]
+        )
+        return context
 
 
 @app.route("policy/{policy_id:int}", name="policy")
@@ -235,11 +257,12 @@ class PolicyPageView(TitleMixin, TemplateView):
 @app.route("policy/{policy_id:int}/report", name="policy_reports")
 class PolicyReportPageView(TitleMixin, TemplateView):
     page_title = "Policy Reports"
-    template_name = "votes/policy_reports.html"
+    template_name = "votes/policy_report.html"
 
     def get_context_data(self, policy_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
         context["policy"] = Policy.objects.get(id=policy_id)
+        context["policy_report"] = PolicyReport.from_policy(context["policy"])
         return context
 
 

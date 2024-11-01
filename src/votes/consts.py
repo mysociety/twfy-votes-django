@@ -155,6 +155,23 @@ class VoteType(StrEnum):
         return self.replace("_", " ").title()
 
 
+class PowersAnalysis(StrEnum):
+    USES_POWERS = "uses_powers"
+    DOES_NOT_USE_POWERS = "does_not_use_powers"
+    INSUFFICENT_INFO = "insufficent_info"
+
+    def display_name(self):
+        return self.value.replace("_", " ").title()
+
+
+class IssueType(StrEnum):
+    STRONG_WITHOUT_POWER = "strong_without_power"
+    NO_STRONG_VOTES = "no_strong_votes"
+    NO_STRONG_VOTES_AFTER_POWER_CHANGE = "no_strong_votes_after_power_change"
+    STRONG_VOTE_GOV_AGENDA = "strong_vote_gov_agenda"
+    ONLY_ONE_STRONG_VOTE = "only_one_strong_vote"
+
+
 class OrganisationType(StrEnum):
     CHAMBER = "chamber"
     PARTY = "party"
