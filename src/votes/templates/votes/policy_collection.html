@@ -5,7 +5,7 @@
 {% block content.inner %}
     <h1>Policies - {{ chamber.name }} - {{ status.title }}</h1>
     {% for grouped_policies in policy_collection %}
-        <h3>{{ grouped_policies.name.description }}</h3>
+        <h3>{{ grouped_policies.name }}</h3>
         <ul>
             {% for policy in grouped_policies.policies %}
                 <li>

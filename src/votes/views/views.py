@@ -51,7 +51,7 @@ class HomePageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("people/{filter:str}", name="people")
+@app.route("people/{filter:slug}", name="people")
 class PeoplePageView(TitleMixin, TemplateView):
     page_title = "People"
     template_name = "votes/people.html"
@@ -101,7 +101,7 @@ class DecisionsPageView(TitleMixin, TemplateView):
 
 
 @app.route(
-    "decision/division/{chamber_slug:str}/{decision_date:date}/{decision_num:int}",
+    "decisions/division/{chamber_slug:str}/{decision_date:date}/{decision_num:int}",
     name="division",
 )
 class DivisionPageView(TitleMixin, TemplateView):
@@ -130,7 +130,7 @@ class DivisionPageView(TitleMixin, TemplateView):
 
 
 @app.route(
-    "decision/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str}",
+    "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str}",
     name="agreement",
 )
 class AgreementPageView(TitleMixin, TemplateView):
@@ -267,7 +267,7 @@ class PolicyReportPageView(TitleMixin, TemplateView):
 
 
 @app.route(
-    "policies/{chamber_slug:str}/{status_slug:str}/{group_slug:str}",
+    "policies/{chamber_slug:slug}/{status_slug:slug}/{group_slug:slug}",
     name="policy_collection",
 )
 class PolicyCollectionPageView(TitleMixin, TemplateView):
@@ -291,7 +291,6 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
         # get unique of all groups
         groups = set()
         for policy in policies:
-            print(policy)
             groups.update(policy.groups.all())
         policy_collection: list[ChamberPolicyGroup] = []
         for group in groups:
@@ -299,7 +298,7 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
                 policy for policy in policies if group in policy.groups.all()
             ]
             policy_collection.append(
-                ChamberPolicyGroup(name=group, policies=group_policies)
+                ChamberPolicyGroup(name=group.description, policies=group_policies)
             )
 
         context["policy_collection"] = policy_collection
@@ -308,7 +307,7 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
 
 
 @app.route(
-    "person/{person_id:int}/policies/{chamber_slug:str}/{party_slug:str}/{period_slug:str}",
+    "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}",
     name="person_policy",
 )
 class PersonPoliciesView(TitleMixin, TemplateView):

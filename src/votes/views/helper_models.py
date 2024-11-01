@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass
 from itertools import groupby
 
 import pandas as pd
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 from twfy_votes.helpers.routes import RouteApp
 
@@ -30,8 +29,8 @@ from ..models.decisions import (
 app = RouteApp(app_name="votes")
 
 
-@dataclass
-class DivisionSearch:
+class DivisionSearch(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     start_date: datetime.date
     end_date: datetime.date
     chamber: Chamber
@@ -52,14 +51,15 @@ class DivisionSearch:
         return pd.DataFrame(data=data)
 
 
-@dataclass
-class ChamberPolicyGroup:
+class ChamberPolicyGroup(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     name: str
     policies: list[Policy]
 
 
-@dataclass
-class PolicyCollection:
+class PolicyCollection(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     groups: list[PolicyDisplayGroup]
 
     def __iter__(self):
@@ -132,10 +132,17 @@ class PolicyCollection:
         return groups
 
 
-@dataclass
-class PolicyDisplayGroup:
+class PolicyDisplayGroup(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     name: str
     paired_policies: list[PairedPolicy]
+
+    def model_dump(self):
+        return {
+            "name": self.name,
+            "paired_policies": [x.model_dump() for x in self.paired_policies],
+        }
 
     def __iter__(self):
         return iter(self.paired_policies)
@@ -176,12 +183,13 @@ class PolicyDisplayGroup:
         return df
 
 
-@dataclass
-class PairedPolicy:
+class PairedPolicy(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     policy: Policy
     own_distribution: VoteDistribution
     other_distribution: VoteDistribution
 
+    @computed_field
     @property
     def comparison_score_difference(self) -> float:
         return (
@@ -189,6 +197,7 @@ class PairedPolicy:
             - self.other_distribution.distance_score
         )
 
+    @computed_field
     @property
     def significant_difference(self) -> bool:
         own_score = self.own_distribution.distance_score

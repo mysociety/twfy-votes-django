@@ -4,6 +4,7 @@ from typing import Literal
 from django.http import HttpRequest
 
 from ninja import ModelSchema, NinjaAPI
+from pydantic import BaseModel
 
 from ..consts import PolicyStatus
 from ..models.decisions import (
@@ -17,11 +18,18 @@ from ..models.decisions import (
     PolicyDivisionLink,
     PolicyGroup,
     Vote,
+    VoteDistribution,
 )
 from ..models.people import Person
-from .helper_models import PolicyReport
+from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
+
+
+class VoteDistributionSchema(ModelSchema):
+    class Meta:
+        model = VoteDistribution
+        fields = "__all__"
 
 
 class PersonSchema(ModelSchema):
@@ -73,7 +81,7 @@ class DivisionSchema(ModelSchema):
 
 class DivisionWithInfoSchema(ModelSchema):
     votes: list[VoteSchema]
-    breakdowns: list[DivisionBreakdownSchema]
+    overall_breakdowns: list[DivisionBreakdownSchema]
     party_breakdowns: list[DivisionPartyBreakdownSchema]
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
 
@@ -123,6 +131,42 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
+class PairedPolicySchema(BaseModel):
+    policy: PolicySchema
+    own_distribution: VoteDistributionSchema
+    other_distribution: VoteDistributionSchema
+    comparison_score_difference: float
+    significant_difference: bool
+
+    @classmethod
+    def from_basic(cls, paired_policy: PairedPolicy):
+        return cls.model_construct(
+            policy=PolicySchema.from_orm(paired_policy.policy),
+            own_distribution=VoteDistributionSchema.from_orm(
+                paired_policy.own_distribution
+            ),
+            other_distribution=VoteDistributionSchema.from_orm(
+                paired_policy.other_distribution
+            ),
+            comparison_score_difference=paired_policy.comparison_score_difference,
+            significant_difference=paired_policy.significant_difference,
+        )
+
+
+class PolicyDisplayGroupSchema(BaseModel):
+    name: str
+    paired_policies: list[PairedPolicySchema]
+
+    @classmethod
+    def from_basic(cls, group: PolicyDisplayGroup):
+        return cls(
+            name=group.name,
+            paired_policies=[
+                PairedPolicySchema.from_basic(x) for x in group.paired_policies
+            ],
+        )
+
+
 @api.get(
     "/decisions/division/{chamber_slug}/{date}/{division_number}.json",
     response=DivisionWithInfoSchema,
@@ -151,6 +195,26 @@ def get_person(request: HttpRequest, person_id: int):
 @api.get("/person/{person_id}/votes.json", response=PersonWithVoteSchema)
 def get_person_with_votes(request: HttpRequest, person_id: int):
     return Person.objects.get(id=person_id)
+
+
+@api.get(
+    "/person/{person_id}/policies/{chamber_slug}/{party_slug}/{period_slug}.json",
+    response=list[PolicyDisplayGroupSchema],
+)
+def get_person_policies(
+    request: HttpRequest,
+    person_id: int,
+    chamber_slug: str,
+    party_slug: str,
+    period_slug: str,
+):
+    from .views import PersonPoliciesView
+
+    data = PersonPoliciesView().get_context_data(
+        person_id, chamber_slug, party_slug, period_slug
+    )
+
+    return [PolicyDisplayGroupSchema.from_basic(x) for x in data["collection"]]
 
 
 @api.get(
@@ -200,6 +264,21 @@ def get_policy_by_id(request: HttpRequest, policy_id: int):
 def get_policy_report_by_id(request: HttpRequest, policy_id: int):
     policy = Policy.objects.get(id=policy_id)
     return PolicyReport.from_policy(policy).model_dump()
+
+
+@api.get(
+    "/policies/{chamber_slug}/{status_slug}/{group_slug}.json",
+    response=list[PolicySchema],
+)
+def get_chamber_status_policies(
+    request: HttpRequest, chamber_slug: str, status_slug: str, group_slug: str
+):
+    if group_slug == "all":
+        return Policy.objects.filter(chamber__slug=chamber_slug, status=status_slug)
+    else:
+        return Policy.objects.filter(
+            chamber__slug=chamber_slug, status=status_slug, group__slug=group_slug
+        )
 
 
 @api.get("/policies/reports.json")

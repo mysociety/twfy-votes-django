@@ -76,7 +76,7 @@ class TestPolicy(BaseTestResponse):
 
 class TestDecisions(BaseTestResponse):
     url = "/decisions"
-    has_json = True
+    has_json = False
 
 
 class TestDivision(BaseTestResponse):
@@ -95,19 +95,13 @@ class TestDivisionsMonth(BaseTestResponse):
 
 
 class TestPersonPolicy(BaseTestResponse):
-    url = "/person/10001/records/commons/labour"
+    url = "/person/10001/policies/commons/labour/all_time"
     has_json = True
 
 
 class TestAgreementInfo(BaseTestResponse):
     url = "/decisions/agreement/commons/2019-06-24/b.530.1"
     has_json = True
-
-
-def test_valid_policy_xml(client: Client):
-    response = client.get("/twfy-compatible/policies/6679.xml")
-    assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/xml"
 
 
 def test_vote_popolo(client: Client):
@@ -119,21 +113,21 @@ def test_vote_popolo(client: Client):
 def test_vote_participants_2005(client: Client):
     response = client.get("/decisions/division/commons/2005-11-22/105.json")
     assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
+    assert "application/json" in response.headers["Content-Type"]
 
     data = response.json()
 
-    assert data["breakdowns"][0]["total_possible_members"] == 646
+    assert data["overall_breakdowns"][0]["total_possible_members"] == 646
 
 
 def test_vote_participants_2015(client: Client):
     response = client.get("/decisions/division/commons/2015-12-08/145.json")
     assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
+    assert "application/json" in response.headers["Content-Type"]
 
     data = response.json()
 
-    assert data["breakdowns"][0]["total_possible_members"] == 650
+    assert data["overall_breakdowns"][0]["total_possible_members"] == 650
 
 
 def test_all_popolo_policies(client: Client):

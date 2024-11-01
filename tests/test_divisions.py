@@ -31,7 +31,7 @@ class TestDivision2023:
 
         data = response.json()
 
-        overall_breakdown = data["breakdowns"][0]
+        overall_breakdown = data["overall_breakdowns"][0]
 
         assert overall_breakdown["for_motion"] == 290, "Expected 290 for votes"
         assert overall_breakdown["against_motion"] == 56, "Expected 56 against votes"
