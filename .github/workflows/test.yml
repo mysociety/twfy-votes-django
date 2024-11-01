@@ -7,7 +7,7 @@ on:
   workflow_call:
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,6 +16,7 @@ jobs:
         uses: mysociety/run-in-devcontainer@v1
         with:
           dockerfile: Dockerfile
+          app: web
           run: |
             script/setup
             script/populate
