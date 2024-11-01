@@ -11,19 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Run tests and try and build project
+        uses: mysociety/run-in-devcontainer@v1
         with:
-          python-version: '3.11' 
-        
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-
-      - name: Install dependencies
-        run: poetry install
-
-      - name: populate data
-        run: script/populate
-
-      - name: run tests
-        run: script/test
+          run: |
+            script/setup
+            script/populate
+            script/test
+     
     
