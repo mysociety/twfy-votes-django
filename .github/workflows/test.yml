@@ -15,6 +15,7 @@ jobs:
       - name: Run tests and try and build project
         uses: mysociety/run-in-devcontainer@v1
         with:
+          dockerfile: Dockerfile
           run: |
             script/setup
             script/populate
