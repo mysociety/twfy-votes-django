@@ -16,7 +16,22 @@ class ISODateConverter:
         return value.isoformat()
 
 
+class StringNotJson:
+    """
+    checks if it's a lowercase string that doesn't end in .json
+    """
+
+    regex = r"[a-z0-9.]+(?<!\.json)"
+
+    def to_python(self, value: str) -> str:
+        return value
+
+    def to_url(self, value: str) -> str:
+        return value
+
+
 register_converter(ISODateConverter, "date")
+register_converter(StringNotJson, "str_not_json")
 
 
 ViewClass = TypeVar("ViewClass", bound=Type[View])

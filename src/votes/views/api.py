@@ -22,6 +22,7 @@ from ..models.decisions import (
 )
 from ..models.people import Person
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
+from .twfy_bridge import PopoloPolicy
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
 
@@ -289,5 +290,6 @@ def get_all_policy_reports(request: HttpRequest):
     return data
 
 
-# /person/{person_id}/records/{chamber_slug}/{party_id}
-# /twfy-compatible/popolo/{policy_id}.json
+@api.get("/twfy-compatible/popolo/{policy_id}.json", response=PopoloPolicy)
+def get_popolo_policy(request: HttpRequest, policy_id: int):
+    return PopoloPolicy.from_policy_id(policy_id)

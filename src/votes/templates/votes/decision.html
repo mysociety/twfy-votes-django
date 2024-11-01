@@ -1,72 +1,82 @@
 {% extends "votes/base.html" %}
 
 {% block content.inner %}
-    <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.division_number }}</h1>
-    <h2>{{ decision.division_name|safe }}</h2>
+    {% if decision.decision_type == "Division" %}
+        <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.division_number }}</h1>
+    {% elif decision.decision_type == "Agreement" %}
+        <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.decision_ref }}</h1>
+    {% endif %}
+    <h2>{{ decision.safe_decision_name|safe }}</h2>
     <p>
         <a href="{{ decision.twfy_link }}">View vote in TheyWorkForYou</a>
     </p>
     <h2>Analysis</h2>
     <h3>Result</h3>
-    {% with decision.overall_breakdowns.first.motion_result as mr %}
-        {% if mr == "Success" %}
-            <p>✅Motion passed.</p>
-        {% elif mr == "Failure" %}
-            <p>❌Motion failed.</p>
-        {% elif mr == "Tie" %}
-            <p>🤝Motion tied (failed).</p>
-        {% endif %}
-    {% endwith %}
-    <h3>Parliamentary dynamics</h3>
-    {% with decision.voting_cluster as dc %}
-        <strong>{{ dc.desc }}</strong>
-        {% with dc.tag as vc_tag %}
-            {% if vc_tag == "opp_strong_aye_gov_strong_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
-                    This usually suggests an important point of principle, or that it would have substantive effects if passed.
-                {% endmarkdown %}
-            {% elif vc_tag == "gov_strong_aye_opp_strong_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
-                    This usually suggests an important point of principle, that even if the government is likely to win, it is significant public signal of opposition.
-                {% endmarkdown %}
-            {% elif vc_tag == "gov_aye_opp_lean_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the government is proposing a motion,
-                    but there is division amoung opposition MPS in opposing it (but generally, leaning against).
-                {% endmarkdown %}
-            {% elif vc_tag == "opp_aye_weak_gov_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the opposition is proposing a motion,
-                    but there isn't complete high turnout in the government voting against.
-                    The government will still typically win these, but the lower turnout on both sides is reflected in the lower stakes of the vote.
-                {% endmarkdown %}
-            {% elif vc_tag == "gov_aye_opp_weak_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the government is proposing a motion,
-                    but opposition is less strongly opposing it (low turnout).
-                    This is usually a sign that the government will win the vote regardless, in principle opposition parties are against it,
-                    but that it's not a significant enough issue to send a signal of strong opposition (versus other use of {{ decision.chamber.members_plural }} time).
-                {% endmarkdown %}
-            {% elif vc_tag == "gov_no_opp_lean_no" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where the government is voting against a motion, and *generally* opposition MPs are also voting against it.
-                    This might reflect a vote bought by a smaller opposition party, or a group of government party rebels.
-                {% endmarkdown %}
-            {% elif vc_tag == "low_participation" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where there is low participation from both sides.
-                    This might be non-contentious or procedural motions in the early stages of member proposed bills.
-                {% endmarkdown %}
-            {% elif vc_tag == "cross_party_aye" %}
-                {% markdown %}
-                    This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
-                    There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/oppoistion lines.
-                {% endmarkdown %}
+    {% if decision.decision_type == "Agreement" %}
+        <p>✅Motion approved without vote.</p>
+    {% elif decision.decision_type == "Division" %}
+        {% with decision.overall_breakdowns.first.motion_result as mr %}
+            {% if mr == "Success" %}
+                <p>✅Motion passed.</p>
+            {% elif mr == "Failure" %}
+                <p>❌Motion failed.</p>
+            {% elif mr == "Tie" %}
+                <p>🤝Motion tied (failed).</p>
             {% endif %}
         {% endwith %}
-    {% endwith %}
+    {% endif %}
+    {% if decision.decision_type == "Division" %}
+        <h3>Parliamentary dynamics</h3>
+        {% with decision.voting_cluster as dc %}
+            <strong>{{ dc.desc }}</strong>
+            {% with dc.tag as vc_tag %}
+                {% if vc_tag == "opp_strong_aye_gov_strong_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
+                        This usually suggests an important point of principle, or that it would have substantive effects if passed.
+                    {% endmarkdown %}
+                {% elif vc_tag == "gov_strong_aye_opp_strong_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
+                        This usually suggests an important point of principle, that even if the government is likely to win, it is significant public signal of opposition.
+                    {% endmarkdown %}
+                {% elif vc_tag == "gov_aye_opp_lean_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the government is proposing a motion,
+                        but there is division amoung opposition MPS in opposing it (but generally, leaning against).
+                    {% endmarkdown %}
+                {% elif vc_tag == "opp_aye_weak_gov_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the opposition is proposing a motion,
+                        but there isn't complete high turnout in the government voting against.
+                        The government will still typically win these, but the lower turnout on both sides is reflected in the lower stakes of the vote.
+                    {% endmarkdown %}
+                {% elif vc_tag == "gov_aye_opp_weak_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the government is proposing a motion,
+                        but opposition is less strongly opposing it (low turnout).
+                        This is usually a sign that the government will win the vote regardless, in principle opposition parties are against it,
+                        but that it's not a significant enough issue to send a signal of strong opposition (versus other use of {{ decision.chamber.member_plural }} time).
+                    {% endmarkdown %}
+                {% elif vc_tag == "gov_no_opp_lean_no" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where the government is voting against a motion, and *generally* opposition MPs are also voting against it.
+                        This might reflect a vote bought by a smaller opposition party, or a group of government party rebels.
+                    {% endmarkdown %}
+                {% elif vc_tag == "low_participation" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where there is low participation from both sides.
+                        This might be non-contentious or procedural motions in the early stages of member proposed bills.
+                    {% endmarkdown %}
+                {% elif vc_tag == "cross_party_aye" %}
+                    {% markdown %}
+                        This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
+                        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/oppoistion lines.
+                    {% endmarkdown %}
+                {% endif %}
+            {% endwith %}
+        {% endwith %}
+    {% endif %}
     {% if relevant_policies %}
         <h2>Policies</h2>
         <p>This decision is part of the following policies:</p>
@@ -78,12 +88,26 @@
             {% endfor %}
         </ul>
     {% endif %}
-    <h2>Voting breakdown</h2>
-    {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
-    <h2>Party voting breakdown</h2>
-    {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
-    <h2>Voting list</h2>
-    {% style_df decision.votes_df "Party alignment" %}
+    {% if decision.decision_type == "Division" %}
+        <h2>Voting breakdown</h2>
+        {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
+        <h2>Party voting breakdown</h2>
+        {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
+        <h2>Voting list</h2>
+        {% style_df decision.votes_df "Party alignment" %}
+    {% elif decision.decision_type == "Agreement" %}
+        <h2>Membership list</h2>
+        <div class="alert alert-warning" role="alert">
+            <p>
+                This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
+            </p>
+            <p>
+                It shouldn't be taken as given that all of these people would have voted in favour of the motion, or that they were present.
+            </p>
+            <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
+        </div>
+        {% style_df decision.votes_df %}
+    {% endif %}
 {% endblock content.inner %}
 
 {% block extracss %}

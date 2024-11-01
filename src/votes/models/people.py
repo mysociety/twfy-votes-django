@@ -42,6 +42,9 @@ class Person(DjangoVoteModel):
     votes: DummyOneToMany[Vote] = related_name("person")
     vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
 
+    def str_id(self):
+        return f"uk.org.publicwhip/person/{self.id}"
+
     def votes_url(self):
         return reverse("person_votes", kwargs={"person_id": self.id})
 

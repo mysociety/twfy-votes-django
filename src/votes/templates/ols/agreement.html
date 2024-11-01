@@ -10,7 +10,7 @@
     <p style="font-style:italic">Analysis results are experimental.</p>
     {% if item.details.vote_motion_analysis %}
         <h3>Vote type</h3>
-        <p>{{ item.details.vote_type() }}</p>
+        <p>{{ item.details.decision_type() }}</p>
         <p style="font-style:italic">
             Motion analysis is based on keywords within the identified motion. Errors usually
             usually in favour of a significant motion type.

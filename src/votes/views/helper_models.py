@@ -19,6 +19,7 @@ from ..models.decisions import (
     Agreement,
     Chamber,
     Division,
+    Person,
     Policy,
     PolicyDivisionLink,
     PolicyGroup,
@@ -41,8 +42,8 @@ class DivisionSearch(BaseModel):
             {
                 "Date": d.date,
                 "Division": UrlColumn(url=d.url(), text=d.safe_decision_name()),
-                "Vote Type": d.vote_type(),
-                "Powers": d.motion_uses_powers(),
+                "Vote Type": d.decision_type,
+                "Powers": d.motion_uses_powers,
                 "Voting Cluster": d.voting_cluster()["desc"],
             }
             for d in self.decisions
@@ -78,17 +79,19 @@ class PolicyCollection(BaseModel):
 
         pp_list: list[PairedPolicy] = []
 
-        for _, group in groupby(sorted_list, key=get_key):
+        for key, group in groupby(sorted_list, key=get_key):
             group = list(group)
             our_key = [x for x in group if x.is_target]
             their_key = [x for x in group if not x.is_target]
             if len(our_key) > 1 or len(their_key) > 1:
                 raise ValueError("Too many distributions for the same policy")
             if len(our_key) == 0:
-                raise ValueError("No distribution for the target")
+                # this may happen when someone has been present for agreements but not any votes
+                # let's just skip this for the moment
+                continue
+                # raise ValueError(f"No distribution for the target for key : {key}")
             our_key = our_key[0]
             if len(their_key) == 0:
-                print("using other key")
                 their_key = our_key
             else:
                 their_key = their_key[0]
@@ -181,6 +184,70 @@ class PolicyDisplayGroup(BaseModel):
         df = pd.DataFrame(data=[x.model_dump() for x in items])
 
         return df
+
+
+class PairedPersonDistributions(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    person: Person
+    period: str
+    own_distribution: VoteDistribution
+    other_distribution: VoteDistribution
+    no_party_comparison: bool = False
+
+    @computed_field
+    @property
+    def comparison_score_difference(self) -> float:
+        return (
+            self.own_distribution.distance_score
+            - self.other_distribution.distance_score
+        )
+
+    @classmethod
+    def from_distributions(
+        cls, distributions: list[VoteDistribution]
+    ) -> list[PairedPersonDistributions]:
+        def get_key(v: VoteDistribution) -> str:
+            return (
+                f"{v.policy_id}-{v.person_id}-{v.period_id}-{v.chamber_id}-{v.party_id}"
+            )
+
+        sorted_list = sorted(distributions, key=get_key)
+
+        pp_list: list[PairedPersonDistributions] = []
+
+        for key, group in groupby(sorted_list, key=get_key):
+            group = list(group)
+            our_key = [x for x in group if x.is_target]
+            their_key = [x for x in group if not x.is_target]
+            if len(our_key) > 1 or len(their_key) > 1:
+                raise ValueError(
+                    f"Too many distributions for the same policy, our_key: {our_key}, their_key: {their_key}"
+                )
+            if len(our_key) == 0:
+                # this may happen when someone has been present for agreements but not any votes
+                # let's just skip this for the moment
+                continue
+                # raise ValueError(f"No distribution for the target for key {key}")
+            our_key = our_key[0]
+            if len(their_key) == 0:
+                no_party_comparison = True
+                their_key = our_key
+            else:
+                no_party_comparison = False
+                their_key = their_key[0]
+            pp = PairedPersonDistributions(
+                person=our_key.person,
+                period=our_key.period.slug,
+                own_distribution=our_key,
+                other_distribution=their_key,
+                no_party_comparison=no_party_comparison,
+            )
+            if our_key.distance_score == -1:
+                # weed out no data avaliable policies
+                continue
+            pp_list.append(pp)
+
+        return pp_list
 
 
 class PairedPolicy(BaseModel):
@@ -303,7 +370,7 @@ class PolicyReport(BaseModel):
         for division in policy.division_links.all():
             # Test for overlap of strong votes and no powers
             uses_powers = (
-                division.decision.motion_uses_powers() == PowersAnalysis.USES_POWERS
+                division.decision.motion_uses_powers == PowersAnalysis.USES_POWERS
             )
             if division.strength == PolicyStrength.STRONG:
                 strong_count += 1
@@ -311,10 +378,10 @@ class PolicyReport(BaseModel):
                 """
                 # not enabled until motion detectioni s turned back on
                 vma = division.decision.vote_motion_analysis
-                vote_type = vma.vote_type if vma else "Unknown"
+                decision_type = vma.decision_type if vma else "Unknown"
                 if (
                     "queen's speech" in division.decision.division_name.lower()
-                    or vote_type == VoteType.GOVERNMENT_AGENDA
+                    or decision_type == VoteType.GOVERNMENT_AGENDA
                 ):
                     if report.add_from_division_issue(
                         division_link=division, issue=IssueType.STRONG_VOTE_GOV_AGENDA

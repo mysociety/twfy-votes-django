@@ -107,7 +107,7 @@ class TestAgreementInfo(BaseTestResponse):
 def test_vote_popolo(client: Client):
     response = client.get("/twfy-compatible/popolo/6679.json")
     assert response.status_code == 200
-    assert response.headers["Content-Type"] == "application/json"
+    assert "application/json" in response.headers["Content-Type"]
 
 
 def test_vote_participants_2005(client: Client):
@@ -140,7 +140,7 @@ def test_all_popolo_policies(client: Client):
     response = client.get("/policies/commons/active/all.json")
     data = response.json()
 
-    policy_ids = [policy["id"] for policy in data["policies"]]
+    policy_ids = [policy["id"] for policy in data]
     for p in policy_ids:
         response = client.get(f"/twfy-compatible/popolo/{p}.json")
         assert response.status_code == 200, f"Failed on {p}"

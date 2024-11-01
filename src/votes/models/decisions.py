@@ -53,8 +53,10 @@ class DecisionProtocol(Protocol):
     Use this to define types that all decisiosn types should impliemnt
     """
 
-    def vote_type(self) -> str: ...
+    @property
+    def decision_type(self) -> str: ...
 
+    @property
     def motion_uses_powers(self) -> str: ...
 
     def safe_decision_name(self) -> str: ...
@@ -211,9 +213,11 @@ class Division(DjangoVoteModel):
 
         return self.chamber.twfy_debate_link(gid)
 
-    def vote_type(self) -> str:
+    @property
+    def decision_type(self) -> str:
         return "Division"
 
+    @property
     def motion_uses_powers(self) -> str:
         return "Unknown"
 
@@ -411,15 +415,32 @@ class Agreement(DjangoVoteModel):
         return {"tag": "Unknown", "desc": "Unknown"}
 
     def safe_decision_name(self) -> str:
-        return self.key
+        return self.decision_name
 
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
         return self.chamber.twfy_debate_link(gid)
 
-    def vote_type(self) -> str:
+    def votes_df(self) -> pd.DataFrame:
+        relevant_memberships = Membership.objects.filter(
+            chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
+        )
+        data = [
+            {
+                "Person": UrlColumn(url=m.person.votes_url(), text=m.person.name),
+                "Party": m.party.name,
+                "Vote": "Collective",
+            }
+            for m in relevant_memberships
+        ]
+
+        return pd.DataFrame(data=data)
+
+    @property
+    def decision_type(self) -> str:
         return "Agreement"
 
+    @property
     def motion_uses_powers(self) -> str:
         return "Unknown"
 
@@ -454,6 +475,7 @@ class Policy(DjangoVoteModel):
     groups: ManyToMany[PolicyGroup] = related_name("policies")
     division_links: DummyOneToMany[PolicyDivisionLink] = related_name("policy")
     agreement_links: DummyOneToMany[PolicyAgreementLink] = related_name("policy")
+    vote_distributions: DummyOneToMany[VoteDistribution] = related_name("policy")
     policy_hash: str
 
     def url(self) -> str:
@@ -470,7 +492,7 @@ class Policy(DjangoVoteModel):
                 "alignment": x.alignment,
                 "strength": x.strength,
                 "decision type": "Division",
-                "uses powers": x.decision.motion_uses_powers(),
+                "uses powers": x.decision.motion_uses_powers,
                 "voting cluster": x.decision.voting_cluster()["desc"],
                 "participant count": x.decision.single_breakdown().signed_votes,
             }
@@ -486,7 +508,7 @@ class Policy(DjangoVoteModel):
                 "alignment": x.alignment,
                 "strength": x.strength,
                 "decision type": "Agreement",
-                "uses powers": x.decision.motion_uses_powers(),
+                "uses powers": x.decision.motion_uses_powers,
                 "voting cluster": x.decision.voting_cluster()["desc"],
                 "participant count": 0,
             }
@@ -562,6 +584,19 @@ class VoteDistribution(DjangoVoteModel):
     start_year: int
     end_year: int
     distance_score: float
+
+    @property
+    def total_votes(self) -> float:
+        return (
+            self.num_votes_same
+            + self.num_strong_votes_same
+            + self.num_votes_different
+            + self.num_strong_votes_different
+            + self.num_votes_absent
+            + self.num_strong_votes_absent
+            + self.num_votes_abstain
+            + self.num_strong_votes_abstain
+        )
 
     @property
     def verbose_score(self) -> str:

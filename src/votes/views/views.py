@@ -14,6 +14,7 @@ from ..models.decisions import (
     Chamber,
     Division,
     Policy,
+    PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
     Vote,
@@ -130,12 +131,12 @@ class DivisionPageView(TitleMixin, TemplateView):
 
 
 @app.route(
-    "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str}",
+    "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str_not_json}",
     name="agreement",
 )
 class AgreementPageView(TitleMixin, TemplateView):
     page_title = "Agreement"
-    template_name = "votes/agreement.html"
+    template_name = "votes/decision.html"
 
     def get_context_data(
         self,
@@ -145,9 +146,17 @@ class AgreementPageView(TitleMixin, TemplateView):
         **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        context["agreement"] = Agreement.objects.get(
-            chamber__slug=chamber_slug, date=decision_date, reference=decision_ref
+        decision = Agreement.objects.get(
+            chamber__slug=chamber_slug, date=decision_date, decision_ref=decision_ref
         )
+        context["decision"] = decision
+        context["decision"] = decision
+        context["relevant_policies"] = [
+            x.policy
+            for x in PolicyAgreementLink.objects.filter(
+                decision=decision
+            ).prefetch_related("policy")
+        ]
         return context
 
 
