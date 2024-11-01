@@ -1,0 +1,29 @@
+# Run linting and basic file format checks
+
+name: Test
+
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' 
+        
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: populate data
+        run: script/populate
+
+      - name: run tests
+        run: script/test
+    
