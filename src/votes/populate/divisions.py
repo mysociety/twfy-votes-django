@@ -62,7 +62,7 @@ class api_divisions_with_total_membership:
         LEFT JOIN org_membership_count on
             (CAST(api_divisions.division_date as DATE) between org_membership_count.start_date
             and org_membership_count.end_date
-            and api_divisions.chamber = org_membership_count.chamber_slug)
+            and CAST(api_divisions.chamber as STRING) = org_membership_count.chamber_slug)
         """
 
 
