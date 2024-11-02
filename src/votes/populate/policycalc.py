@@ -555,6 +555,18 @@ def run_policy_calculations(
 ):
     partial_update = update_since is not None
 
+    sources = [
+        policy_divisions_relevant,
+        policy_agreements_relevant,
+        policy_votes_relevant,
+        policy_collective_relevant,
+        pw_relevant_people,
+    ]
+
+    for s in sources:
+        if s.source.exists() is False:
+            raise ValueError(f"{s.source} not present")
+
     count = generate_policy_distributions(update_from_hash=partial_update, quiet=quiet)
 
     if not quiet:
