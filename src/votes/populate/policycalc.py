@@ -514,6 +514,9 @@ def generate_policy_distributions(
     count = 0
 
     for _, row in tqdm(relevant_df.iterrows(), total=len(relevant_df), disable=quiet):
+        tqdm.write(
+            f"person_id: {row['person_id']}, chamber_id: {row['chamber_id']}, party_id: {row['party_id']}"
+        )
         df = (
             PolicyPivotTable(
                 person_id=row["person_id"],
