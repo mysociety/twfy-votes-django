@@ -260,6 +260,3 @@ class relevant_people:
 def run_pre_calc(quiet: bool = False):
     with DuckQuery.connect() as cduck:
         cduck.compile(duck).run()
-        df = cduck.compile("SELECT * from relevant_parties_for_people").df()
-        print(df.head())
-        print(df.tail())
