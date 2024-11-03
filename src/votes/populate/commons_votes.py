@@ -51,7 +51,7 @@ class Member(BaseModel):
     PartyAbbreviation: Optional[str]
     MemberFrom: str
     ListAs: Optional[str]
-    ProxyName: None
+    ProxyName: Optional[str]
 
 
 class Division(BaseModel):

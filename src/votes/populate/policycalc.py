@@ -524,6 +524,9 @@ def generate_policy_distributions(
             .df()
         )
 
+        if len(df) == 0:
+            raise ValueError("No policy calc information returned")
+
         list_cols = ["num_comparators", "division_ids"]
         for col in df.columns:
             if col not in list_cols:
@@ -546,6 +549,18 @@ def run_policy_calculations(
     quiet: bool = False, update_since: datetime.date | None = None
 ):
     partial_update = update_since is not None
+
+    sources = [
+        policy_divisions_relevant,
+        policy_agreements_relevant,
+        policy_votes_relevant,
+        policy_collective_relevant,
+        pw_relevant_people,
+    ]
+
+    for s in sources:
+        if s.source.exists() is False:
+            raise ValueError(f"{s.source} not present")
 
     count = generate_policy_distributions(update_from_hash=partial_update, quiet=quiet)
 

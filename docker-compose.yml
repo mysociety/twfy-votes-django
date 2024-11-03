@@ -10,13 +10,13 @@ services:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'twfy-votes'
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
     working_dir: /app
   web:
-    image: mysociety/twfy-votes:${TAG:-latest}
+    image: mysociety/twfy-votes-django:${TAG:-latest}
     build: .
     command: /app/script/server --development
     volumes:

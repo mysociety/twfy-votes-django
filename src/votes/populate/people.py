@@ -265,6 +265,10 @@ def import_popolo(quiet: bool = False):
             chamber_slug = ChamberSlug.from_parlparse(
                 post_org_or_self_org(membership), passthrough=True
             )
+            if chamber_slug in ["crown", "london-assembly"]:
+                chamber_id = 0
+            else:
+                chamber_id = chamber_slug_lookup[chamber_slug]
             post = membership.post()
             post_label = post.role if post else ""
             area_name = post.area.name if post else ""
@@ -278,7 +282,7 @@ def import_popolo(quiet: bool = False):
                 effective_party_slug=effective_party,
                 party_id=org_slug_lookup.get(membership.on_behalf_of_id or ""),
                 effective_party_id=org_slug_lookup.get(effective_party),
-                chamber_id=chamber_slug_lookup.get(chamber_slug),
+                chamber_id=chamber_id,
                 chamber_slug=chamber_slug,
                 area_name=area_name,
                 post_label=post_label,
