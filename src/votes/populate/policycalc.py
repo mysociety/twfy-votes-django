@@ -533,12 +533,7 @@ def generate_policy_distributions(
                 df[col] = df[col].fillna(0)
 
         df["policy_hash"] = df["policy_id"].map(policy_id_lookup)
-        distances = df.apply(score_from_row, axis=1)
-        try:
-            df["distance_score"] = distances
-        except Exception as e:
-            print(distances)
-            raise e
+        df["distance_score"] = df.apply(score_from_row, axis=1)
 
         df.to_parquet(
             policy_dest
