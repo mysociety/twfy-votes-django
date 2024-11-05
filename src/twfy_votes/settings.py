@@ -31,18 +31,14 @@ environ.Env.read_env(BASE_DIR / ".env")
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / ".static"
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
-
 SECRET_KEY = env("SECRET_KEY")
-
 DEBUG = env("DEBUG")
-
 REFRESH_TOKEN = env("REFRESH_TOKEN")
-
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = env("ALLOWED_HOSTS")
+CACHE_FILE = env("CACHE_FILE")
+HIDE_DEBUG_TOOLBAR = env("HIDE_DEBUG_TOOLBAR")
+GOOGLE_ANALYTICS = env("GOOGLE_ANALYTICS")
+TWFY_API_KEY = env("TWFY_API_KEY")
 
 # Application definition
 
