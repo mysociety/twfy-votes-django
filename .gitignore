@@ -9,3 +9,4 @@ conf/httpd.conf
 conf/httpd.conf.deployed
 conf/crontab
 conf/crontab.deployed
+__pycache__/
