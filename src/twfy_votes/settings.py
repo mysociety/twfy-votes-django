@@ -22,6 +22,7 @@ env = environ.Env(
     ALLOWED_HOSTS=(list, []),
     HIDE_DEBUG_TOOLBAR=(bool, False),
     GOOGLE_ANALYTICS=(str, ""),
+    TWFY_API_KEY=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
