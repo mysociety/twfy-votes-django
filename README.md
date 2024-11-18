@@ -1,6 +1,6 @@
 # twfy-votes-django
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mysociety/twfy-votes)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mysociety/twfy-votes-django)
 
 Voting information platform.
 
