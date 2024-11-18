@@ -6,12 +6,15 @@ $color-tcc-honeysuckle-yellow: #fec835;
 $color-tcc-peak-district-green: #bcd685;
 $color-tcc-heart-green: #89c489;
 $color-tcc-seafoam-green: #1aa680;
-$color-tcc-sherwood-forest-green: #073a41;
+$color-tcc-sherwood-forest-green: #e021a7;
 $color-tcc-kingfisher-blue: #21a8e0;
 $color-tcc-windermere-blue: #202448;
 $color-tcc-ben-nevis-grey: #1d1d1b;
 
 $color-twfy-green: #4b7e45;
+$color-twfy-blue: #1567ae;
+$color-twfy-off-white: #f3f1eb;
+
 
 $color-darker-seafoam: #068670; // like seafoam-green, but 4.51 contrast with #fff
 
@@ -31,7 +34,7 @@ $gray-600: #6c757d;
 $gray-700: #495057;
 $gray-800: #343a40;
 $gray-900: #212529;
-$black: #000;
+$black: #333;
 
 $red: darken($color-tcc-robin-red, 10%);
 
@@ -46,29 +49,18 @@ $blue-700: mix($color-tcc-windermere-blue, $color-tcc-kingfisher-blue, 50%);
 $blue-800: mix($color-tcc-windermere-blue, $color-tcc-kingfisher-blue, 75%);
 $blue-900: $color-tcc-windermere-blue;
 
-$green: $color-tcc-heart-green;
-$green-100: mix(#fff, $color-tcc-peak-district-green, 66.66%);
-$green-200: mix(#fff, $color-tcc-peak-district-green, 33.33%);
-$green-300: $color-tcc-peak-district-green;
-$green-400: mix($color-tcc-heart-green, $color-tcc-peak-district-green, 50%);
-$green-500: $color-tcc-heart-green;
-$green-600: darken($color-tcc-heart-green, 10%);
-$green-700: darken($color-tcc-heart-green, 25%);
-$green-800: darken($color-tcc-heart-green, 45%);
-$green-900: darken($color-tcc-heart-green, 55%);
+$green: $color-twfy-green;
+$green-100: #cae1c8; // Like TWFY
+$green-200: mix(#fff, $color-twfy-green, 33.33%);
+$green-300: $color-twfy-green;
+$green-400: mix(#fff, $color-twfy-green, 66.66%);
+$green-500: $color-twfy-green;
+$green-600: darken($color-twfy-green, 10%);
+$green-700: darken($color-twfy-green, 25%);
+$green-800: darken($color-twfy-green, 45%);
+$green-900: darken($color-twfy-green, 55%);
 
-$teal: $color-twfy-green;
-$teal-100: mix($white, $color-twfy-green, 80%);
-$teal-200: mix($white, $color-twfy-green, 60%);
-$teal-300: mix($white, $color-twfy-green, 40%);
-$teal-400: mix($white, $color-twfy-green, 20%);
-$teal-500: $color-twfy-green;
-$teal-600: $color-darker-seafoam;
-$teal-700: mix($color-tcc-sherwood-forest-green, $color-darker-seafoam, 50%);
-$teal-800: $color-tcc-sherwood-forest-green;
-$teal-900: mix($black, $color-tcc-sherwood-forest-green, 40%);
-
-$primary: $color-darker-seafoam;
+$primary: $color-twfy-green;
 $secondary: $gray-600;
 $success: $color-tcc-heart-green;
 $dark: $color-tcc-sherwood-forest-green;
@@ -105,14 +97,14 @@ $position-values: (
 
 // Body
 
-$body-bg: $white;
-$body-color: $color-tcc-sherwood-forest-green;
+$body-bg: $color-twfy-off-white;
+$body-color: $black;
 
 // Utilities maps
 
 // Links
 
-$link-color: $color-darker-seafoam;
+$link-color: $color-twfy-blue;
 $link-shade-percentage: 20%;
 $link-hover-color: shift-color($link-color, $link-shade-percentage);
 
@@ -137,7 +129,7 @@ $grid-breakpoints: (
 
 // Typography
 
-$font-family-sans-serif: "Public Sans",
+$font-family-sans-serif: "Source Sans 3",
   sans-serif,
   "Apple Color Emoji",
   "Segoe UI Emoji",
@@ -179,14 +171,6 @@ $legend-font-size: 1rem;
 $mark-padding: 0;
 $mark-bg: #fff55a;
 
-// Tables
-
-$table-striped-bg-factor: .04;
-$table-striped-bg: rgba($teal-900, $table-striped-bg-factor);
-$table-active-bg-factor: .1;
-$table-active-bg: rgba($teal-900, $table-active-bg-factor);
-$table-hover-bg-factor: .075;
-$table-hover-bg: rgba($teal-900, $table-hover-bg-factor);
 
 // Buttons + Forms
 
@@ -217,7 +201,7 @@ $nav-tabs-link-active-border-color: $gray-500 $gray-500 $nav-tabs-link-active-bg
 
 $navbar-padding-y: $spacer * 1.5;
 
-$navbar-brand-font-size: 2em;
+$navbar-brand-font-size: 1.5rem;
 $navbar-brand-padding-y: 0;
 
 $navbar-toggler-padding-y: 0.5rem;
@@ -225,7 +209,7 @@ $navbar-toggler-padding-x: 0.75rem;
 
 $navbar-light-color: $black;
 $navbar-light-hover-color: $link-hover-color;
-$navbar-light-active-color: $teal-500;
+$navbar-light-active-color: $black;
 $navbar-light-toggler-icon-bg: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><path stroke='#{$navbar-light-color}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='3' d='M4 7h22M4 15h22M4 23h22'/></svg>");
 
 // Dropdowns
