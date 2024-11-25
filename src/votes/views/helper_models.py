@@ -10,6 +10,7 @@ from twfy_votes.helpers.routes import RouteApp
 
 from ..consts import (
     IssueType,
+    MotionType,
     PolicyGroupSlug,
     PolicyStatus,
     PolicyStrength,
@@ -43,7 +44,8 @@ class DivisionSearch(BaseModel):
                 "Date": d.date,
                 "Division": UrlColumn(url=d.url(), text=d.safe_decision_name()),
                 "Vote Type": d.decision_type,
-                "Powers": d.motion_uses_powers,
+                "Motion Type": MotionType(d.motion_type()).display_name(),
+                "Uses Parl. Powers": d.motion_uses_powers.simple_str(),
                 "Voting Cluster": d.voting_cluster()["desc"],
             }
             for d in self.decisions
@@ -375,19 +377,18 @@ class PolicyReport(BaseModel):
             if division.strength == PolicyStrength.STRONG:
                 strong_count += 1
             if division.strength == PolicyStrength.STRONG:
-                """
-                # not enabled until motion detectioni s turned back on
-                vma = division.decision.vote_motion_analysis
-                decision_type = vma.decision_type if vma else "Unknown"
+                motion = division.decision.motion
+
+                decision_type = motion.motion_type if motion else "Unknown"
+
                 if (
                     "queen's speech" in division.decision.division_name.lower()
-                    or decision_type == VoteType.GOVERNMENT_AGENDA
+                    or decision_type == MotionType.GOVERNMENT_AGENDA
                 ):
                     if report.add_from_division_issue(
                         division_link=division, issue=IssueType.STRONG_VOTE_GOV_AGENDA
                     ):
                         strong_without_power += 1
-                """
 
             if division.strength == PolicyStrength.STRONG and not uses_powers:
                 if report.add_from_division_issue(

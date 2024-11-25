@@ -8,10 +8,31 @@
     {% endif %}
     <h2>{{ decision.safe_decision_name|safe }}</h2>
     <p>
-        <a href="{{ decision.twfy_link }}">View vote in TheyWorkForYou</a>
+        <a href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
     </p>
-    <h2>Analysis</h2>
-    <h3>Result</h3>
+    {% if decision.motion %}
+        <h2>Motion</h2>
+        <p>
+            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
+        </p>
+        <p class = "motion_type">Motion type: {{ decision.motion.motion_type_nice }}</p>
+        <p class = "motion_type">
+            Uses Parliamentary powers:
+            {% with decision.motion.motion_uses_powers.simple as sp %}
+                {% if sp == True %}
+                    Yes
+                {% elif sp == False %}
+                    No
+                {% elif sp == None %}
+                    Unknown
+                {% endif %}
+            {% endwith %}
+        </p>
+        <div class = "motion_text">
+            <p>{{ decision.motion.nice_html|safe }}</p>
+        </div>
+    {% endif %}
+    <h2>Result</h2>
     {% if decision.decision_type == "Agreement" %}
         <p>✅Motion approved without vote.</p>
     {% elif decision.decision_type == "Division" %}
@@ -26,7 +47,7 @@
         {% endwith %}
     {% endif %}
     {% if decision.decision_type == "Division" %}
-        <h3>Parliamentary dynamics</h3>
+        <h2>Parliamentary dynamics</h2>
         {% with decision.voting_cluster as dc %}
             <strong>{{ dc.desc }}</strong>
             {% with dc.tag as vc_tag %}
@@ -38,30 +59,30 @@
                 {% elif vc_tag == "gov_strong_aye_opp_strong_no" %}
                     {% markdown %}
                         This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
-                        This usually suggests an important point of principle, that even if the government is likely to win, it is significant public signal of opposition.
+                        This usually suggests an important point of principle, that even if the government is likely to win, is significant public signal of opposition.
                     {% endmarkdown %}
                 {% elif vc_tag == "gov_aye_opp_lean_no" %}
                     {% markdown %}
                         This vote is most similar to a group of votes where the government is proposing a motion,
-                        but there is division amoung opposition MPS in opposing it (but generally, leaning against).
+                        but there is division amoung opposition MPs/parties in opposing it (but generally, leaning against).
                     {% endmarkdown %}
                 {% elif vc_tag == "opp_aye_weak_gov_no" %}
                     {% markdown %}
-                        This vote is most similar to a group of votes where the opposition is proposing a motion,
-                        but there isn't complete high turnout in the government voting against.
-                        The government will still typically win these, but the lower turnout on both sides is reflected in the lower stakes of the vote.
+                        This vote is most similar to a group of votes where the motion is proposed by the opposition, the
+                        result is quite polarized, but there is a medium level of participation (most MPs, but not all).
+                        This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
                     {% endmarkdown %}
                 {% elif vc_tag == "gov_aye_opp_weak_no" %}
                     {% markdown %}
                         This vote is most similar to a group of votes where the government is proposing a motion,
-                        but opposition is less strongly opposing it (low turnout).
-                        This is usually a sign that the government will win the vote regardless, in principle opposition parties are against it,
-                        but that it's not a significant enough issue to send a signal of strong opposition (versus other use of {{ decision.chamber.member_plural }} time).
+                        but opposition is less strongly opposing it (higher numbers of absences).
+                        This can reflect different views between opposition parties - where at least one party
+                        neither wants to be on the record as voting for or against.
                     {% endmarkdown %}
                 {% elif vc_tag == "gov_no_opp_lean_no" %}
                     {% markdown %}
-                        This vote is most similar to a group of votes where the government is voting against a motion, and *generally* opposition MPs are also voting against it.
-                        This might reflect a vote bought by a smaller opposition party, or a group of government party rebels.
+                        This vote is most similar to a group of votes where the government is voting against a motion, and opposition MPs/parties are divided in their support.
+                        This can reflect an amendment or motion bought by one opposition party, which other opposition parties are not supportive of.
                     {% endmarkdown %}
                 {% elif vc_tag == "low_participation" %}
                     {% markdown %}
@@ -71,7 +92,7 @@
                 {% elif vc_tag == "cross_party_aye" %}
                     {% markdown %}
                         This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
-                        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/oppoistion lines.
+                        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/opposition lines.
                     {% endmarkdown %}
                 {% endif %}
             {% endwith %}

@@ -24,6 +24,11 @@ class pw_divisions:
 
 
 @duck.as_source
+class division_links:
+    source = BASE_DIR / "data" / "source" / "division-links.parquet"
+
+
+@duck.as_source
 class api_divisions:
     source = BASE_DIR / "data" / "compiled" / "api_divisions.parquet"
 
@@ -33,18 +38,38 @@ class org_membership_count:
     alias_for = "postgres_db.votes_orgmembershipcount"
 
 
+@duck.as_alias
+class motions:
+    alias_for = "postgres_db.votes_motion"
+
+
+@duck.as_view
+class division_links_with_id:
+    query = """
+    SELECT
+        division_links.*,
+        motions.id as motion_id
+    from division_links
+    join motions on
+        (division_links.motion_gid = motions.gid)
+    """
+
+
 @duck.as_view
 class divisions_with_total_membership:
     query = """
         SELECT
             pw_divisions.*,
-            org_membership_count.count as total_possible_members
+            org_membership_count.count as total_possible_members,
+            division_links_with_id.motion_id as motion_id
         FROM
             pw_divisions
         LEFT JOIN org_membership_count on
             (pw_divisions.division_date between org_membership_count.start_date
             and org_membership_count.end_date
             and pw_divisions.chamber = org_membership_count.chamber_slug)
+        LEFT JOIN division_links_with_id on
+            (pw_divisions.source_gid = division_links_with_id.division_gid)
         WHERE
             pw_divisions.chamber != 'pbc'
             and division_id not like '%cy-senedd'
@@ -73,9 +98,20 @@ def add_ellipsis(text: str, max_length: int = 255) -> str:
 
 
 def division_from_row(
-    row: pd.Series, chamber_id_lookup: dict[ChamberSlug, int]
+    row: pd.Series,
+    chamber_id_lookup: dict[ChamberSlug, int],
+    add_motion_id: bool = True,
 ) -> Division:
-    return Division(
+    if add_motion_id:
+        motion_id = row["motion_id"]
+        if pd.isna(motion_id):
+            motion_id = None
+        else:
+            motion_id = int(motion_id)
+    else:
+        motion_id = None
+
+    d = Division(
         key=row["division_id"],
         chamber_slug=ChamberSlug(row["chamber"]),
         chamber_id=chamber_id_lookup[ChamberSlug(row["chamber"])],
@@ -85,7 +121,10 @@ def division_from_row(
         date=row["division_date"],
         division_number=row["division_number"],
         total_possible_members=row["total_possible_members"],
+        motion_id=motion_id,
     )
+
+    return d
 
 
 @import_register.register("divisions", group=ImportOrder.DECISIONS)
@@ -109,7 +148,7 @@ def import_divisions(quiet: bool = False, update_since: datetime.date | None = N
     ]
 
     api_to_create = [
-        division_from_row(row, chamber_id_lookup=chamber_lookup)
+        division_from_row(row, chamber_id_lookup=chamber_lookup, add_motion_id=False)
         for _, row in votes_api_df.iterrows()
         if timestamp is None or row["division_date"] >= timestamp
     ]
@@ -125,6 +164,8 @@ def import_divisions(quiet: bool = False, update_since: datetime.date | None = N
         to_delete = Division.objects.all()
 
     to_create = Division.get_lookup_manager("key").add_ids(to_create)
+    api_to_create = Division.get_lookup_manager("key").add_ids(api_to_create)
+
     with Division.disable_constraints():
         to_delete.delete()
         Division.objects.bulk_create(to_create, batch_size=10000)
