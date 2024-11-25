@@ -7,6 +7,7 @@ from typing import Optional, Protocol, Type, TypeVar
 from django.db import models
 from django.urls import reverse
 
+import markdown
 import pandas as pd
 from numpy import nan
 
@@ -23,10 +24,12 @@ from twfy_votes.helpers.typed_django.models import (
 
 from ..consts import (
     ChamberSlug,
+    MotionType,
     PolicyDirection,
     PolicyGroupSlug,
     PolicyStatus,
     PolicyStrength,
+    PowersAnalysis,
     StrengthMeaning,
     TagType,
     VotePosition,
@@ -57,13 +60,18 @@ class DecisionProtocol(Protocol):
     def decision_type(self) -> str: ...
 
     @property
-    def motion_uses_powers(self) -> str: ...
+    def motion_uses_powers(self) -> PowersAnalysis: ...
+
+    @property
+    def motion(self) -> Motion | None: ...
 
     def safe_decision_name(self) -> str: ...
 
     def url(self) -> str: ...
 
     def twfy_link(self) -> str: ...
+
+    def motion_speech_url(self) -> str: ...
 
 
 DecisionProtocolType = TypeVar("DecisionProtocolType", bound=DecisionProtocol)
@@ -91,7 +99,7 @@ class Chamber(DjangoVoteModel):
             case (None, None):
                 return None
             case (None, last_agreement):
-                return last_agreement.date
+                return last_agreement.date  # type: ignore
             case (last_division, None):
                 return last_division.date
             case (last_division, last_agreement):
@@ -164,6 +172,121 @@ class PolicyComparisonPeriod(DjangoVoteModel):
         return self.start_date <= date <= self.end_date
 
 
+class Motion(DjangoVoteModel):
+    gid: str
+    speech_id: str
+    date: datetime.date
+    title: str
+    text: TextField
+    motion_type: MotionType
+
+    def is_nonaction_vote(self, quiet: bool = True) -> bool:
+        """
+        Analyse the text of a motion to determine if it is a non-action motion
+        """
+        non_action_phrases = [
+            "believes",
+            "regrets",
+            "notes with approval",
+            "expressed approval",
+            "welcomes",
+            "is concerned",
+            "calls on the",
+            "recognises",
+            "takes note",
+            "agrees with the goverment's decision",
+            "regret that the gracious speech",
+            "do now adjourn",
+            "has considered",
+        ]
+        action_phrases = [
+            "orders that",
+            "requires the goverment",
+            "censures",
+            "declines to give a second reading",
+        ]
+
+        reduced_text = self.text.lower()
+
+        score = 0
+        for phrase in non_action_phrases:
+            if phrase in reduced_text:
+                if not quiet:
+                    print(f"matched {phrase}")
+                score += 1
+
+        for phrase in action_phrases:
+            if phrase in reduced_text:
+                if not quiet:
+                    print(f"matched {phrase}- is action")
+                score = 0
+
+        return score > 0
+
+    def motion_uses_powers(self) -> PowersAnalysis:
+        """
+        We only need to do vote analysis for votes that aren't inherently using powers based on
+        classification further up.
+        """
+
+        if self.motion_type in [
+            MotionType.ADJOURNMENT,
+            MotionType.OTHER,
+            MotionType.GOVERNMENT_AGENDA,
+        ]:
+            if self.is_nonaction_vote():
+                return PowersAnalysis.DOES_NOT_USE_POWERS
+            else:
+                return PowersAnalysis.USES_POWERS
+        else:
+            return PowersAnalysis.USES_POWERS
+
+    def motion_type_nice(self):
+        return str(self.motion_type).replace("_", " ").title()
+
+    def nice_html(self) -> str:
+        return markdown.markdown(self.nice_text(), extensions=["tables"])
+
+    def nice_text(self) -> str:
+        text = self.text
+
+        lines = text.split("\n")
+
+        # we want to add a full empty line before and after markdown tables
+        # we also have a situation when we get lots of tables in a row it's not immediately obv
+        # when the next one starts
+        # but on the *second* line we get |----
+        # so can retrospectively add a line break there
+
+        new_lines = []
+        in_table = False
+        for i, line in enumerate(lines):
+            if line.startswith("|"):
+                if not in_table:
+                    new_lines.append("")
+                    in_table = True
+                new_lines.append(line)
+                if line.startswith("|----"):
+                    # insert a line break two rows up
+                    new_lines.insert(-2, "")
+            else:
+                if in_table:
+                    in_table = False
+                    new_lines.append(line)
+                    new_lines.append("")
+                    new_lines.append("")
+                else:
+                    new_lines.append(line)
+
+        text = "\n".join(new_lines)
+
+        # add newline after each semi colon or full stop.
+        text = text.replace(";", ";\n\n")
+        text = text.replace("“SCHEDULE", "\n\n“SCHEDULE")
+
+        return text
+
+
 @is_valid_decision_model
 class Division(DjangoVoteModel):
     key: str
@@ -183,6 +306,26 @@ class Division(DjangoVoteModel):
         "division"
     )
     tags: DummyManyToMany[DivisionTag] = related_name("division")
+    motion_id: Dummy[Optional[int]] = None
+    motion: Optional[Motion] = field(
+        models.ForeignKey,
+        to=Motion,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        default=None,
+        related_name="divisions",
+    )
+
+    def motion_type(self) -> MotionType:
+        if self.motion:
+            return self.motion.motion_type
+        return MotionType.UNKNOWN
+
+    def motion_speech_url(self) -> str:
+        if self.motion:
+            gid = self.motion.speech_id.split("/")[-1]
+            return self.chamber.twfy_debate_link(gid)
+        return ""
 
     def single_breakdown(self):
         ob = self.overall_breakdowns.first()
@@ -193,13 +336,13 @@ class Division(DjangoVoteModel):
     def voting_cluster(self) -> dict[str, str]:
         lookup = {
             "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
-            "gov_aye_opp_lean_no": "Divided ppposition: Government Aye, Opposition lean No",
-            "opp_aye_weak_gov_no": "Low stakes: Opposition Aye, Weak Government No",
+            "gov_aye_opp_lean_no": "Divided opposition: Government Aye, Opposition divided",
+            "opp_aye_weak_gov_no": "Medium conflict: Opposition Aye, Government No",
             "gov_aye_opp_weak_no": "Nominal opposition: Government Aye Opposition Weak No",
-            "gov_no_opp_lean_no": "Shut it down: Rough consensus against",
-            "low_participation": "Low Participation vote",
-            "gov_strong_aye_opp_strong_no": "Strong Conflict: Gov proposes",
-            "cross_party_aye": "Cross Party Aye",
+            "gov_no_opp_lean_no": "Multi-party against: Government No, Opposition divided",
+            "low_participation": "Low participation vote",
+            "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
+            "cross_party_aye": "Cross party aye",
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
@@ -218,8 +361,11 @@ class Division(DjangoVoteModel):
         return "Division"
 
     @property
-    def motion_uses_powers(self) -> str:
-        return "Unknown"
+    def motion_uses_powers(self) -> PowersAnalysis:
+        if self.motion:
+            return self.motion.motion_uses_powers()
+        else:
+            return PowersAnalysis.INSUFFICENT_INFO
 
     def url(self) -> str:
         return reverse(
@@ -240,7 +386,9 @@ class Division(DjangoVoteModel):
                 "Neutral motion": x.neutral_motion,
                 "Absent motion": x.absent_motion,
                 "Party turnout": x.signed_votes / x.vote_participant_count,
-                "For motion percentage": x.for_motion_percentage,
+                "For motion percentage": x.for_motion_percentage
+                if not pd.isna(x.for_motion_percentage)
+                else "-",
             }
             for x in self.party_breakdowns.all()
         ]
@@ -307,6 +455,10 @@ class Division(DjangoVoteModel):
             }
             for v in self.votes.all()
         ]
+
+        for d in data:
+            if pd.isna(d["Party alignment"]):
+                d["Party alignment"] = "-"
 
         return pd.DataFrame(data=data)
 
@@ -410,15 +562,37 @@ class Agreement(DjangoVoteModel):
     date: datetime.date
     decision_ref: str
     decision_name: str
+    motion_id: Dummy[Optional[int]] = None
+    motion: Optional[Motion] = field(
+        models.ForeignKey,
+        to=Motion,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="agreements",
+        default=None,
+    )
+
+    def motion_type(self) -> MotionType:
+        if self.motion:
+            return self.motion.motion_type
+        return MotionType.UNKNOWN
+
+    def motion_speech_url(self) -> str:
+        if self.motion:
+            gid = self.motion.speech_id.split("/")[-1]
+            return self.chamber.twfy_debate_link(gid)
+        return ""
 
     def voting_cluster(self) -> dict[str, str]:
-        return {"tag": "Unknown", "desc": "Unknown"}
+        return {"tag": "Agreement", "desc": "Agreement"}
 
     def safe_decision_name(self) -> str:
-        return self.decision_name
+        return self.decision_name or "[missing title]"
 
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
+        # remove the final .number
+        gid = f"{self.date.isoformat()}.".join(gid.split(".")[:-1])
         return self.chamber.twfy_debate_link(gid)
 
     def votes_df(self) -> pd.DataFrame:
@@ -441,8 +615,11 @@ class Agreement(DjangoVoteModel):
         return "Agreement"
 
     @property
-    def motion_uses_powers(self) -> str:
-        return "Unknown"
+    def motion_uses_powers(self) -> PowersAnalysis:
+        if self.motion:
+            return self.motion.motion_uses_powers()
+        else:
+            return PowersAnalysis.INSUFFICENT_INFO
 
     def url(self) -> str:
         return reverse(

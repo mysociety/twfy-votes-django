@@ -14,11 +14,15 @@
         <ul>
             {% for division in month_decisions %}
                 <li>
-                    {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.division_name|safe }}</a>
-                    {% if division.overall_breakdowns.first.motion_result_int == 1 %}
+                    {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
+                    {% if division.decision_type == "Agreement" %}
                         ✔️
-                    {% else %}
-                        ❌
+                    {% elif division.decision_type == "Division" %}
+                        {% if division.overall_breakdowns.first.motion_result_int == 1 %}
+                            ✅
+                        {% else %}
+                            ❌
+                        {% endif %}
                     {% endif %}
                 </li>
             {% endfor %}

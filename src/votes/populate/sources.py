@@ -11,6 +11,9 @@ to_fetch = [
     "https://www.theyworkforyou.com/pwdata/votes/divisions.parquet",
     "https://www.theyworkforyou.com/pwdata/votes/votes.parquet",
     "https://raw.githubusercontent.com/mysociety/parlparse/master/members/people.json",
+    "https://pages.mysociety.org/parl-motion-detector/data/parliamentary_motions/latest/agreements.parquet",
+    "https://pages.mysociety.org/parl-motion-detector/data/parliamentary_motions/latest/motions.parquet",
+    "https://pages.mysociety.org/parl-motion-detector/data/parliamentary_motions/latest/division-links.parquet",
 ]
 
 
