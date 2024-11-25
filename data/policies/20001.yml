@@ -40,9 +40,8 @@ agreement_links:
 - decision:
     chamber_slug: commons
     date: 2023-10-25
-    decision_ref: c.936.7
+    decision_ref: c.936.7.6
     division_name: ''
-    key: commons-2023-10-25-c.936.7
     source_gid: uk.org.publicwhip/debate/2023-10-25c.936.7
   alignment: agree
   strength: strong
@@ -50,9 +49,8 @@ agreement_links:
 - decision:
     chamber_slug: commons
     date: 2021-11-16
-    decision_ref: d.489.1
+    decision_ref: d.489.1.16
     division_name: ''
-    key: commons-2021-11-16-d.489.1
     source_gid: uk.org.publicwhip/debate/2021-11-16d.489.1
   alignment: agree
   strength: strong
