@@ -20,7 +20,9 @@ The goal of this is that little heavy lifting should happen at run time - and th
 
 # Populating the database
 
-`script/populate -all` - will run through all the steps to create the database from scratch.
+`script/setup` -- setup database.
+
+`script/populate --all` - will run through all the steps to create the database from scratch.
 
 Individual steps can be run with `scripts/populate --group votes` - see 'populate/register.py` for a list of groups. 
 
