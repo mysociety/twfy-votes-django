@@ -115,7 +115,7 @@ def import_motions(quiet: bool = False, update_since: datetime.date | None = Non
             Motion(
                 gid=row["gid"],
                 speech_id=row["speech_id"],
-                date=row["date"],
+                date=datetime.date.fromisoformat(row["date"]),
                 title=row["motion_title"],
                 text=row["motion_text"],
                 motion_type=row["motion_type"],
