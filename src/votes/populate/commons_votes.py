@@ -20,7 +20,7 @@ from mysoc_validator import Popolo
 from mysoc_validator.models.popolo import Chamber, IdentifierScheme
 from pydantic import BaseModel, Field, RootModel
 
-from votes.consts import VotePosition
+from votes.consts import StrVotePosition
 
 from .register import ImportOrder, import_register
 
@@ -29,7 +29,7 @@ class MiniVote(BaseModel):
     division_id: str
     membership_id: int
     person_id: int
-    vote: VotePosition
+    vote: StrVotePosition
 
 
 class MiniDivision(BaseModel):
@@ -113,11 +113,11 @@ class Division(BaseModel):
         votes: list[MiniVote] = []
 
         mappings = [
-            (yes_ids, VotePosition.AYE),
-            (no_ids, VotePosition.NO),
-            (absent_ids, VotePosition.ABSENT),
-            (yes_teller_ids, VotePosition.TELLAYE),
-            (no_teller_ids, VotePosition.TELLNO),
+            (yes_ids, StrVotePosition.AYE),
+            (no_ids, StrVotePosition.NO),
+            (absent_ids, StrVotePosition.ABSENT),
+            (yes_teller_ids, StrVotePosition.TELLAYE),
+            (no_teller_ids, StrVotePosition.TELLNO),
         ]
 
         for ids, position in mappings:

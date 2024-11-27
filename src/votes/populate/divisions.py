@@ -61,7 +61,8 @@ class divisions_with_total_membership:
         SELECT
             pw_divisions.*,
             org_membership_count.count as total_possible_members,
-            division_links_with_id.motion_id as motion_id
+            division_links_with_id.motion_id as motion_id,
+            'twfy' as division_info_source
         FROM
             pw_divisions
         LEFT JOIN org_membership_count on
@@ -81,7 +82,8 @@ class api_divisions_with_total_membership:
     query = """
         SELECT
             api_divisions.*,
-            org_membership_count.count as total_possible_members
+            org_membership_count.count as total_possible_members,
+            'commons_api' as division_info_source
         FROM
             api_divisions
         LEFT JOIN org_membership_count on
@@ -121,6 +123,7 @@ def division_from_row(
         date=row["division_date"],
         division_number=row["division_number"],
         total_possible_members=row["total_possible_members"],
+        division_info_source=row["division_info_source"],
         motion_id=motion_id,
     )
 
