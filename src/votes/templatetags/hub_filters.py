@@ -15,6 +15,14 @@ register = Library()
 User = get_user_model()
 
 
+@register.filter(name="replace_underscore_with_hyphen")
+def replace_underscore_with_hyphen(value: str) -> str:
+    """Replaces underscores with hyphens in a string."""
+    if isinstance(value, str):
+        return value.replace("_", "-")
+    return value
+
+
 @register.filter(name="split")
 def split(value: str, key: str):
     return value.split(key)
@@ -101,7 +109,7 @@ def nice_headers(s: str) -> str:
 @register.simple_tag
 def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
     if percentage_columns is None:
-        percentage_columns = []
+        percentage_columns = []  # type: ignore
 
     def format_percentage(value: float):
         # if value is na return "-"
