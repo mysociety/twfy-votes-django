@@ -15,7 +15,9 @@
         <p>
             <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
         </p>
-        <p class = "motion_type">Motion type: {{ decision.motion.motion_type_nice }}</p>
+        <p class = "motion_type">
+            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
+        </p>
         <p class = "motion_type">
             Uses Parliamentary powers:
             {% with decision.motion.motion_uses_powers.simple as sp %}
