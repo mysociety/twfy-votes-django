@@ -100,7 +100,7 @@ class TestPersonPolicy(BaseTestResponse):
 
 
 class TestAgreementInfo(BaseTestResponse):
-    url = "/decisions/agreement/commons/2019-06-24/b.530.1"
+    url = "/decisions/agreement/commons/2019-06-24/b.530.1.2"
     has_json = True
 
 
