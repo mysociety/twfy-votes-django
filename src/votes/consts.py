@@ -155,6 +155,9 @@ class MotionType(StrEnum):
     UNKNOWN = "unknown"
     REASONED_AMENDMENT = "reasoned_amendment"
 
+    def url_slug(self):
+        return self.value.replace("_", "-")
+
     def display_name(self):
         return self.value.replace("_", " ").title()
 
