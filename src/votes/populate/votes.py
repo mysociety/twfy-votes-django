@@ -137,15 +137,31 @@ def import_votes(quiet: bool = False, update_since: datetime.date | None = None)
         "id", flat=True
     )
 
+    # reduce to just the votes associated with the new divisions
     df = pd.read_parquet(votes_with_diff)
     df = df[df["division_id"].isin(rel_division_ids)]
 
     to_create = []
 
+    existing_relevant_votes = Vote.objects.filter(division_id__in=rel_division_ids)
+    lookup = {f"{x.division_id}-{x.person_id}": x.id for x in existing_relevant_votes}
+    last_id = Vote.objects.all().order_by("-id").first()
+    if last_id:
+        max_id = int(last_id.id)  # type: ignore
+    else:
+        max_id = int(1)
+
+    def get_id(key: str):
+        nonlocal max_id
+        if key in lookup:
+            return lookup[key]
+        max_id += 1
+        return max_id
+
     for _, row in df.iterrows():
         to_create.append(
             Vote(
-                id=row["id"],
+                id=get_id(f"{row['division_id']}-{row['person_id']}"),
                 division_id=row["division_id"],
                 person_id=row["person_id"],
                 vote=row["vote"],
