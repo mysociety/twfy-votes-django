@@ -293,6 +293,7 @@ class Division(DjangoVoteModel):
     chamber_slug: ChamberSlug
     chamber_id: Dummy[int]
     chamber: DoNothingForeignKey[Chamber] = related_name("divisions")
+    division_info_source: str = ""
     date: datetime.date
     division_number: int
     division_name: str
@@ -373,6 +374,8 @@ class Division(DjangoVoteModel):
         )
 
     def safe_decision_name(self) -> str:
+        if self.motion:
+            return self.motion.title
         return self.division_name
 
     def party_breakdown_df(self) -> pd.DataFrame:
