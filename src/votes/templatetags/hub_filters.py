@@ -117,6 +117,8 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
         # if value is na return "-"
         if pd.isna(value):
             return "-"
+        if isinstance(value, str):
+            return value
         return "{:.2%}".format(value)
 
     df = df.rename(columns=nice_headers)
@@ -126,8 +128,8 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
             raise ValueError(f"Column {p} not found in DataFrame")
 
     styled_df = df.style.hide(axis="index").format(
-        {x: format_percentage for x in percentage_columns},
-        precision=2,  # type: ignore
+        {x: format_percentage for x in percentage_columns},  # type: ignore
+        precision=2,
     )
 
     return mark_safe(styled_df.to_html())  # type: ignore

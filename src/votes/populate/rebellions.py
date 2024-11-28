@@ -8,7 +8,7 @@ import rich
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import RebellionPeriodType
-from ..models.decisions import RebellionRate
+from ..models import RebellionRate
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

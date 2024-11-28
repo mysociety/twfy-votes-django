@@ -7,7 +7,7 @@ import pandas as pd
 import rich
 
 from ..consts import MotionType
-from ..models.decisions import Motion
+from ..models import Motion
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

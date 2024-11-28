@@ -17,17 +17,18 @@ from bs4 import BeautifulSoup
 from twfy_votes.helpers.routes import RouteApp
 
 from ..consts import ChamberSlug, PolicyStatus
-from ..models.decisions import (
+from ..models import (
     Agreement,
     Chamber,
     Division,
+    Organization,
+    Person,
     Policy,
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
     Vote,
 )
-from ..models.people import Organization, Person
 from .helper_models import (
     ChamberPolicyGroup,
     DivisionSearch,

@@ -8,13 +8,11 @@ import rich
 
 from twfy_votes.helpers.duck import DuckQuery
 
-from ..models.decisions import (
+from ..models import (
     Division,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
-)
-from ..models.people import (
     Organization,
 )
 from .register import ImportOrder, import_register
