@@ -4,8 +4,8 @@
 
 {% block content.inner %}
     <h1>{{ person.name }}</h1>
-    <h2>Votes</h2>
-    {% style_df person.votes_df "Party alignment" %}
+    <h2>Votes: {{ period }}</h2>
+    {% style_df votes_df "Party alignment" %}
 {% endblock content.inner %}
 
 {% block extracss %}

@@ -167,16 +167,30 @@ class PersonPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("person/{person_id:int}/votes", name="person_votes")
+@app.route("person/{person_id:int}/votes/{year:str}", name="person_votes")
 class PersonVotesPageView(TitleMixin, TemplateView):
     page_title = "Person Votes"
     template_name = "votes/person_votes.html"
 
-    def get_context_data(self, person_id: int, **kwargs):
+    def get_context_data(self, person_id: int, year: str, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["person"] = Person.objects.get(id=person_id)
-        context["votes"] = Vote.objects.filter(person_id=person_id)
 
+        person = Person.objects.get(id=person_id)
+        context["person"] = person
+        if year == "all":
+            context["period"] = "All time"
+            context["votes"] = Vote.objects.filter(person_id=person_id)
+            context["votes_df"] = person.votes_df()
+        else:
+            try:
+                int_year = int(year)
+            except (ValueError, TypeError):
+                raise ValueError("Year must be a number")
+            context["period"] = year
+            context["votes"] = Vote.objects.filter(
+                person_id=person_id, division__date__year=int_year
+            )
+            context["votes_df"] = person.votes_df(int_year)
         return context
 
 

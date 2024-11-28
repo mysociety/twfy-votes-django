@@ -107,6 +107,12 @@ class StrVotePosition(StrEnum):
     COLLECTIVE = "collective"  # used for votes where the whole chamber votes as one
 
 
+class RebellionPeriodType(IntEnum):
+    ALLTIME = 0
+    YEAR = 1
+    PERIOD = 2
+
+
 class VotePosition(IntEnum):
     AYE = 1
     NO = 2

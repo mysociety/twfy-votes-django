@@ -18,11 +18,17 @@ from twfy_votes.helpers.typed_django.models import (
     related_name,
 )
 
-from ..consts import ChamberSlug, OrganisationType
+from ..consts import ChamberSlug, OrganisationType, RebellionPeriodType
 from .base_model import DjangoVoteModel
 
 if TYPE_CHECKING:
-    from .decisions import Chamber, PolicyComparisonPeriod, Vote, VoteDistribution
+    from .decisions import (
+        Chamber,
+        PolicyComparisonPeriod,
+        RebellionRate,
+        Vote,
+        VoteDistribution,
+    )
 
 
 @dataclass
@@ -41,6 +47,7 @@ class Person(DjangoVoteModel):
     memberships: DummyOneToMany["Membership"] = related_name("person")
     votes: DummyOneToMany[Vote] = related_name("person")
     vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
+    rebellion_rates: DummyOneToMany[RebellionRate] = related_name("person")
 
     def str_id(self):
         return f"uk.org.publicwhip/person/{self.id}"
@@ -48,8 +55,29 @@ class Person(DjangoVoteModel):
     def votes_url(self):
         return reverse("person_votes", kwargs={"person_id": self.id})
 
+    def rebellion_rate_df(self):
+        from .decisions import UrlColumn
+
+        items = self.rebellion_rates.filter(
+            period_type=RebellionPeriodType.YEAR
+        ).order_by("-period_number")
+        df = pd.DataFrame(
+            [
+                {
+                    "Year": UrlColumn(
+                        reverse("person_votes", args=[self.id, r.period_number]),
+                        str(r.period_number),
+                    ),
+                    "Party alignment": 1 - r.value,
+                    "Total votes": r.total_votes,
+                }
+                for r in items
+            ]
+        )
+
+        return df
+
     def policy_distribution_groups(self):
-        print("here")
         groups: list[DistributionGroup] = []
         distributions = self.vote_distributions.all().prefetch_related(
             "period", "chamber", "party"
@@ -64,7 +92,6 @@ class Person(DjangoVoteModel):
                 chamber=distribution.chamber,
                 period=distribution.period,
             )
-            print(group)
             if group.key() not in existing_keys:
                 groups.append(group)
                 existing_keys.append(group.key())
@@ -91,8 +118,13 @@ class Person(DjangoVoteModel):
                 f"{self.name} was not a member of {chamber_slug} on {date}"
             )
 
-    def votes_df(self) -> pd.DataFrame:
+    def votes_df(self, year: int | None = None) -> pd.DataFrame:
         from .decisions import UrlColumn
+
+        if year:
+            votes_query = self.votes.filter(division__date__year=year)
+        else:
+            votes_query = self.votes.all()
 
         data = [
             {
@@ -110,7 +142,7 @@ class Person(DjangoVoteModel):
                     )
                 ),
             }
-            for v in self.votes.all()
+            for v in votes_query
             if v.division is not None
         ]
 

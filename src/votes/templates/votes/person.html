@@ -7,7 +7,7 @@
     <h2>Options</h2>
     <ul>
         <li>
-            <a href="{% url 'person_votes' person.id %}">All recorded votes.</a>
+            <a href="{% url 'person_votes' person.id 'all' %}">All recorded votes.</a>
         </li>
         {% for record in person.policy_distribution_groups %}
             <li>
@@ -16,4 +16,22 @@
             </li>
         {% endfor %}
     </ul>
+    <h2>Votes and party alignment</h2>
+    {% style_df person.rebellion_rate_df "Party alignment" %}
 {% endblock content.inner %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}

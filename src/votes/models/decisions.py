@@ -30,6 +30,7 @@ from ..consts import (
     PolicyStatus,
     PolicyStrength,
     PowersAnalysis,
+    RebellionPeriodType,
     StrengthMeaning,
     TagType,
     VotePosition,
@@ -799,3 +800,15 @@ class VoteDistribution(DjangoVoteModel):
                 return "No data available"
             case _:
                 raise ValueError("Score must be between 0 and 1")
+
+
+class RebellionRate(DjangoVoteModel):
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("rebellion_rates")
+    period_type: RebellionPeriodType
+    period_number: int
+    value: float
+    total_votes: int
+
+    def composite_key(self) -> str:
+        return f"{self.person_id}-{self.period_type}-{self.period_number}"
