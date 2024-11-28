@@ -110,6 +110,8 @@ def nice_headers(s: str) -> str:
 def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
     if percentage_columns is None:
         percentage_columns = []  # type: ignore
+    else:
+        percentage_columns = list(percentage_columns)  # type: ignore
 
     def format_percentage(value: float):
         # if value is na return "-"
@@ -119,12 +121,13 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
 
     df = df.rename(columns=nice_headers)
 
-    styled_df = (
-        df.style.hide(axis="index")
-        .format(  # type: ignore
-            formatter={x: format_percentage for x in percentage_columns}  # type: ignore
-        )
-        .format(precision=2)
+    for p in percentage_columns:
+        if p not in df.columns:
+            raise ValueError(f"Column {p} not found in DataFrame")
+
+    styled_df = df.style.hide(axis="index").format(
+        {x: format_percentage for x in percentage_columns},
+        precision=2,  # type: ignore
     )
 
     return mark_safe(styled_df.to_html())  # type: ignore

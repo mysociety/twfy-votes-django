@@ -32,7 +32,8 @@ class ImportOrder(IntEnum):
     BREAKDOWNS = 17
     DIVISION_ANALYSIS = 18
     VOTES = 19
-    POLICIES = 20
+    PERSON_STATS = 20
+    POLICIES = 23
     PREP_POLICYCALC = 25
     POLICYCALC = 30
 
