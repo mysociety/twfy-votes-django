@@ -16,7 +16,7 @@ from ..consts import (
     PolicyStrength,
     PowersAnalysis,
 )
-from ..models.decisions import (
+from ..models import (
     Agreement,
     Chamber,
     Division,

@@ -9,7 +9,7 @@ import rich
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import VotePosition
-from ..models.decisions import Division, Vote
+from ..models import Division, Vote
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

@@ -10,7 +10,7 @@ from tqdm import tqdm
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import TagType
-from ..models.decisions import Division, DivisionTag
+from ..models import Division, DivisionTag
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)

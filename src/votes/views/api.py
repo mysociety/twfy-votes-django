@@ -7,12 +7,13 @@ from ninja import ModelSchema, NinjaAPI
 from pydantic import BaseModel
 
 from ..consts import PolicyStatus
-from ..models.decisions import (
+from ..models import (
     Agreement,
     Division,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
+    Person,
     Policy,
     PolicyAgreementLink,
     PolicyDivisionLink,
@@ -20,7 +21,6 @@ from ..models.decisions import (
     Vote,
     VoteDistribution,
 )
-from ..models.people import Person
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
 from .twfy_bridge import PopoloPolicy
 

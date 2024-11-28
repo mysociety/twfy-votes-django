@@ -1,7 +1,7 @@
 import rich
 
 from ..consts import ChamberSlug
-from ..models.decisions import Chamber
+from ..models import Chamber
 from .register import ImportOrder, import_register
 
 member_name_lookup = {

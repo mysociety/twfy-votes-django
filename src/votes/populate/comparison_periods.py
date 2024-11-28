@@ -5,7 +5,7 @@ from django.conf import settings
 import rich
 import tomllib
 
-from ..models.decisions import Chamber, PolicyComparisonPeriod
+from ..models import Chamber, PolicyComparisonPeriod
 from .register import ImportOrder, import_register
 
 

@@ -6,8 +6,8 @@ from typing import Self
 from django.conf import settings
 from django.db import connection
 
-from twfy_votes.helpers.duck import sync_to_postgres
-from twfy_votes.helpers.typed_django.models import ModelType, TypedModel
+from .duck import sync_to_postgres
+from .typed_django.models import ModelType, TypedModel
 
 
 @contextmanager

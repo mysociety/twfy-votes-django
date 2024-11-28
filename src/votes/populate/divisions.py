@@ -9,7 +9,7 @@ import rich
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import ChamberSlug
-from ..models.decisions import Chamber, Division
+from ..models import Chamber, Division
 from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
