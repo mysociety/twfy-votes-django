@@ -62,3 +62,12 @@
     border: 1px solid black;
     padding: 20px 20px 10px 20px;
 }
+
+
+li.decision-type-agreement::marker {
+    content: "✋ ";
+  }
+
+  li.decision-type-division::marker {
+    content: "🗳️ ";
+  }

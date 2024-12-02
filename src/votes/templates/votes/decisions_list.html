@@ -13,10 +13,14 @@
         </p>
         <ul>
             {% for division in month_decisions %}
-                <li>
+                <li class="decision-type-{{ division.decision_type.lower }}">
                     {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
                     {% if division.decision_type == "Agreement" %}
-                        ✔️
+                        {% if division.negative %}
+                            ❌
+                        {% else %}
+                            ✅
+                        {% endif %}
                     {% elif division.decision_type == "Division" %}
                         {% if division.overall_breakdowns.first.motion_result_int == 1 %}
                             ✅

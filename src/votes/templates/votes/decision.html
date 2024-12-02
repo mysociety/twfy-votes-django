@@ -36,7 +36,11 @@
     {% endif %}
     <h2>Result</h2>
     {% if decision.decision_type == "Agreement" %}
-        <p>✅Motion approved without vote.</p>
+        {% if decision.negative %}
+            <p>❌Motion rejected without vote.</p>
+        {% else %}
+            <p>✅Motion approved without vote.</p>
+        {% endif %}
     {% elif decision.decision_type == "Division" %}
         {% with decision.overall_breakdowns.first.motion_result as mr %}
             {% if mr == "Success" %}
