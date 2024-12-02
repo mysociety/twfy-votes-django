@@ -3,6 +3,11 @@
 {% block content.inner %}
     <h1>Decisions in {{ search.chamber.name }}</h1>
     <p>{{ search.decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }}</p>
+    <p>Decisions includes:</p>
+    <ul>
+        <li>🗳️Divisions - where representatives record differences of opinion.</li>
+        <li>✋Agreements - when a decision is made without a vote.</li>
+    </ul>
     {% regroup search.decisions by date.month as decisions_by_date %}
     {% for month, month_decisions in decisions_by_date %}
         <h2>{{ month|month_name }}</h2>
