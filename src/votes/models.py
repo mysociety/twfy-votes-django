@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Optional, Protocol, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    NotRequired,
+    Optional,
+    Protocol,
+    Type,
+    TypedDict,
+    TypeVar,
+)
 
 from django.db import models
 from django.urls import reverse
@@ -54,6 +62,17 @@ if TYPE_CHECKING:
     )
 
 
+class InstructionDict(TypedDict):
+    model: NotRequired[str]
+    group: NotRequired[str]
+    start_group: NotRequired[str]
+    end_group: NotRequired[str]
+    all: NotRequired[bool]
+    quiet: NotRequired[bool]
+    update_since: NotRequired[datetime.date]
+    update_last: NotRequired[int]
+
+
 @dataclass
 class UrlColumn:
     url: str
@@ -103,6 +122,77 @@ class DistributionGroup:
 
     def key(self):
         return f"{self.party.id}-{self.chamber.id}-{self.period.id}"
+
+
+class Update(DjangoVoteModel):
+    """
+    Update queue model
+    """
+
+    id: PrimaryKey = None
+    date_created: Optional[datetime.datetime] = field(models.DateTimeField, null=True)
+    date_started: Optional[datetime.datetime] = field(
+        models.DateTimeField, null=True, blank=True
+    )
+    date_completed: Optional[datetime.datetime] = field(
+        models.DateTimeField, null=True, blank=True
+    )
+    instructions: dict
+    created_via: str
+
+    @classmethod
+    def create_task(
+        cls, instructions: dict, created_via: str, check_for_running: bool = True
+    ):
+        if check_for_running:
+            # basic check that we don't have the same instructions running or queued to be started
+            currently_running = cls.created_not_finished()
+            for update in currently_running:
+                if update.instructions == instructions:
+                    return update
+
+        return cls.objects.create(
+            instructions=instructions,
+            created_via=created_via,
+            date_created=datetime.datetime.now(),
+        )
+
+    def start(self):
+        self.date_started = datetime.datetime.now()
+        self.save()
+
+    def complete(self):
+        self.date_completed = datetime.datetime.now()
+        self.save()
+
+    def check_similar_in_progress(self):
+        return (
+            Update.objects.filter(date_completed=None, instructions=self.instructions)
+            .exclude(id=self.id)
+            .exists()
+        )
+
+    @classmethod
+    def to_run(cls):
+        """
+        Get a set of updates to run
+        Also de-duplicates if multiple instructions are the same
+        """
+        items = cls.objects.filter(date_completed=None, date_started=None)
+        # remove duplicate instructions in a single run
+        instructions = []
+        final_items = []
+        for item in items:
+            if item.instructions in instructions:
+                item.delete()
+            else:
+                instructions.append(item.instructions)
+                final_items.append(item)
+        return final_items
+
+    @classmethod
+    def created_not_finished(cls):
+        return cls.objects.filter(date_completed=None)
 
 
 class Person(DjangoVoteModel):

@@ -160,6 +160,9 @@ class DivisionSearchList(RootModel):
         expanded_items = [Division.from_api(item.DivisionId) for item in partial.root]
         return cls(root=expanded_items)
 
+    def __iter__(self):
+        return iter(self.root)
+
     @classmethod
     def from_date(
         cls, *, start_date: datetime.date, end_date: datetime.date
