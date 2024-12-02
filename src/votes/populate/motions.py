@@ -37,7 +37,16 @@ def catagorise_motion(motion: str) -> MotionType:
         return MotionType.APPROVE_STATUTORY_INSTRUMENT
     elif all_present(l_motion, ["be revoked", "laid before this house"]):
         return MotionType.REVOKE_STATUTORY_INSTRUMENT
-    elif any_present(l_motion, ["reasoned amendment", "declines to give the bill a"]):
+    elif any_present(
+        l_motion,
+        [
+            "reasoned amendment",
+            "declines to give the bill a",
+            "declines to give a second reading",
+        ],
+    ):
+        return MotionType.REASONED_AMENDMENT
+    elif all_present(l_motion, ["second reading", "this house declines to give"]):
         return MotionType.REASONED_AMENDMENT
     elif any_present(l_motion, ["makes provision as set out in this order"]):
         return MotionType.TIMETABLE_CHANGE
