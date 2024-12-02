@@ -8,17 +8,26 @@
         Decisions includes:
         <p>
             <ul>
-                <li>Divisions - where representatives record differences of opinion.</li>
-                <li>Agreements - when a decision is made without a vote.</li>
+                <li>🗳️Divisions - where representatives record differences of opinion.</li>
+                <li>✋Agreements - when a decision is made without a vote.</li>
             </ul>
             {% for c in chambers %}
                 <h2>{{ c.name }}</h2>
-                <ul>
-                    {% for year in c.year_range %}
-                        <li>
-                            <a href="{% url 'decisions_list' c.slug year %}">{{ year }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
+                {% with c.year_range as year_range %}
+                    {% if year_range %}
+                        <p>
+                            Latest year: <a href="{% url 'decisions_list' c.slug year_range|last %}">{{ year_range|last }}</a>
+                        </p>
+                        <div class="decision-year-list">
+                            <ul>
+                                {% for year in year_range|slice:":-1" %}
+                                    <li>
+                                        <a href="{% url 'decisions_list' c.slug year %}">{{ year }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
         {% endblock content.inner %}

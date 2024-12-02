@@ -66,8 +66,27 @@
 
 li.decision-type-agreement::marker {
     content: "✋ ";
-  }
+}
 
-  li.decision-type-division::marker {
+li.decision-type-division::marker {
     content: "🗳️ ";
-  }
+}
+
+
+
+
+.decision-year-list ul {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0;
+    list-style-type: none;
+    margin: 0;
+    justify-content: flex-start;
+
+}
+
+.decision-year-list li {
+    margin-right: 10px;
+    width: 10%;
+    text-align: center;
+}
