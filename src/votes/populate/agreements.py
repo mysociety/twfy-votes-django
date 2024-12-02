@@ -57,6 +57,9 @@ def import_agreements(quiet: bool = False):
 
     chamber_ids = Chamber.id_from_slug("slug")
 
+    # set nan in the negative column to False
+    df["negative"] = df["negative"].fillna(False)
+
     to_create = []
     for index, row in df.iterrows():
         chamber_slug = ChamberSlug(ChamberSlug.from_parlparse(row["chamber"]))
@@ -68,6 +71,7 @@ def import_agreements(quiet: bool = False):
             chamber_slug=chamber_slug,
             chamber_id=chamber_id,
             date=row["date"],
+            negative=row["negative"],
             decision_ref=safe_pid,
             decision_name=row["motion_title"],
             motion_id=int(row["motion_id"]) if not pd.isna(row["motion_id"]) else None,

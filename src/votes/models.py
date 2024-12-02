@@ -741,6 +741,7 @@ class Agreement(DjangoVoteModel):
     date: datetime.date
     decision_ref: str
     decision_name: str
+    negative: bool
     motion_id: Dummy[Optional[int]] = None
     motion: Optional[Motion] = field(
         models.ForeignKey,
