@@ -31,3 +31,10 @@
         </div>
     </div>
 </nav>
+{% if not request.resolver_match.url_name == 'home' %}
+    <div class="bg-green-50">
+        <div class ="container ">
+            This site is in experimental release. Please report <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">any issues on this form</a>.
+        </div>
+    </div>
+{% endif %}
