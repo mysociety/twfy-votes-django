@@ -18,10 +18,12 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
+    SECRET_KEY=(str, ""),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     HIDE_DEBUG_TOOLBAR=(bool, False),
     GOOGLE_ANALYTICS=(str, ""),
+    REFRESH_TOKEN=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
@@ -32,11 +34,12 @@ STATIC_ROOT = BASE_DIR / ".static"
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-ka$edl#zy75+_@ohr-s7kt6m_%#j501c!9k_ofcu&77k*5ur3a"
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+SECRET_KEY = env("SECRET_KEY")
+
+DEBUG = env("DEBUG")
+
+REFRESH_TOKEN = env("REFRESH_TOKEN")
 
 ALLOWED_HOSTS = []
 
