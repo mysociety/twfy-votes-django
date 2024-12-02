@@ -16,6 +16,10 @@ shortcuts: dict[str, InstructionDict] = {
         "start_group": "download_motions",
         "end_group": "decisions",
     },
+    "refresh_daily": {
+        "update_last": 1,
+        "all": True,
+    },
 }
 
 
