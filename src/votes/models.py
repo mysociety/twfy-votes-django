@@ -293,7 +293,7 @@ class Chamber(DjangoVoteModel):
         rel_agreements = [x.date.year for x in Agreement.objects.filter(chamber=self)]
 
         years = rel_divisions + rel_agreements
-        return sorted(list(set(years)), reverse=True)
+        return sorted(list(set(years)))
 
     @property
     def pw_alias(self):
