@@ -116,6 +116,9 @@ class Person(DjangoVoteModel):
     def str_id(self):
         return f"uk.org.publicwhip/person/{self.id}"
 
+    def url(self) -> str:
+        return reverse("person", args=[self.id])
+
     def votes_url(self, year: str = "all"):
         return reverse("person_votes", kwargs={"person_id": self.id, "year": year})
 
@@ -622,7 +625,7 @@ class Division(DjangoVoteModel):
 
         data = [
             {
-                "Person": UrlColumn(url=v.person.votes_url(), text=v.person.name),
+                "Person": UrlColumn(url=v.person.url(), text=v.person.name),
                 "Party": person_to_membership_map[v.person_id].party.name,
                 "Vote": v.vote_desc(),
                 "Party alignment": 1

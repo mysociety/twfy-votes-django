@@ -1,6 +1,5 @@
-.homepage-map-section {
-    background: #fff url('../img/map.webp') 100% 50% no-repeat;
-    background-size: auto 130%;
+.main-content {
+    background: #fff;
 
     @include media-breakpoint-up('lg') {
         background-position: 100% 70%;
