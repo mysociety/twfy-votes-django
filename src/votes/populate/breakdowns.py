@@ -152,7 +152,8 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
             Division.objects.filter(date__gte=update_since).values_list("id", flat=True)
         )
     else:
-        affected_divisions_ids = None
+        affected_divisions_ids = []
+
     # load into database
     division_key_to_id = Division.id_from_slug("key")
     df = pd.read_parquet(division_with_counts)
@@ -160,7 +161,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
     for _, row in df.iterrows():
         # only create for new divisions
         if (
-            affected_divisions_ids
+            update_since
             and division_key_to_id[row["division_id"]] not in affected_divisions_ids
         ):
             continue
@@ -181,7 +182,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
         )
 
     with DivisionBreakdown.disable_constraints():
-        if affected_divisions_ids:
+        if update_since:
             DivisionBreakdown.objects.filter(
                 division_id__in=affected_divisions_ids
             ).delete()
@@ -201,7 +202,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
     for _, row in df.iterrows():
         # only create for new divisions
         if (
-            affected_divisions_ids
+            update_since
             and division_key_to_id[row["division_id"]] not in affected_divisions_ids
         ):
             continue
@@ -224,7 +225,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
         )
 
     with DivisionPartyBreakdown.disable_constraints():
-        if affected_divisions_ids:
+        if update_since:
             DivisionPartyBreakdown.objects.filter(
                 division_id__in=affected_divisions_ids
             ).delete()
@@ -241,7 +242,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
     for _, row in df.iterrows():
         # only create for new divisions
         if (
-            affected_divisions_ids
+            update_since
             and division_key_to_id[row["division_id"]] not in affected_divisions_ids
         ):
             continue
@@ -263,7 +264,7 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
         )
 
     with DivisionsIsGovBreakdown.disable_constraints():
-        if affected_divisions_ids:
+        if update_since:
             DivisionsIsGovBreakdown.objects.filter(
                 division_id__in=affected_divisions_ids
             ).delete()
