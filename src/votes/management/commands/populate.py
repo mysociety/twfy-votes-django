@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
@@ -36,7 +36,12 @@ class Command(BaseCommand):
             help="Update since a certain date",
             default=None,
         )
-
+        parser.add_argument(
+            "--update-last",
+            type=int,
+            help="Update last x days",
+            default=None,
+        )
         parser.add_argument("--all", action="store_true", help="Run all models")
 
     def handle(
@@ -49,6 +54,7 @@ class Command(BaseCommand):
         all: bool = False,
         quiet: bool = False,
         update_since: date | None = None,
+        update_last: int | None = None,
         **options,
     ):
         if group and (start_group or end_group):
@@ -57,6 +63,12 @@ class Command(BaseCommand):
         if start_group and not end_group:
             self.stdout.write("You must specify both start-group and end-group")
             return
+        if update_last and update_since:
+            self.stdout.write("You cannot specify both update-last and update-since")
+            return
+
+        if update_last:
+            update_since = date.today() - timedelta(days=update_last)
 
         if not quiet and update_since:
             print(f"Updating since {update_since}")

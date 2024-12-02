@@ -26,8 +26,18 @@ The goal of this is that little heavy lifting should happen at run time - and th
 
 Individual steps can be run with `scripts/populate --group votes` - see 'populate/register.py` for a list of groups. 
 
-This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes all vote).
-The policy calculation respects this as a flag that makes it only compare the hashes since it was last calculated. 
+This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes). `--update-last [x]` does the laxt x days.
+
+The policy calculation treats this being set as a flag that makes it only compare the hashes since it was last calculated, and recalculate the difference - rather than the default starting from scratch. 
+
+The best range to do an update for commons api happening today is:
+
+`script/populate --update-last 0 --start-group api_votes --end-group person_stats`
+
+And to update motions and agreements (if analysis repo was delayed):
+
+`script/populate --model sources`
+`script/populate --update-last 4 --start-group motions --end-group decisions`
 
 To add new steps, follow the example of one of files in `votes/populate` - adding a Group to the ImportOrder enum if necessary. 
 
