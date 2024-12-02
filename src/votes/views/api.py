@@ -1,9 +1,11 @@
 import datetime
 from typing import Literal
 
+from django.conf import settings
 from django.http import HttpRequest
 
-from ninja import ModelSchema, NinjaAPI
+from ninja import ModelSchema, NinjaAPI, Schema
+from ninja.security import HttpBearer
 from pydantic import BaseModel
 
 from ..consts import PolicyStatus
@@ -18,11 +20,21 @@ from ..models import (
     PolicyAgreementLink,
     PolicyDivisionLink,
     PolicyGroup,
+    Update,
     Vote,
     VoteDistribution,
 )
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
 from .twfy_bridge import PopoloPolicy
+
+
+class AuthBearer(HttpBearer):
+    def authenticate(self, request, token):
+        print(token)
+        print(settings.REFRESH_TOKEN)
+        if token == settings.REFRESH_TOKEN:
+            return token
+
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
 
@@ -166,6 +178,25 @@ class PolicyDisplayGroupSchema(BaseModel):
                 PairedPolicySchema.from_basic(x) for x in group.paired_policies
             ],
         )
+
+
+class TriggerSchema(Schema):
+    shortcut: str
+
+
+@api.post("/webhooks/refresh", include_in_schema=False, auth=AuthBearer())
+def refresh_webhook(request: HttpRequest, item: TriggerSchema):
+    """
+    Trigger a refresh task via webhook
+    """
+
+    allowed_refresh = ["refresh_motions_agreements", "refresh_daily"]
+
+    if item.shortcut in allowed_refresh:
+        Update.create_task({"shortcut": item.shortcut}, created_via="Webhook")
+        return {"status": "success"}
+    else:
+        return {"status": "failure", "message": "Invalid refresh trigger"}
 
 
 @api.get(
