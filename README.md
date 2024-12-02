@@ -36,8 +36,7 @@ The best range to do an update for commons api happening today is:
 
 And to update motions and agreements (if analysis repo was delayed):
 
-`script/populate --model sources`
-`script/populate --update-last 4 --start-group motions --end-group decisions`
+`script/populate --update-last 4 --start-group download_motions --end-group decisions`
 
 To add new steps, follow the example of one of files in `votes/populate` - adding a Group to the ImportOrder enum if necessary. 
 
