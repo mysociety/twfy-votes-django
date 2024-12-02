@@ -118,14 +118,14 @@ def import_cluster_analysis(
     affected_divisions = (
         Division.objects.filter(date__gte=update_since).values_list("id", flat=True)
         if update_since
-        else None
+        else []
     )
 
     df = pd.read_parquet(division_cluster_path)
 
     df["division_database_id"] = df["division_id"].map(division_id_lookup)
 
-    if affected_divisions:
+    if update_since:
         df = df[df["division_database_id"].isin(affected_divisions)]
 
     clusters = get_commons_clusters(df, quiet=quiet)
@@ -135,7 +135,7 @@ def import_cluster_analysis(
     to_create = []
 
     for _, row in tqdm(df.iterrows(), total=len(df), disable=quiet):
-        if affected_divisions and row["division_database_id"] not in affected_divisions:
+        if update_since and row["division_database_id"] not in affected_divisions:
             continue
         item = DivisionTag(
             division_id=row["division_database_id"],
@@ -145,7 +145,7 @@ def import_cluster_analysis(
         to_create.append(item)
 
     with DivisionTag.disable_constraints():
-        if affected_divisions:
+        if update_since:
             DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
         else:
             DivisionTag.objects.all().delete()
