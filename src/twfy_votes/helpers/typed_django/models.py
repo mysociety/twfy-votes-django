@@ -328,7 +328,7 @@ def pure_pydantic_annotations(type: Any, allow_bare_annotation: bool) -> Any:
             raise ValueError("First metadata must be a FieldInfo")
 
     # If there is anything else left, return that as a new Annotated
-    return Annotated[tuple([base_type] + new_metadata)]
+    return Annotated[tuple([base_type] + new_metadata)]  # type: ignore
 
 
 def copy_field(field: models.Field) -> models.Field:

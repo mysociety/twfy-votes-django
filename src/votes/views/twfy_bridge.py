@@ -9,7 +9,7 @@ from enum import StrEnum
 from pydantic import BaseModel, ConfigDict
 
 from ..consts import ChamberSlug, PolicyDirection, PolicyStrength, VotePosition
-from ..models.decisions import (
+from ..models import (
     Chamber,
     Division,
     DivisionBreakdown,

@@ -98,6 +98,7 @@ h1 {
 h2 {
   @extend %heading;
   @include font-size($h2-font-size);
+  padding-top: 20px;
 }
 
 h3 {

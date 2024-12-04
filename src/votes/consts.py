@@ -107,6 +107,12 @@ class StrVotePosition(StrEnum):
     COLLECTIVE = "collective"  # used for votes where the whole chamber votes as one
 
 
+class RebellionPeriodType(IntEnum):
+    ALLTIME = 0
+    YEAR = 1
+    PERIOD = 2
+
+
 class VotePosition(IntEnum):
     AYE = 1
     NO = 2
@@ -117,7 +123,7 @@ class VotePosition(IntEnum):
     COLLECTIVE = 7  # used for votes where the whole chamber votes as one
 
 
-class VoteType(StrEnum):
+class MotionType(StrEnum):
     """
     Enum for different types of parlimentary vote.
     Not all of these are formal descriptions.
@@ -150,9 +156,16 @@ class VoteType(StrEnum):
     PRIVATE_SITTING = "private_sitting"
     EU_DOCUMENT_SCRUTINY = "eu_document_scrutiny"  # historically, a vote noting a document was a requirement before a minister could support in council
     OTHER = "other"
+    PROPOSED_CLAUSE = "proposed_clause"
+    BILL_INTRODUCTION = "bill_introduction"
+    UNKNOWN = "unknown"
+    REASONED_AMENDMENT = "reasoned_amendment"
+
+    def url_slug(self):
+        return self.value.replace("_", "-")
 
     def display_name(self):
-        return self.replace("_", " ").title()
+        return self.value.replace("_", " ").title()
 
 
 class PowersAnalysis(StrEnum):
@@ -160,8 +173,25 @@ class PowersAnalysis(StrEnum):
     DOES_NOT_USE_POWERS = "does_not_use_powers"
     INSUFFICENT_INFO = "insufficent_info"
 
+    def simple(self) -> bool | None:
+        if self == self.USES_POWERS:
+            return True
+        if self == self.DOES_NOT_USE_POWERS:
+            return False
+        return None
+
+    def simple_str(self) -> str:
+        match self.simple():
+            case True:
+                return "Yes"
+            case False:
+                return "No"
+            case None:
+                return "Unknown"
+
     def display_name(self):
-        return self.value.replace("_", " ").title()
+        text = self.value.replace("_powers", "_parliamentary_powers")
+        return text.replace("_", " ").title()
 
 
 class IssueType(StrEnum):

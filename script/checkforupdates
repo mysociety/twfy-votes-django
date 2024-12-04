@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# check that we are in the expected directory
+cd `dirname $0`/..
+
+script/manage run_queue --check-for-updates

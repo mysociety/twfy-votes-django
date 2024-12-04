@@ -1,7 +1,7 @@
 import rich
 
 from ..consts import PolicyGroupSlug
-from ..models.decisions import PolicyGroup
+from ..models import PolicyGroup
 from .register import ImportOrder, import_register
 
 description_lookup = {

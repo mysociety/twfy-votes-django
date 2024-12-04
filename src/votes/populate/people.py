@@ -11,8 +11,7 @@ from mysoc_validator.models.popolo import Membership as PopoloMembership
 from mysoc_validator.models.popolo import Person as PopoloPerson
 
 from ..consts import ChamberSlug, OrganisationType
-from ..models.decisions import Chamber
-from ..models.people import Membership, Organization, OrgMembershipCount, Person
+from ..models import Chamber, Membership, Organization, OrgMembershipCount, Person
 from .register import ImportOrder, import_register
 
 

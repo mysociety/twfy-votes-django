@@ -8,12 +8,12 @@ from django.db import models
 import rich
 from ruamel.yaml import YAML
 
+from twfy_votes.helpers.base_model import disable_constraints
 from twfy_votes.policy.models import (
     PartialPolicy,
 )
 
-from ..models.base_model import disable_constraints
-from ..models.decisions import (
+from ..models import (
     Agreement,
     Chamber,
     Division,

@@ -2,41 +2,75 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
-from typing import Optional, Protocol, Type, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    NotRequired,
+    Optional,
+    Protocol,
+    Type,
+    TypedDict,
+    TypeVar,
+)
 
 from django.db import models
 from django.urls import reverse
 
+import markdown
+import numpy as np
 import pandas as pd
 from numpy import nan
 
+from twfy_votes.helpers.base_model import DjangoVoteModel
 from twfy_votes.helpers.typed_django.models import (
     DoNothingForeignKey,
     Dummy,
     DummyManyToMany,
     DummyOneToMany,
     ManyToMany,
+    PrimaryKey,
     TextField,
     field,
     related_name,
 )
 
-from ..consts import (
+from .consts import (
     ChamberSlug,
+    MotionType,
+    OrganisationType,
     PolicyDirection,
     PolicyGroupSlug,
     PolicyStatus,
     PolicyStrength,
+    PowersAnalysis,
+    RebellionPeriodType,
     StrengthMeaning,
     TagType,
     VotePosition,
 )
-from ..policy_generation.scoring import (
+from .policy_generation.scoring import (
     ScoringFuncProtocol,
     SimplifiedScore,
 )
-from .base_model import DjangoVoteModel
-from .people import Membership, Organization, Person
+
+if TYPE_CHECKING:
+    from .models import (
+        Chamber,
+        PolicyComparisonPeriod,
+        RebellionRate,
+        Vote,
+        VoteDistribution,
+    )
+
+
+class InstructionDict(TypedDict):
+    model: NotRequired[str]
+    group: NotRequired[str]
+    start_group: NotRequired[str]
+    end_group: NotRequired[str]
+    all: NotRequired[bool]
+    quiet: NotRequired[bool]
+    update_since: NotRequired[datetime.date]
+    update_last: NotRequired[int]
 
 
 @dataclass
@@ -57,13 +91,18 @@ class DecisionProtocol(Protocol):
     def decision_type(self) -> str: ...
 
     @property
-    def motion_uses_powers(self) -> str: ...
+    def motion_uses_powers(self) -> PowersAnalysis: ...
+
+    @property
+    def motion(self) -> Motion | None: ...
 
     def safe_decision_name(self) -> str: ...
 
     def url(self) -> str: ...
 
     def twfy_link(self) -> str: ...
+
+    def motion_speech_url(self) -> str: ...
 
 
 DecisionProtocolType = TypeVar("DecisionProtocolType", bound=DecisionProtocol)
@@ -73,6 +112,244 @@ def is_valid_decision_model(
     klass: Type[DecisionProtocolType],
 ) -> Type[DecisionProtocolType]:
     return klass
+
+
+@dataclass
+class DistributionGroup:
+    party: Organization
+    chamber: Chamber
+    period: PolicyComparisonPeriod
+
+    def key(self):
+        return f"{self.party.id}-{self.chamber.id}-{self.period.id}"
+
+
+class Update(DjangoVoteModel):
+    """
+    Update queue model
+    """
+
+    id: PrimaryKey = None
+    date_created: Optional[datetime.datetime] = field(models.DateTimeField, null=True)
+    date_started: Optional[datetime.datetime] = field(
+        models.DateTimeField, null=True, blank=True
+    )
+    date_completed: Optional[datetime.datetime] = field(
+        models.DateTimeField, null=True, blank=True
+    )
+    instructions: dict
+    created_via: str
+
+    @classmethod
+    def create_task(
+        cls, instructions: dict, created_via: str, check_for_running: bool = True
+    ):
+        if check_for_running:
+            # basic check that we don't have the same instructions running or queued to be started
+            currently_running = cls.created_not_finished()
+            for update in currently_running:
+                if update.instructions == instructions:
+                    return update
+
+        return cls.objects.create(
+            instructions=instructions,
+            created_via=created_via,
+            date_created=datetime.datetime.now(),
+        )
+
+    def start(self):
+        self.date_started = datetime.datetime.now()
+        self.save()
+
+    def complete(self):
+        self.date_completed = datetime.datetime.now()
+        self.save()
+
+    def check_similar_in_progress(self):
+        return (
+            Update.objects.filter(date_completed=None, instructions=self.instructions)
+            .exclude(id=self.id)
+            .exists()
+        )
+
+    @classmethod
+    def to_run(cls):
+        """
+        Get a set of updates to run
+        Also de-duplicates if multiple instructions are the same
+        """
+        items = cls.objects.filter(date_completed=None, date_started=None)
+        # remove duplicate instructions in a single run
+        instructions = []
+        final_items = []
+        for item in items:
+            if item.instructions in instructions:
+                item.delete()
+            else:
+                instructions.append(item.instructions)
+                final_items.append(item)
+        return final_items
+
+    @classmethod
+    def created_not_finished(cls):
+        return cls.objects.filter(date_completed=None)
+
+
+class Person(DjangoVoteModel):
+    id: PrimaryKey = None
+    name: str
+    memberships: DummyOneToMany["Membership"] = related_name("person")
+    votes: DummyOneToMany[Vote] = related_name("person")
+    vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
+    rebellion_rates: DummyOneToMany[RebellionRate] = related_name("person")
+
+    def str_id(self):
+        return f"uk.org.publicwhip/person/{self.id}"
+
+    def url(self) -> str:
+        return reverse("person", args=[self.id])
+
+    def votes_url(self, year: str = "all"):
+        return reverse("person_votes", kwargs={"person_id": self.id, "year": year})
+
+    def rebellion_rate_df(self):
+        items = self.rebellion_rates.filter(
+            period_type=RebellionPeriodType.YEAR
+        ).order_by("-period_number")
+        df = pd.DataFrame(
+            [
+                {
+                    "Year": UrlColumn(
+                        reverse("person_votes", args=[self.id, r.period_number]),
+                        str(r.period_number),
+                    ),
+                    "Party alignment": 1 - r.value,
+                    "Total votes": r.total_votes,
+                }
+                for r in items
+            ]
+        )
+
+        return df
+
+    def policy_distribution_groups(self):
+        groups: list[DistributionGroup] = []
+        distributions = self.vote_distributions.all().prefetch_related(
+            "period", "chamber", "party"
+        )
+        # iterate through this and create unique groups
+
+        existing_keys = []
+
+        for distribution in distributions:
+            group = DistributionGroup(
+                party=distribution.party,
+                chamber=distribution.chamber,
+                period=distribution.period,
+            )
+            if group.key() not in existing_keys:
+                groups.append(group)
+                existing_keys.append(group.key())
+
+        return groups
+
+    @classmethod
+    def current(cls):
+        """
+        Those with a membership that is current.
+        """
+        return cls.objects.filter(memberships__end_date__gte=datetime.date.today())
+
+    def membership_in_chamber_on_date(
+        self, chamber_slug: ChamberSlug, date: datetime.date
+    ) -> Membership:
+        membership = self.memberships.filter(
+            chamber_slug=chamber_slug, start_date__lte=date, end_date__gte=date
+        ).first()
+        if membership:
+            return membership
+        else:
+            raise ValueError(
+                f"{self.name} was not a member of {chamber_slug} on {date}"
+            )
+
+    def votes_df(self, year: int | None = None) -> pd.DataFrame:
+        if year:
+            votes_query = self.votes.filter(division__date__year=year)
+        else:
+            votes_query = self.votes.all()
+
+        data = [
+            {
+                "Date": v.division.date,
+                "Division": UrlColumn(
+                    url=v.division.url(), text=v.division.division_name
+                ),
+                "Vote": v.vote_desc(),
+                "Party alignment": (
+                    1
+                    - (
+                        v.diff_from_party_average
+                        if v.diff_from_party_average is not None
+                        else np.nan
+                    )
+                ),
+            }
+            for v in votes_query
+            if v.division is not None
+        ]
+
+        # sort by data decending
+        data = sorted(data, key=lambda x: x["Date"], reverse=True)
+
+        return pd.DataFrame(data=data)
+
+
+class Organization(DjangoVoteModel):
+    id: PrimaryKey = None
+    slug: str
+    name: str
+    classification: OrganisationType = OrganisationType.UNKNOWN
+    org_memberships: DummyOneToMany["Membership"] = related_name("organization")
+    party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
+
+
+class OrgMembershipCount(DjangoVoteModel):
+    chamber_slug: ChamberSlug
+    chamber_id: Dummy[int] = 0
+    chamber: DoNothingForeignKey[Organization] = related_name("org_membership_counts")
+    start_date: datetime.date
+    end_date: datetime.date
+    count: int
+
+
+class Membership(DjangoVoteModel):
+    """
+    A timed connection between a person and a post.
+    """
+
+    id: PrimaryKey = None
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("memberships")
+    start_date: datetime.date
+    end_date: datetime.date
+    party_slug: str
+    effective_party_slug: str
+    party_id: Dummy[Optional[int]] = None
+    party: DoNothingForeignKey[Organization] = field(
+        default=None, null=True, related_name="party_memberships"
+    )
+    effective_party_id: Dummy[Optional[int]] = None
+    effective_party: DoNothingForeignKey[Organization] = field(
+        default=None, null=True, related_name="effective_party_memberships"
+    )
+    chamber_id: Dummy[Optional[int]] = None
+    chamber: DoNothingForeignKey[Chamber] = field(
+        default=None, null=True, related_name="org_memberships"
+    )
+    chamber_slug: str
+    post_label: str
+    area_name: str
 
 
 class Chamber(DjangoVoteModel):
@@ -91,7 +368,7 @@ class Chamber(DjangoVoteModel):
             case (None, None):
                 return None
             case (None, last_agreement):
-                return last_agreement.date
+                return last_agreement.date  # type: ignore
             case (last_division, None):
                 return last_division.date
             case (last_division, last_agreement):
@@ -109,7 +386,7 @@ class Chamber(DjangoVoteModel):
         rel_agreements = [x.date.year for x in Agreement.objects.filter(chamber=self)]
 
         years = rel_divisions + rel_agreements
-        return sorted(list(set(years)), reverse=True)
+        return sorted(list(set(years)))
 
     @property
     def pw_alias(self):
@@ -164,12 +441,128 @@ class PolicyComparisonPeriod(DjangoVoteModel):
         return self.start_date <= date <= self.end_date
 
 
+class Motion(DjangoVoteModel):
+    gid: str
+    speech_id: str
+    date: datetime.date
+    title: str
+    text: TextField
+    motion_type: MotionType
+
+    def is_nonaction_vote(self, quiet: bool = True) -> bool:
+        """
+        Analyse the text of a motion to determine if it is a non-action motion
+        """
+        non_action_phrases = [
+            "believes",
+            "regrets",
+            "notes with approval",
+            "expressed approval",
+            "welcomes",
+            "is concerned",
+            "calls on the",
+            "recognises",
+            "takes note",
+            "agrees with the goverment's decision",
+            "regret that the gracious speech",
+            "do now adjourn",
+            "has considered",
+        ]
+        action_phrases = [
+            "orders that",
+            "requires the goverment",
+            "censures",
+            "declines to give a second reading",
+        ]
+
+        reduced_text = self.text.lower()
+
+        score = 0
+        for phrase in non_action_phrases:
+            if phrase in reduced_text:
+                if not quiet:
+                    print(f"matched {phrase}")
+                score += 1
+
+        for phrase in action_phrases:
+            if phrase in reduced_text:
+                if not quiet:
+                    print(f"matched {phrase}- is action")
+                score = 0
+
+        return score > 0
+
+    def motion_uses_powers(self) -> PowersAnalysis:
+        """
+        We only need to do vote analysis for votes that aren't inherently using powers based on
+        classification further up.
+        """
+
+        if self.motion_type in [
+            MotionType.ADJOURNMENT,
+            MotionType.OTHER,
+            MotionType.GOVERNMENT_AGENDA,
+        ]:
+            if self.is_nonaction_vote():
+                return PowersAnalysis.DOES_NOT_USE_POWERS
+            else:
+                return PowersAnalysis.USES_POWERS
+        else:
+            return PowersAnalysis.USES_POWERS
+
+    def motion_type_nice(self):
+        return str(self.motion_type).replace("_", " ").title()
+
+    def nice_html(self) -> str:
+        return markdown.markdown(self.nice_text(), extensions=["tables"])
+
+    def nice_text(self) -> str:
+        text = self.text
+
+        lines = text.split("\n")
+
+        # we want to add a full empty line before and after markdown tables
+        # we also have a situation when we get lots of tables in a row it's not immediately obv
+        # when the next one starts
+        # but on the *second* line we get |----
+        # so can retrospectively add a line break there
+
+        new_lines = []
+        in_table = False
+        for i, line in enumerate(lines):
+            if line.startswith("|"):
+                if not in_table:
+                    new_lines.append("")
+                    in_table = True
+                new_lines.append(line)
+                if line.startswith("|----"):
+                    # insert a line break two rows up
+                    new_lines.insert(-2, "")
+            else:
+                if in_table:
+                    in_table = False
+                    new_lines.append(line)
+                    new_lines.append("")
+                    new_lines.append("")
+                else:
+                    new_lines.append(line)
+
+        text = "\n".join(new_lines)
+
+        # add newline after each semi colon or full stop.
+        text = text.replace(";", ";\n\n")
+        text = text.replace("“SCHEDULE", "\n\n“SCHEDULE")
+
+        return text
+
+
 @is_valid_decision_model
 class Division(DjangoVoteModel):
     key: str
     chamber_slug: ChamberSlug
     chamber_id: Dummy[int]
     chamber: DoNothingForeignKey[Chamber] = related_name("divisions")
+    division_info_source: str = ""
     date: datetime.date
     division_number: int
     division_name: str
@@ -183,6 +576,26 @@ class Division(DjangoVoteModel):
         "division"
     )
     tags: DummyManyToMany[DivisionTag] = related_name("division")
+    motion_id: Dummy[Optional[int]] = None
+    motion: Optional[Motion] = field(
+        models.ForeignKey,
+        to=Motion,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        default=None,
+        related_name="divisions",
+    )
+
+    def motion_type(self) -> MotionType:
+        if self.motion:
+            return self.motion.motion_type
+        return MotionType.UNKNOWN
+
+    def motion_speech_url(self) -> str:
+        if self.motion:
+            gid = self.motion.speech_id.split("/")[-1]
+            return self.chamber.twfy_debate_link(gid)
+        return ""
 
     def single_breakdown(self):
         ob = self.overall_breakdowns.first()
@@ -193,13 +606,13 @@ class Division(DjangoVoteModel):
     def voting_cluster(self) -> dict[str, str]:
         lookup = {
             "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
-            "gov_aye_opp_lean_no": "Divided ppposition: Government Aye, Opposition lean No",
-            "opp_aye_weak_gov_no": "Low stakes: Opposition Aye, Weak Government No",
+            "gov_aye_opp_lean_no": "Divided opposition: Government Aye, Opposition divided",
+            "opp_aye_weak_gov_no": "Medium conflict: Opposition Aye, Government No",
             "gov_aye_opp_weak_no": "Nominal opposition: Government Aye Opposition Weak No",
-            "gov_no_opp_lean_no": "Shut it down: Rough consensus against",
-            "low_participation": "Low Participation vote",
-            "gov_strong_aye_opp_strong_no": "Strong Conflict: Gov proposes",
-            "cross_party_aye": "Cross Party Aye",
+            "gov_no_opp_lean_no": "Multi-party against: Government No, Opposition divided",
+            "low_participation": "Low participation vote",
+            "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
+            "cross_party_aye": "Cross party aye",
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
@@ -218,8 +631,11 @@ class Division(DjangoVoteModel):
         return "Division"
 
     @property
-    def motion_uses_powers(self) -> str:
-        return "Unknown"
+    def motion_uses_powers(self) -> PowersAnalysis:
+        if self.motion:
+            return self.motion.motion_uses_powers()
+        else:
+            return PowersAnalysis.INSUFFICENT_INFO
 
     def url(self) -> str:
         return reverse(
@@ -227,6 +643,8 @@ class Division(DjangoVoteModel):
         )
 
     def safe_decision_name(self) -> str:
+        if self.motion:
+            return self.motion.title
         return self.division_name
 
     def party_breakdown_df(self) -> pd.DataFrame:
@@ -240,7 +658,9 @@ class Division(DjangoVoteModel):
                 "Neutral motion": x.neutral_motion,
                 "Absent motion": x.absent_motion,
                 "Party turnout": x.signed_votes / x.vote_participant_count,
-                "For motion percentage": x.for_motion_percentage,
+                "For motion percentage": x.for_motion_percentage
+                if not pd.isna(x.for_motion_percentage)
+                else "-",
             }
             for x in self.party_breakdowns.all()
         ]
@@ -295,7 +715,7 @@ class Division(DjangoVoteModel):
 
         data = [
             {
-                "Person": UrlColumn(url=v.person.votes_url(), text=v.person.name),
+                "Person": UrlColumn(url=v.person.url(), text=v.person.name),
                 "Party": person_to_membership_map[v.person_id].party.name,
                 "Vote": v.vote_desc(),
                 "Party alignment": 1
@@ -307,6 +727,10 @@ class Division(DjangoVoteModel):
             }
             for v in self.votes.all()
         ]
+
+        for d in data:
+            if pd.isna(d["Party alignment"]):
+                d["Party alignment"] = "-"
 
         return pd.DataFrame(data=data)
 
@@ -410,15 +834,38 @@ class Agreement(DjangoVoteModel):
     date: datetime.date
     decision_ref: str
     decision_name: str
+    negative: bool
+    motion_id: Dummy[Optional[int]] = None
+    motion: Optional[Motion] = field(
+        models.ForeignKey,
+        to=Motion,
+        on_delete=models.DO_NOTHING,
+        null=True,
+        related_name="agreements",
+        default=None,
+    )
+
+    def motion_type(self) -> MotionType:
+        if self.motion:
+            return self.motion.motion_type
+        return MotionType.UNKNOWN
+
+    def motion_speech_url(self) -> str:
+        if self.motion:
+            gid = self.motion.speech_id.split("/")[-1]
+            return self.chamber.twfy_debate_link(gid)
+        return ""
 
     def voting_cluster(self) -> dict[str, str]:
-        return {"tag": "Unknown", "desc": "Unknown"}
+        return {"tag": "Agreement", "desc": "Agreement"}
 
     def safe_decision_name(self) -> str:
-        return self.decision_name
+        return self.decision_name or "[missing title]"
 
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
+        # remove the final .number
+        gid = f"{self.date.isoformat()}.".join(gid.split(".")[:-1])
         return self.chamber.twfy_debate_link(gid)
 
     def votes_df(self) -> pd.DataFrame:
@@ -441,8 +888,11 @@ class Agreement(DjangoVoteModel):
         return "Agreement"
 
     @property
-    def motion_uses_powers(self) -> str:
-        return "Unknown"
+    def motion_uses_powers(self) -> PowersAnalysis:
+        if self.motion:
+            return self.motion.motion_uses_powers()
+        else:
+            return PowersAnalysis.INSUFFICENT_INFO
 
     def url(self) -> str:
         return reverse(
@@ -619,3 +1069,15 @@ class VoteDistribution(DjangoVoteModel):
                 return "No data available"
             case _:
                 raise ValueError("Score must be between 0 and 1")
+
+
+class RebellionRate(DjangoVoteModel):
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("rebellion_rates")
+    period_type: RebellionPeriodType
+    period_number: int
+    value: float
+    total_votes: int
+
+    def composite_key(self) -> str:
+        return f"{self.person_id}-{self.period_type}-{self.period_number}"

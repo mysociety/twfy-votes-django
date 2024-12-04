@@ -18,11 +18,13 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 env = environ.Env(
+    SECRET_KEY=(str, ""),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     HIDE_DEBUG_TOOLBAR=(bool, False),
     GOOGLE_ANALYTICS=(str, ""),
     TWFY_API_KEY=(str, ""),
+    REFRESH_TOKEN=(str, ""),
 )
 
 environ.Env.read_env(BASE_DIR / ".env")
@@ -31,12 +33,17 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / ".static"
 
 SECRET_KEY = env("SECRET_KEY")
-DEBUG = True
 ALLOWED_HOSTS = env("ALLOWED_HOSTS")
 CACHE_FILE = env("CACHE_FILE")
 HIDE_DEBUG_TOOLBAR = env("HIDE_DEBUG_TOOLBAR")
 GOOGLE_ANALYTICS = env("GOOGLE_ANALYTICS")
 TWFY_API_KEY = env("TWFY_API_KEY")
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+
+DEBUG = env("DEBUG")
+
+REFRESH_TOKEN = env("REFRESH_TOKEN")
 
 # Application definition
 

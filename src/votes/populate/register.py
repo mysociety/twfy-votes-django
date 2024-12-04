@@ -21,17 +21,20 @@ def accepts_argument(func: Callable[[Any], Any], arg_name: str):
 
 
 class ImportOrder(IntEnum):
-    DOWNLOAD = 1
+    DOWNLOAD_PEOPLE_VOTES = 1
     CHAMBERS = 4
     PEOPLE = 5
     LOOKUPS = 10
+    DOWNLOAD_MOTIONS = 11
+    MOTIONS = 13
     API_VOTES = 14
     DECISIONS = 15
     PRE_BREAKDOWNS = 16
     BREAKDOWNS = 17
     DIVISION_ANALYSIS = 18
     VOTES = 19
-    POLICIES = 20
+    PERSON_STATS = 20
+    POLICIES = 23
     PREP_POLICYCALC = 25
     POLICYCALC = 30
 
@@ -106,15 +109,15 @@ class ImportRegister:
         quiet: bool = False,
         update_since: datetime.date | None = None,
     ) -> None:
-        start_group = ImportOrder[start_group.upper()]
-        end_group = ImportOrder[end_group.upper()]
+        start_group_order = ImportOrder[start_group.upper()]
+        end_group_order = ImportOrder[end_group.upper()]
 
         # iterate through ImportOrder from start_group to end_group
 
         for group in ImportOrder:
-            if group < start_group:
+            if group < start_group_order:
                 continue
-            if group > end_group:
+            if group > end_group_order:
                 break
             self.run_group(group.name, quiet=quiet, update_since=update_since)
 

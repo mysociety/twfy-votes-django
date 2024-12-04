@@ -1,6 +1,6 @@
 # twfy-votes-django
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mysociety/twfy-votes)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mysociety/twfy-votes-django)
 
 Voting information platform.
 
@@ -20,16 +20,46 @@ The goal of this is that little heavy lifting should happen at run time - and th
 
 # Populating the database
 
-`script/populate -all` - will run through all the steps to create the database from scratch.
+`script/setup` -- setup database.
+
+`script/populate --all` - will run through all the steps to create the database from scratch.
 
 Individual steps can be run with `scripts/populate --group votes` - see 'populate/register.py` for a list of groups. 
 
-This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes all vote).
-The policy calculation respects this as a flag that makes it only compare the hashes since it was last calculated. 
+This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes). `--update-last [x]` does the laxt x days.
+
+The policy calculation treats this being set as a flag that makes it only compare the hashes since it was last calculated, and recalculate the difference - rather than the default starting from scratch. 
+
+The best range to do an update for commons api happening today is:
+
+`script/populate --update-last 0 --start-group api_votes --end-group person_stats`
+
+or `script/populate --shortcut refresh_commons_api`
+
+And to update motions and agreements (if analysis repo was delayed):
+
+`script/populate --update-last 4 --start-group download_motions --end-group decisions`
+
+
+or `script/populate --shortcut refresh_motions_agreements`
+
 
 To add new steps, follow the example of one of files in `votes/populate` - adding a Group to the ImportOrder enum if necessary. 
 
 Groups and models are different concepts when multiple models logically can be created at the same time (order doens't matter) - but before or after other steps. 
+
+# The automatic update process
+
+There is a task checker that runs every minute - can be manually run with `script/manage run_queue --check-for-updates`.
+
+This checks for any update queue items that have been created, and runs the corresponding update (the instructions dict it expects uses the same inputs as the populate command).
+
+These are currently produced in four ways.
+
+* Manually through the django admin.
+* A check of the Commons Votes API.
+* Webhook meant for twfy's parsing to trigger (refreshes the last day).
+* Webhook meant for the motion detector to trigger (refreshes motions) - ideally consolidate this into parlparse at some point. 
 
 # Adjusting policies
 

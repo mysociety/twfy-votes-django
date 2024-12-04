@@ -2,24 +2,33 @@ from __future__ import annotations
 
 import calendar
 import datetime
+import re
+from pathlib import Path
 from typing import Literal
 
+from django.http import Http404
+from django.template import Context, Template
+from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
+
+import markdown
+from bs4 import BeautifulSoup
 
 from twfy_votes.helpers.routes import RouteApp
 
 from ..consts import ChamberSlug, PolicyStatus
-from ..models.decisions import (
+from ..models import (
     Agreement,
     Chamber,
     Division,
+    Organization,
+    Person,
     Policy,
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
     Vote,
 )
-from ..models.people import Organization, Person
 from .helper_models import (
     ChamberPolicyGroup,
     DivisionSearch,
@@ -29,6 +38,88 @@ from .helper_models import (
 from .mixins import TitleMixin
 
 app = RouteApp(app_name="votes")
+
+
+@app.route("help/{markdown_slug:slug}", name="help")
+class MarkdownView(TemplateView):
+    """
+    View that accepts a markdown slug and renders the markdown file
+    with the given slug in the template.
+    """
+
+    template_name = "votes/markdown.html"
+
+    def get_markdown_context(self, **kwargs) -> dict:
+        """
+        Override this method to add extra context to feed to the markdown.
+        """
+        return {}
+
+    def get_context_data(self, **kwargs):
+        """
+        Given a markdown slug, fetch the file from caps/templates/caps/markdown/{slug}.md
+        This is a jekyll style markdown file, with a yaml header and markdown body.
+        The yaml header is parsed and used to populate the template context.
+        """
+        context = super().get_context_data(**kwargs)
+
+        markdown_slug = kwargs.get("markdown_slug")
+        if markdown_slug is None:
+            raise Http404
+        # sanitise the slug to prevent directory traversal
+        markdown_slug = re.sub(r"[^a-zA-Z0-9_-]", "", markdown_slug)
+        template_path = Path("src", "votes", "markdown/{}.md".format(markdown_slug))
+        markdown_body = template_path.read_text()
+
+        # Extract the markdown H1 header to use as the page title, and remove it from the markdown_body
+        lines = markdown_body.splitlines()
+        h1_header = lines[0]
+        assert h1_header.startswith(
+            "# "
+        ), "Markdown file should start with an H1 header '# title'"
+        markdown_body = "\n".join(lines[1:])
+        context["page_title"] = h1_header[2:]
+
+        markdown_content = markdown.markdown(markdown_body, extensions=["toc"])
+
+        markdown_context = Context(self.get_markdown_context(**kwargs))
+
+        # we want to run the markdown_content through a basic django template so that any urls, etc are expanded
+        markdown_content = Template(markdown_content).render(markdown_context)
+
+        # there are ids assigned to each header by the TOC extention, extract these so we can put them in the sidebar
+        soup = BeautifulSoup(markdown_content, "html.parser")
+        headers = soup.find_all(["h1", "h2", "h3", "h4", "h5", "h6"])
+        header_links = []
+        last_item = {1: None, 2: None, 3: None, 4: None, 5: None, 6: None}
+
+        for header in headers:
+            header_item = {
+                "level": int(header.name[1]),
+                "text": header.text,
+                "id": header.attrs["id"],
+                "parent": None,
+            }
+            current_level = header_item["level"]
+            last_item[current_level] = header_item["id"]
+            if current_level > 1:
+                header_item["parent"] = last_item[current_level - 1]
+            header_links.append(header_item)
+
+        # re-arrange the headers into a tree
+        for header in header_links:
+            header["children"] = [
+                h for h in header_links if h["parent"] == header["id"]
+            ]
+
+        # remove anything below h3 and that will now be a child from top level
+        header_links = [
+            h for h in header_links if h["level"] <= 3 and h["parent"] is None
+        ]
+
+        context["body"] = mark_safe(str(soup))
+        context["header_links"] = header_links
+        return context
 
 
 @app.route("", name="home")
@@ -77,16 +168,30 @@ class PersonPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("person/{person_id:int}/votes", name="person_votes")
+@app.route("person/{person_id:int}/votes/{year:str}", name="person_votes")
 class PersonVotesPageView(TitleMixin, TemplateView):
     page_title = "Person Votes"
     template_name = "votes/person_votes.html"
 
-    def get_context_data(self, person_id: int, **kwargs):
+    def get_context_data(self, person_id: int, year: str, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["person"] = Person.objects.get(id=person_id)
-        context["votes"] = Vote.objects.filter(person_id=person_id)
 
+        person = Person.objects.get(id=person_id)
+        context["person"] = person
+        if year == "all":
+            context["period"] = "All time"
+            context["votes"] = Vote.objects.filter(person_id=person_id)
+            context["votes_df"] = person.votes_df()
+        else:
+            try:
+                int_year = int(year)
+            except (ValueError, TypeError):
+                raise ValueError("Year must be a number")
+            context["period"] = year
+            context["votes"] = Vote.objects.filter(
+                person_id=person_id, division__date__year=int_year
+            )
+            context["votes_df"] = person.votes_df(int_year)
         return context
 
 

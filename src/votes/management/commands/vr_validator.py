@@ -18,8 +18,14 @@ from tqdm import tqdm
 from typing_extensions import Self
 
 from ...consts import PolicyDirection, PolicyStrength, VotePosition
-from ...models.decisions import Chamber, Policy, PolicyComparisonPeriod
-from ...models.people import Membership, Organization, Person
+from ...models import (
+    Chamber,
+    Membership,
+    Organization,
+    Person,
+    Policy,
+    PolicyComparisonPeriod,
+)
 from ...populate.policycalc import PolicyPivotTable, get_connected_duck
 
 

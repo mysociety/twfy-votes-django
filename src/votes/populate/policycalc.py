@@ -15,7 +15,7 @@ from tqdm import tqdm
 from twfy_votes.helpers.duck import DuckQuery
 from twfy_votes.helpers.duck.funcs import query_to_parquet
 from twfy_votes.helpers.duck.templates import EnforceIntJinjaQuery
-from votes.models.decisions import Policy, VoteDistribution
+from votes.models import Policy, VoteDistribution
 from votes.policy_generation.scoring import ScoreFloatPair
 
 from .register import ImportOrder, import_register

@@ -166,6 +166,9 @@ class pw_vote_with_absences:
              and pw_division.chamber_slug = pdm.chamber_slug)
     left join
         pw_vote_deduped as pw_vote on (pw_vote.division_id = pw_division.key and pw_vote.membership_id = pdm.id)
+    where
+        -- because we'll join with the api seperately in a second
+        pw_division.division_info_source != 'commons_api'
     """
 
 

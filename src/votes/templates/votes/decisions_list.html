@@ -3,6 +3,11 @@
 {% block content.inner %}
     <h1>Decisions in {{ search.chamber.name }}</h1>
     <p>{{ search.decisions|length }} decisions from {{ search.start_date }} to {{ search.end_date }}</p>
+    <p>Decisions includes:</p>
+    <ul>
+        <li>🗳️Divisions - where representatives record differences of opinion.</li>
+        <li>✋Agreements - when a decision is made without a vote.</li>
+    </ul>
     {% regroup search.decisions by date.month as decisions_by_date %}
     {% for month, month_decisions in decisions_by_date %}
         <h2>{{ month|month_name }}</h2>
@@ -13,12 +18,20 @@
         </p>
         <ul>
             {% for division in month_decisions %}
-                <li>
-                    {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.division_name|safe }}</a>
-                    {% if division.overall_breakdowns.first.motion_result_int == 1 %}
-                        ✔️
-                    {% else %}
-                        ❌
+                <li class="decision-type-{{ division.decision_type.lower }}">
+                    {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
+                    {% if division.decision_type == "Agreement" %}
+                        {% if division.negative %}
+                            ❌
+                        {% else %}
+                            ✅
+                        {% endif %}
+                    {% elif division.decision_type == "Division" %}
+                        {% if division.overall_breakdowns.first.motion_result_int == 1 %}
+                            ✅
+                        {% else %}
+                            ❌
+                        {% endif %}
                     {% endif %}
                 </li>
             {% endfor %}
