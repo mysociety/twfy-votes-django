@@ -29,9 +29,9 @@
         <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
         <meta property="og:url" content="{{ request.build_absolute_uri }}">
         <meta property="og:title" content="{{ page_title }}">
-        <meta property="og:site_name" content="Local Intelligence Hub">
+        <meta property="og:site_name" content="TheyWorkForYou Votes">
         <meta property="og:description"
-              content="{{ meta_description|default:'Your starting point for data about local MPs, constituencies, public opinion and the climate and nature movement.' }}">
+              content="{{ meta_description|default:"Analysis and data on voting in the UK's Parliaments" }}">
         <meta property="og:type" content="website">
         <meta property="og:image"
               content="https://{{ request.get_host }}{% static 'img/opengraph.png' %}">
