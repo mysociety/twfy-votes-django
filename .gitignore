@@ -2,3 +2,11 @@
 .static
 build
 dev_*.ipynb
+.venv
+conf/env
+conf/env.deployed
+conf/httpd.conf
+conf/httpd.conf.deployed
+conf/crontab
+conf/crontab.deployed
+__pycache__/
