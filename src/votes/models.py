@@ -865,7 +865,8 @@ class Agreement(DjangoVoteModel):
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
         # remove the final .number
-        gid = f"{self.date.isoformat()}.".join(gid.split(".")[:-1])
+        gid = ".".join(gid.split(".")[:-1])
+        gid = f"{self.date.isoformat()}{gid}"
         return self.chamber.twfy_debate_link(gid)
 
     def votes_df(self) -> pd.DataFrame:
