@@ -1,4 +1,5 @@
 import datetime
+from collections import Counter
 from pathlib import Path
 
 from django.conf import settings
@@ -118,7 +119,7 @@ def division_from_row(
         chamber_slug=ChamberSlug(row["chamber"]),
         chamber_id=chamber_id_lookup[ChamberSlug(row["chamber"])],
         source_gid=row["source_gid"],
-        debate_gid=row["debate_gid"],
+        debate_gid=row["debate_gid"] or "",
         division_name=add_ellipsis(row["division_title"]),
         date=row["division_date"],
         division_number=row["division_number"],
@@ -165,6 +166,16 @@ def import_divisions(quiet: bool = False, update_since: datetime.date | None = N
         to_delete = Division.objects.filter(date__gte=update_since)
     else:
         to_delete = Division.objects.all()
+
+    # need to check for duplicate keys in to_create
+    keys = [x.key for x in to_create]
+
+    if len(keys) != len(set(keys)):
+        duplicate_keys = [
+            k for k, v in Counter(keys).items() if v > 1 and k is not None
+        ]
+        if duplicate_keys:
+            raise ValueError(f"Duplicate keys found in to_create: {duplicate_keys}")
 
     to_create = Division.get_lookup_manager("key").add_ids(to_create)
     api_to_create = Division.get_lookup_manager("key").add_ids(api_to_create)
