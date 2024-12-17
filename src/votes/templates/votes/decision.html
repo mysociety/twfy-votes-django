@@ -15,6 +15,9 @@
     </div>
     {% if decision.motion %}
         <h2>Motion</h2>
+        {% featureflag "advanced_info" %}
+            <p>Motion ID: {{ decision.motion.id }}</p>
+        {% endfeatureflag %}
         <p>
             <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
         </p>
@@ -126,20 +129,20 @@
         <h2>Voting list</h2>
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
-        {% draft %}
-        <h2>Membership list</h2>
-        <div class="alert alert-warning" role="alert">
-            <p>
-                This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
-            </p>
-            <p>
-                It shouldn't be taken as given that all of these people would have voted in favour of the motion, or that they were present.
-            </p>
-            <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
-        </div>
-        {% style_df decision.votes_df %}
-    {% enddraft %}
-{% endif %}
+        {% featureflag "advanced_info" %}
+            <h2>Membership list</h2>
+            <div class="alert alert-warning" role="alert">
+                <p>
+                    This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
+                </p>
+                <p>
+                    It shouldn't be taken as given that all of these people would have voted in favour of the motion, or that they were present.
+                </p>
+                <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
+            </div>
+            {% style_df decision.votes_df %}
+        {% endfeatureflag %}
+    {% endif %}
 {% endblock content.inner %}
 
 {% block extracss %}

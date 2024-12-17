@@ -4,12 +4,14 @@ from typing import Any
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
-from django.template import Library, Node
+from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
 import markdown
 import pandas as pd
+
+from votes.views.auth import super_users_or_group
 
 register = Library()
 User = get_user_model()
@@ -201,3 +203,38 @@ def do_draft(parser, token):
     nodelist = parser.parse(("enddraft",))  # Parse until {% enddraft %}
     parser.delete_first_token()  # Remove 'enddraft'
     return DraftNode(nodelist)
+
+
+class UserFlagNode(Node):
+    """
+    Node class to conditionally render content inside {% userflag "flag_name" %}...{% enduserflag %}
+    """
+
+    def __init__(self, nodelist, flag_name):
+        self.nodelist = nodelist
+        self.flag_name = flag_name
+
+    def render(self, context):
+        request = context.get("request")
+        if not request:
+            return ""
+        if super_users_or_group(request.user, self.flag_name):
+            return self.nodelist.render(context)
+        return ""
+
+
+@register.tag(name="featureflag")
+def do_userflag(parser, token):
+    """
+    Custom template block tag: {% featureflag "flag_name" %}...{% endfeatureflag %}
+    Renders content only if the user has the specified flag access.
+    """
+    try:
+        tag_name, flag_name = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError(
+            "%r tag requires a single argument" % token.contents.split()[0]
+        )
+    nodelist = parser.parse(("endfeatureflag",))
+    parser.delete_first_token()
+    return UserFlagNode(nodelist, flag_name.strip('"'))

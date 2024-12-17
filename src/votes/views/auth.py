@@ -9,5 +9,9 @@ def super_users_or_group(user: AbstractBaseUser | AnonymousUser, group_slug: str
     return False
 
 
+def can_view_advanced_info(user: AbstractBaseUser | AnonymousUser):
+    return super_users_or_group(user, "advanced_info")
+
+
 def can_view_draft_content(user: AbstractBaseUser | AnonymousUser):
     return super_users_or_group(user, "access_in_progress")
