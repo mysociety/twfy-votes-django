@@ -439,13 +439,19 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         period_slug: str,
         **kwargs,
     ):
+        # When called from the API view, the request object is not available
+        if hasattr(self, "request"):
+            rq = self.request
+        else:
+            rq = None
+
         context = super().get_context_data(**kwargs)
         person = Person.objects.get(id=person_id)
         chamber = Chamber.objects.get(slug=chamber_slug)
         party = Organization.objects.get(slug=party_slug)
         period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
 
-        if can_view_draft_content(self.request.user):
+        if rq and can_view_draft_content(rq.user):
             valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
         else:
             valid_status = [PolicyStatus.ACTIVE]
