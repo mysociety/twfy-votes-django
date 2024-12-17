@@ -21,6 +21,7 @@ def accepts_argument(func: Callable[[Any], Any], arg_name: str):
 
 
 class ImportOrder(IntEnum):
+    USER_GROUPS = 0
     DOWNLOAD_PEOPLE_VOTES = 1
     CHAMBERS = 4
     PEOPLE = 5

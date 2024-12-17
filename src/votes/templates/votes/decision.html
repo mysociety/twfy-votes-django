@@ -126,6 +126,7 @@
         <h2>Voting list</h2>
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
+        {% draft %}
         <h2>Membership list</h2>
         <div class="alert alert-warning" role="alert">
             <p>
@@ -137,7 +138,8 @@
             <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
         </div>
         {% style_df decision.votes_df %}
-    {% endif %}
+    {% enddraft %}
+{% endif %}
 {% endblock content.inner %}
 
 {% block extracss %}

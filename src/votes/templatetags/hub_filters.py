@@ -176,3 +176,28 @@ class MarkdownNode(Node):
 
         text = markdown.markdown(markdown_text, extensions=["toc"])
         return text
+
+
+class DraftNode(Node):
+    """
+    Node class to conditionally render content inside {% draft %}...{% enddraft %}
+    """
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        if context.get("can_view_draft_content"):
+            return self.nodelist.render(context)
+        return ""
+
+
+@register.tag(name="draft")
+def do_draft(parser, token):
+    """
+    Custom template block tag: {% draft %}...{% enddraft %}
+    Renders content only if the user has draft access.
+    """
+    nodelist = parser.parse(("enddraft",))  # Parse until {% enddraft %}
+    parser.delete_first_token()  # Remove 'enddraft'
+    return DraftNode(nodelist)
