@@ -13,7 +13,7 @@
                 </p>
                 <div class="decision-year-list">
                     <ul>
-                        {% for year in year_range|slice:":-1" %}
+                        {% for year in year_range %}
                             <li>
                                 <a href="{% url 'decisions_list' c.slug year %}">{{ year }}</a>
                             </li>
