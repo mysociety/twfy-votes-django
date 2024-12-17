@@ -46,6 +46,8 @@ from .consts import (
     StrengthMeaning,
     TagType,
     VotePosition,
+    WhipDirection,
+    WhipPriority,
 )
 from .policy_generation.scoring import (
     ScoringFuncProtocol,
@@ -1082,3 +1084,28 @@ class RebellionRate(DjangoVoteModel):
 
     def composite_key(self) -> str:
         return f"{self.person_id}-{self.period_type}-{self.period_number}"
+
+
+class WhipReport(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("whip_reports")
+    party = DoNothingForeignKey[Organization]
+    party_id: Dummy[int] = 0
+    whip_direction: WhipDirection
+    whip_priority: WhipPriority
+
+
+class DivisionAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("division_annotations")
+    detail: str = ""
+    link: str
+
+
+class VoteAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("vote_annotations")
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("vote_annotations")
+    detail: str = ""
+    link: str
