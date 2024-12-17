@@ -13,13 +13,6 @@ groups:
 division_links:
 - decision:
     chamber_slug: commons
-    date: 2000-04-05
-    division_number: 150
-  alignment: against
-  strength: strong
-  notes: ''
-- decision:
-    chamber_slug: commons
     date: 2006-05-15
     division_number: 232
   alignment: against
