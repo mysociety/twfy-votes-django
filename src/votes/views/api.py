@@ -8,7 +8,7 @@ from ninja import ModelSchema, NinjaAPI, Schema
 from ninja.security import HttpBearer
 from pydantic import BaseModel
 
-from ..consts import PolicyStatus
+from ..consts import PolicyStatus, RebellionPeriodType
 from ..models import (
     Agreement,
     Division,
@@ -20,6 +20,7 @@ from ..models import (
     PolicyAgreementLink,
     PolicyDivisionLink,
     PolicyGroup,
+    RebellionRate,
     Update,
     Vote,
     VoteDistribution,
@@ -142,6 +143,13 @@ class PolicySchema(ModelSchema):
     class Meta:
         model = Policy
         fields = "__all__"
+
+
+class RebellionRateSchema(ModelSchema):
+    class Meta:
+        model = RebellionRate
+        fields = "__all__"
+        exclude = ["id"]
 
 
 class PairedPolicySchema(BaseModel):
@@ -324,3 +332,49 @@ def get_all_policy_reports(request: HttpRequest):
 @api.get("/twfy-compatible/popolo/{policy_id}.json", response=PopoloPolicy)
 def get_popolo_policy(request: HttpRequest, policy_id: int):
     return PopoloPolicy.from_policy_id(policy_id)
+
+
+@api.get(
+    "/party_alignment/{period_slug}/{period_number}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment_all(
+    request: HttpRequest, period_slug: Literal["year", "period"], period_number: int
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, period_number=period_number
+    ).order_by("person_id")
+
+
+@api.get(
+    "/party_alignment/person/{person_id}/{period_slug}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment(
+    request: HttpRequest,
+    person_id: str,
+    period_slug: Literal["all_time", "year", "period"],
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, person_id=person_id
+    ).order_by("period_number")
