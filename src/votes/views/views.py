@@ -226,6 +226,7 @@ class DivisionPageView(TitleMixin, TemplateView):
         decision = Division.objects.get(
             chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
         ).apply_analysis_override()
+
         context["decision"] = decision
         context["relevant_policies"] = [
             x.policy

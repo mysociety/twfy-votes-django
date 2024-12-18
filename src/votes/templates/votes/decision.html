@@ -16,6 +16,26 @@
     <div class="alert alert-secondary" role="alert">
         Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
     </div>
+    <h2>Result</h2>
+    {% if decision.decision_type == "Agreement" %}
+        {% if decision.negative %}
+            <p>❌Motion rejected without vote.</p>
+        {% else %}
+            <p>✅Motion approved without vote.</p>
+        {% endif %}
+    {% elif decision.decision_type == "Division" %}
+        {% with decision.overall_breakdowns.first.motion_result as mr %}
+            {% if mr == "Success" %}
+                <p>✅Motion passed.</p>
+            {% elif mr == "Failure" %}
+                <p>❌Motion failed.</p>
+            {% elif mr == "Tie" %}
+                <p>🤝Motion tied (failed).</p>
+            {% endif %}
+        {% endwith %}
+
+        {% include 'votes/includes/division_dots.html' %}
+    {% endif %}
     {% if decision.motion %}
         <h2>Motion</h2>
         {% featureflag "advanced_info" %}
@@ -42,24 +62,6 @@
         <div class = "motion_text">
             <p>{{ decision.motion.nice_html|safe }}</p>
         </div>
-    {% endif %}
-    <h2>Result</h2>
-    {% if decision.decision_type == "Agreement" %}
-        {% if decision.negative %}
-            <p>❌Motion rejected without vote.</p>
-        {% else %}
-            <p>✅Motion approved without vote.</p>
-        {% endif %}
-    {% elif decision.decision_type == "Division" %}
-        {% with decision.overall_breakdowns.first.motion_result as mr %}
-            {% if mr == "Success" %}
-                <p>✅Motion passed.</p>
-            {% elif mr == "Failure" %}
-                <p>❌Motion failed.</p>
-            {% elif mr == "Tie" %}
-                <p>🤝Motion tied (failed).</p>
-            {% endif %}
-        {% endwith %}
     {% endif %}
     {% if decision.decision_type == "Division" %}
         <h2>Parliamentary dynamics</h2>
