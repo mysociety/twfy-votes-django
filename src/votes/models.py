@@ -83,6 +83,31 @@ class UrlColumn:
     def __str__(self) -> str:
         return f'<a href="{self.url}">{self.text}</a>'
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text == other.text
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text < other.text
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text <= other.text
+
+    def __gt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text > other.text
+
+    def __ge__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text >= other.text
+
 
 class DecisionProtocol(Protocol):
     """
@@ -359,6 +384,9 @@ class Chamber(DjangoVoteModel):
     member_plural: str
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
+
+    def member_singular(self) -> str:
+        return self.member_plural[:-1]
 
     def last_decision_date(self) -> Optional[datetime.date]:
         last_division = Division.objects.filter(chamber=self).order_by("-date").first()
@@ -739,7 +767,42 @@ class Division(DjangoVoteModel):
 
         return df
 
+    def vote_groups(self):
+        vote_groups = {
+            "directional": [],
+            "tellers": [],
+            "misc": [],
+        }
+
+        sdf = self.votes_df().sort_values("Person").sort_values("Party")
+
+        for group, df in sdf.groupby("Vote"):
+            if group == "Absent":
+                pass
+            if group == "Tellaye":
+                group = "Aye (Teller)"
+            if group == "Tellno":
+                group = "No (Teller)"
+            vote_group = {
+                "grouping": group,
+                "count": len(df),
+                "members": df.to_dict(orient="records"),
+            }
+            match group:
+                case "Aye" | "No":
+                    vote_groups["directional"].append(vote_group)
+                case "Absent" | "Abstain":
+                    vote_groups["misc"].append(vote_group)
+                case "Aye (Teller)" | "No (Teller)":
+                    vote_groups["tellers"].append(vote_group)
+
+        return vote_groups
+
     def votes_df(self) -> pd.DataFrame:
+        existing = getattr(self, "_votes_df", None)
+        if existing is not None:
+            return existing
+
         relevant_memberships = Membership.objects.filter(
             chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
         )
@@ -764,7 +827,11 @@ class Division(DjangoVoteModel):
             if pd.isna(d["Party alignment"]):
                 d["Party alignment"] = "-"
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        setattr(self, "_votes_df", df)
+
+        return df
 
 
 class DivisionTag(DjangoVoteModel):
