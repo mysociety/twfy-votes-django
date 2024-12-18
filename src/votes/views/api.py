@@ -15,6 +15,8 @@ from ..models import (
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
+    DivisionTag,
+    Motion,
     Person,
     Policy,
     PolicyAgreementLink,
@@ -38,6 +40,18 @@ class AuthBearer(HttpBearer):
 
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
+
+
+class DivisionTagSchema(ModelSchema):
+    class Meta:
+        model = DivisionTag
+        fields = "__all__"
+
+
+class MotionSchema(ModelSchema):
+    class Meta:
+        model = Motion
+        fields = "__all__"
 
 
 class VoteDistributionSchema(ModelSchema):
@@ -98,6 +112,15 @@ class DivisionWithInfoSchema(ModelSchema):
     overall_breakdowns: list[DivisionBreakdownSchema]
     party_breakdowns: list[DivisionPartyBreakdownSchema]
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
+    motion: MotionSchema | None
+    voting_cluster: dict[str, str]
+
+    @staticmethod
+    def resolve_voting_cluster(obj: Division):
+        di = obj.voting_cluster()
+        if di["bespoke"] == "":
+            di.pop("bespoke")
+        return di
 
     class Meta:
         model = Division
@@ -216,7 +239,7 @@ def get_division(
 ):
     return Division.objects.get(
         chamber_slug=chamber_slug, date=date, division_number=division_number
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/people/{people_option}.json", response=list[PersonSchema])
@@ -266,21 +289,27 @@ def get_agreement(
 ):
     return Agreement.objects.get(
         chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/decisions/{chamber_slug}/{year}.json", response=list[DivisionSchema])
 def get_divisions_by_year(request: HttpRequest, chamber_slug: str, year: int):
-    return Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    ]
 
 
 @api.get("/decisions/{chamber_slug}/{year}/{month}.json", response=list[DivisionSchema])
 def get_divisions_by_month(
     request: HttpRequest, chamber_slug: str, year: int, month: int
 ):
-    return Division.objects.filter(
-        chamber_slug=chamber_slug, date__year=year, date__month=month
-    )
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(
+            chamber_slug=chamber_slug, date__year=year, date__month=month
+        )
+    ]
 
 
 @api.get("/policies.json", response=list[PolicySchema])

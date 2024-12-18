@@ -225,7 +225,7 @@ class DivisionPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Division.objects.get(
             chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
-        )
+        ).apply_analysis_override()
         context["decision"] = decision
         context["relevant_policies"] = [
             x.policy
@@ -254,7 +254,8 @@ class AgreementPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Agreement.objects.get(
             chamber__slug=chamber_slug, date=decision_date, decision_ref=decision_ref
-        )
+        ).apply_analysis_override()
+
         context["decision"] = decision
         context["decision"] = decision
         context["relevant_policies"] = [

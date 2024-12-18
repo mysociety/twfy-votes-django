@@ -588,6 +588,26 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_overrde()
+        if not override:
+            return self
+
+        if override.banned_motion_ids:
+            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
+            if self.motion_id in banned_ids:
+                self.motion = None
+
+        return self
+
     def motion_type(self) -> MotionType:
         if self.motion:
             return self.motion.motion_type
@@ -615,13 +635,23 @@ class Division(DjangoVoteModel):
             "low_participation": "Low participation vote",
             "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
             "cross_party_aye": "Cross party aye",
+            "free_vote": "Free vote",
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
         data = tag.analysis_data if tag else "Unknown"
+        bespoke = ""
+
+        analysis_override = self.analysis_overrde()
+        if analysis_override:
+            if analysis_override.parl_dynamics_group:
+                data = analysis_override.parl_dynamics_group
+            if analysis_override.manual_parl_dynamics_desc:
+                bespoke = analysis_override.manual_parl_dynamics_desc
+
         desc = lookup.get(data, "Unknown")
 
-        return {"tag": data, "desc": desc}
+        return {"tag": data, "desc": desc, "bespoke": bespoke}
 
     def twfy_link(self) -> str:
         gid = self.source_gid.split("/")[-1]
@@ -846,6 +876,25 @@ class Agreement(DjangoVoteModel):
         related_name="agreements",
         default=None,
     )
+
+    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_overrde()
+        if not override:
+            return self
+        if override.banned_motion_ids:
+            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
+            if self.motion_id in banned_ids:
+                self.motion = None
+
+        return self
 
     def motion_type(self) -> MotionType:
         if self.motion:
@@ -1109,3 +1158,14 @@ class VoteAnnotation(DjangoVoteModel):
     person: DoNothingForeignKey[Person] = related_name("vote_annotations")
     detail: str = ""
     link: str
+
+
+class AnalysisOverride(DjangoVoteModel):
+    """
+    This is an option to override automatically created division data.
+    """
+
+    decision_key: str
+    banned_motion_ids: TextField = field(blank=True, default="")
+    parl_dynamics_group: str = field(blank=True, default="")
+    manual_parl_dynamics_desc: TextField = field(blank=True, default="")
