@@ -8,18 +8,21 @@ from ninja import ModelSchema, NinjaAPI, Schema
 from ninja.security import HttpBearer
 from pydantic import BaseModel
 
-from ..consts import PolicyStatus
+from ..consts import PolicyStatus, RebellionPeriodType
 from ..models import (
     Agreement,
     Division,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
+    DivisionTag,
+    Motion,
     Person,
     Policy,
     PolicyAgreementLink,
     PolicyDivisionLink,
     PolicyGroup,
+    RebellionRate,
     Update,
     Vote,
     VoteDistribution,
@@ -37,6 +40,18 @@ class AuthBearer(HttpBearer):
 
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
+
+
+class DivisionTagSchema(ModelSchema):
+    class Meta:
+        model = DivisionTag
+        fields = "__all__"
+
+
+class MotionSchema(ModelSchema):
+    class Meta:
+        model = Motion
+        fields = "__all__"
 
 
 class VoteDistributionSchema(ModelSchema):
@@ -97,6 +112,15 @@ class DivisionWithInfoSchema(ModelSchema):
     overall_breakdowns: list[DivisionBreakdownSchema]
     party_breakdowns: list[DivisionPartyBreakdownSchema]
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
+    motion: MotionSchema | None
+    voting_cluster: dict[str, str]
+
+    @staticmethod
+    def resolve_voting_cluster(obj: Division):
+        di = obj.voting_cluster()
+        if di["bespoke"] == "":
+            di.pop("bespoke")
+        return di
 
     class Meta:
         model = Division
@@ -142,6 +166,13 @@ class PolicySchema(ModelSchema):
     class Meta:
         model = Policy
         fields = "__all__"
+
+
+class RebellionRateSchema(ModelSchema):
+    class Meta:
+        model = RebellionRate
+        fields = "__all__"
+        exclude = ["id"]
 
 
 class PairedPolicySchema(BaseModel):
@@ -208,7 +239,7 @@ def get_division(
 ):
     return Division.objects.get(
         chamber_slug=chamber_slug, date=date, division_number=division_number
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/people/{people_option}.json", response=list[PersonSchema])
@@ -258,21 +289,27 @@ def get_agreement(
 ):
     return Agreement.objects.get(
         chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/decisions/{chamber_slug}/{year}.json", response=list[DivisionSchema])
 def get_divisions_by_year(request: HttpRequest, chamber_slug: str, year: int):
-    return Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    ]
 
 
 @api.get("/decisions/{chamber_slug}/{year}/{month}.json", response=list[DivisionSchema])
 def get_divisions_by_month(
     request: HttpRequest, chamber_slug: str, year: int, month: int
 ):
-    return Division.objects.filter(
-        chamber_slug=chamber_slug, date__year=year, date__month=month
-    )
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(
+            chamber_slug=chamber_slug, date__year=year, date__month=month
+        )
+    ]
 
 
 @api.get("/policies.json", response=list[PolicySchema])
@@ -324,3 +361,49 @@ def get_all_policy_reports(request: HttpRequest):
 @api.get("/twfy-compatible/popolo/{policy_id}.json", response=PopoloPolicy)
 def get_popolo_policy(request: HttpRequest, policy_id: int):
     return PopoloPolicy.from_policy_id(policy_id)
+
+
+@api.get(
+    "/party_alignment/{period_slug}/{period_number}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment_all(
+    request: HttpRequest, period_slug: Literal["year", "period"], period_number: int
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, period_number=period_number
+    ).order_by("person_id")
+
+
+@api.get(
+    "/party_alignment/person/{person_id}/{period_slug}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment(
+    request: HttpRequest,
+    person_id: str,
+    period_slug: Literal["all_time", "year", "period"],
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, person_id=person_id
+    ).order_by("period_number")

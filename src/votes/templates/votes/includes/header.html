@@ -21,6 +21,8 @@
                 {% include 'votes/includes/nav-item.html' with name='people' label='People' url_param='all' %}
                 {% include 'votes/includes/nav-item.html' with name='policies' label='Policies' %}
                 {% if user.is_authenticated %}
+
+                    {% include 'votes/includes/nav-item.html' with name='logout' label='Sign out' %}
                 {% else %}
 
                     {% include 'votes/includes/nav-item.html' with name='login' label='Sign in' %}

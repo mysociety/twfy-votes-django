@@ -211,3 +211,27 @@ class OrganisationType(StrEnum):
 
 class TagType(StrEnum):
     GOV_CLUSTERS = "gov_clusters"
+
+
+class WhipPriority(StrEnum):
+    """
+    This is the priority of the whip.
+    """
+
+    FREE = "free"
+    ONE_LINE = "one_line"  # one line whip - preferred vote with no strong attendance
+    TWO_LINE = "two_line"  # two line, rare - instruct to attend without preference
+    THREE_LINE = (
+        "three_line"  # three line - instruct to attend and vote with preference
+    )
+
+
+class WhipDirection(StrEnum):
+    """
+    This is the direction of the whip.
+    """
+
+    FOR = "for"
+    AGAINST = "against"
+    ABSTAIN = "abstain"
+    FREE = "free"

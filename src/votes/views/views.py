@@ -29,6 +29,7 @@ from ..models import (
     PolicyDivisionLink,
     Vote,
 )
+from .auth import can_view_draft_content
 from .helper_models import (
     ChamberPolicyGroup,
     DivisionSearch,
@@ -224,7 +225,8 @@ class DivisionPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Division.objects.get(
             chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
-        )
+        ).apply_analysis_override()
+
         context["decision"] = decision
         context["relevant_policies"] = [
             x.policy
@@ -253,7 +255,8 @@ class AgreementPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Agreement.objects.get(
             chamber__slug=chamber_slug, date=decision_date, decision_ref=decision_ref
-        )
+        ).apply_analysis_override()
+
         context["decision"] = decision
         context["decision"] = decision
         context["relevant_policies"] = [
@@ -330,6 +333,8 @@ class PoliciesPageView(TitleMixin, TemplateView):
         context["chambers"] = Chamber.with_votes()
         # get policy statuses
         do_not_display = [PolicyStatus.RETIRED, PolicyStatus.REJECTED]
+        if not can_view_draft_content(self.request.user):
+            do_not_display.append(PolicyStatus.DRAFT)
         context["statuses"] = [x for x in PolicyStatus if x not in do_not_display]
         return context
 
@@ -436,15 +441,22 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         period_slug: str,
         **kwargs,
     ):
+        # When called from the API view, the request object is not available
+        if hasattr(self, "request"):
+            rq = self.request
+        else:
+            rq = None
+
         context = super().get_context_data(**kwargs)
         person = Person.objects.get(id=person_id)
         chamber = Chamber.objects.get(slug=chamber_slug)
         party = Organization.objects.get(slug=party_slug)
         period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
 
-        valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
-
-        # add logic to show drafts here for admin user
+        if rq and can_view_draft_content(rq.user):
+            valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
+        else:
+            valid_status = [PolicyStatus.ACTIVE]
 
         distributions = list(
             person.vote_distributions.filter(

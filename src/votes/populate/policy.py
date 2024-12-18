@@ -1,4 +1,3 @@
-import datetime
 from pathlib import Path
 from typing import Any, Type, cast
 
@@ -105,13 +104,8 @@ def populate_policies(quiet: bool = False) -> None:
     division_lookup = Division.id_from_slug("key")
     agreement_lookup = Agreement.id_from_slug("key")
 
-    weird_date_cut_off = datetime.date(2010, 1, 1)
-
     for partial in partials:
         for link in partial.division_links:
-            # temp undtil we fix the data
-            if link.decision.date < weird_date_cut_off:
-                continue
             division_links.append(
                 PolicyDivisionLink(
                     policy_id=partial.id,
@@ -123,9 +117,6 @@ def populate_policies(quiet: bool = False) -> None:
             )
 
         for link in partial.agreement_links:
-            # temp undtil we fix the data
-            if link.decision.date < weird_date_cut_off:
-                continue
             agreement_links.append(
                 PolicyAgreementLink(
                     policy_id=partial.id,

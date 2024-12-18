@@ -46,6 +46,8 @@ from .consts import (
     StrengthMeaning,
     TagType,
     VotePosition,
+    WhipDirection,
+    WhipPriority,
 )
 from .policy_generation.scoring import (
     ScoringFuncProtocol,
@@ -80,6 +82,31 @@ class UrlColumn:
 
     def __str__(self) -> str:
         return f'<a href="{self.url}">{self.text}</a>'
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text == other.text
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text < other.text
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text <= other.text
+
+    def __gt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text > other.text
+
+    def __ge__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text >= other.text
 
 
 class DecisionProtocol(Protocol):
@@ -358,6 +385,9 @@ class Chamber(DjangoVoteModel):
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
 
+    def member_singular(self) -> str:
+        return self.member_plural[:-1]
+
     def last_decision_date(self) -> Optional[datetime.date]:
         last_division = Division.objects.filter(chamber=self).order_by("-date").first()
         last_agreement = (
@@ -586,6 +616,26 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_overrde()
+        if not override:
+            return self
+
+        if override.banned_motion_ids:
+            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
+            if self.motion_id in banned_ids:
+                self.motion = None
+
+        return self
+
     def motion_type(self) -> MotionType:
         if self.motion:
             return self.motion.motion_type
@@ -613,13 +663,23 @@ class Division(DjangoVoteModel):
             "low_participation": "Low participation vote",
             "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
             "cross_party_aye": "Cross party aye",
+            "free_vote": "Free vote",
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
         data = tag.analysis_data if tag else "Unknown"
+        bespoke = ""
+
+        analysis_override = self.analysis_overrde()
+        if analysis_override:
+            if analysis_override.parl_dynamics_group:
+                data = analysis_override.parl_dynamics_group
+            if analysis_override.manual_parl_dynamics_desc:
+                bespoke = analysis_override.manual_parl_dynamics_desc
+
         desc = lookup.get(data, "Unknown")
 
-        return {"tag": data, "desc": desc}
+        return {"tag": data, "desc": desc, "bespoke": bespoke}
 
     def twfy_link(self) -> str:
         gid = self.source_gid.split("/")[-1]
@@ -707,7 +767,42 @@ class Division(DjangoVoteModel):
 
         return df
 
+    def vote_groups(self):
+        vote_groups = {
+            "directional": [],
+            "tellers": [],
+            "misc": [],
+        }
+
+        sdf = self.votes_df().sort_values("Person").sort_values("Party")
+
+        for group, df in sdf.groupby("Vote"):
+            if group == "Absent":
+                pass
+            if group == "Tellaye":
+                group = "Aye (Teller)"
+            if group == "Tellno":
+                group = "No (Teller)"
+            vote_group = {
+                "grouping": group,
+                "count": len(df),
+                "members": df.to_dict(orient="records"),
+            }
+            match group:
+                case "Aye" | "No":
+                    vote_groups["directional"].append(vote_group)
+                case "Absent" | "Abstain":
+                    vote_groups["misc"].append(vote_group)
+                case "Aye (Teller)" | "No (Teller)":
+                    vote_groups["tellers"].append(vote_group)
+
+        return vote_groups
+
     def votes_df(self) -> pd.DataFrame:
+        existing = getattr(self, "_votes_df", None)
+        if existing is not None:
+            return existing
+
         relevant_memberships = Membership.objects.filter(
             chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
         )
@@ -732,7 +827,11 @@ class Division(DjangoVoteModel):
             if pd.isna(d["Party alignment"]):
                 d["Party alignment"] = "-"
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        setattr(self, "_votes_df", df)
+
+        return df
 
 
 class DivisionTag(DjangoVoteModel):
@@ -845,6 +944,25 @@ class Agreement(DjangoVoteModel):
         default=None,
     )
 
+    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_overrde()
+        if not override:
+            return self
+        if override.banned_motion_ids:
+            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
+            if self.motion_id in banned_ids:
+                self.motion = None
+
+        return self
+
     def motion_type(self) -> MotionType:
         if self.motion:
             return self.motion.motion_type
@@ -865,7 +983,8 @@ class Agreement(DjangoVoteModel):
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
         # remove the final .number
-        gid = f"{self.date.isoformat()}.".join(gid.split(".")[:-1])
+        gid = ".".join(gid.split(".")[:-1])
+        gid = f"{self.date.isoformat()}{gid}"
         return self.chamber.twfy_debate_link(gid)
 
     def votes_df(self) -> pd.DataFrame:
@@ -1081,3 +1200,39 @@ class RebellionRate(DjangoVoteModel):
 
     def composite_key(self) -> str:
         return f"{self.person_id}-{self.period_type}-{self.period_number}"
+
+
+class WhipReport(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("whip_reports")
+    party = DoNothingForeignKey[Organization]
+    party_id: Dummy[int] = 0
+    whip_direction: WhipDirection
+    whip_priority: WhipPriority
+
+
+class DivisionAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("division_annotations")
+    detail: str = ""
+    link: str
+
+
+class VoteAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("vote_annotations")
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("vote_annotations")
+    detail: str = ""
+    link: str
+
+
+class AnalysisOverride(DjangoVoteModel):
+    """
+    This is an option to override automatically created division data.
+    """
+
+    decision_key: str
+    banned_motion_ids: TextField = field(blank=True, default="")
+    parl_dynamics_group: str = field(blank=True, default="")
+    manual_parl_dynamics_desc: TextField = field(blank=True, default="")
