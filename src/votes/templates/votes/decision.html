@@ -6,6 +6,9 @@
     {% elif decision.decision_type == "Agreement" %}
         <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.decision_ref }}</h1>
     {% endif %}
+    <div class="alert alert-secondary" role="alert">
+        Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
+    </div>
     <h2>{{ decision.safe_decision_name|safe }}</h2>
     {% featureflag "advanced_info" %}
         <p>Decision Key: {{ decision.key }}</p>
@@ -13,9 +16,6 @@
     <p>
         <a href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
     </p>
-    <div class="alert alert-secondary" role="alert">
-        Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
-    </div>
     <h2>Result</h2>
     {% if decision.decision_type == "Agreement" %}
         {% if decision.negative %}
@@ -35,33 +35,6 @@
         {% endwith %}
 
         {% include 'votes/includes/division_dots.html' %}
-    {% endif %}
-    {% if decision.motion %}
-        <h2>Motion</h2>
-        {% featureflag "advanced_info" %}
-            <p>Motion ID: {{ decision.motion.id }}</p>
-        {% endfeatureflag %}
-        <p>
-            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
-        </p>
-        <p class = "motion_type">
-            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
-        </p>
-        <p class = "motion_type">
-            Uses Parliamentary powers:
-            {% with decision.motion.motion_uses_powers.simple as sp %}
-                {% if sp == True %}
-                    Yes
-                {% elif sp == False %}
-                    No
-                {% elif sp == None %}
-                    Unknown
-                {% endif %}
-            {% endwith %}
-        </p>
-        <div class = "motion_text">
-            <p>{{ decision.motion.nice_html|safe }}</p>
-        </div>
     {% endif %}
     {% if decision.decision_type == "Division" %}
         <h2>Parliamentary dynamics</h2>
@@ -120,6 +93,35 @@
                 {% endwith %}
             {% endif %}
         {% endwith %}
+    {% endif %}
+    {% if decision.motion %}
+        <h2>Motion</h2>
+        {% featureflag "advanced_info" %}
+            <p>Motion ID: {{ decision.motion.id }}</p>
+        {% endfeatureflag %}
+        <p>
+            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
+        </p>
+        <p class = "motion_type">
+            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
+        </p>
+        {% featureflag "advanced_info" %}
+            <p class = "motion_type">
+                Uses Parliamentary powers:
+                {% with decision.motion.motion_uses_powers.simple as sp %}
+                    {% if sp == True %}
+                        Yes
+                    {% elif sp == False %}
+                        No
+                    {% elif sp == None %}
+                        Unknown
+                    {% endif %}
+                {% endwith %}
+            </p>
+        {% endfeatureflag %}
+        <div class = "motion_text">
+            <p>{{ decision.motion.nice_html|safe }}</p>
+        </div>
     {% endif %}
     {% if relevant_policies %}
         <h2>Policies</h2>

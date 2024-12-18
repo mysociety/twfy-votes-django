@@ -53,10 +53,6 @@
     font-weight: bold;
 }
 
-.motion_text {
-    border: 1px solid black;
-    padding: 20px 20px 10px 20px;
-}
 
 
 li.decision-type-agreement::marker {
@@ -84,4 +80,16 @@ li.decision-type-division::marker {
     margin-right: 10px;
     width: 10%;
     text-align: center;
+}
+
+.motion_text {
+    line-height: 1.6;
+    border-left: 4px solid #0078d7;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: justify;
+    border-right: 1px solid black;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    padding: 15px 15px 10px 20px;
 }
