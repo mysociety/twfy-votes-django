@@ -5,7 +5,32 @@ import pytest
 pytestmark = pytest.mark.django_db
 
 
-class TestDivision2023:
+class BaseTestResponse:
+    url: str = "/"
+    status_code: int = 200
+    must_contain: list[str] = []
+    must_not_contain: list[str] = []
+    has_json: bool = False
+
+    def test_present(self, client: Client):
+        response = client.get(self.url)
+        assert response.status_code == self.status_code
+
+        for item in self.must_contain:
+            assert item in response.content.decode(), f"Missing {item}"
+
+        for item in self.must_not_contain:
+            assert item not in response.content.decode(), f"Unexpected {item}"
+
+    def test_json(self, client: Client):
+        if not self.has_json:
+            return
+        response = client.get(self.url + ".json")
+        assert response.status_code == self.status_code
+        assert response.json() is not None
+
+
+class TestDivision2023(BaseTestResponse):
     url: str = "/decisions/division/commons/2023-12-13/33"
     status_code: int = 200
     must_contain: list[str] = []
