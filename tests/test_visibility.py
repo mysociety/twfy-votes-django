@@ -3,6 +3,8 @@ from django.test import Client
 
 import pytest
 
+from votes.consts import PermissionGroupSlug
+
 pytestmark = pytest.mark.django_db
 
 
@@ -19,7 +21,7 @@ def test_super_user():
 @pytest.fixture
 def test_has_draft_power_user():
     user = User.objects.create_user(username="testuserdraft", password="password")
-    group = Group.objects.get(name="can_view_draft")
+    group = Group.objects.get(name=PermissionGroupSlug.CAN_VIEW_DRAFT)
     user.groups.add(group)
     yield user
     user.delete()

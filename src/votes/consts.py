@@ -3,6 +3,15 @@ from __future__ import annotations
 from enum import IntEnum, StrEnum
 
 
+class PermissionGroupSlug(StrEnum):
+    CAN_VIEW_DRAFT = "can_view_draft"  # can view draft features and info
+    ADVANCED_INFO = "advanced_info"  # can view extra ids and other admin info
+    CAN_REPORT_WHIP = "can_report_whip"  # can add whipreports
+    CAN_REPORT_SELF_WHIP = "can_report_self_whip"  # can add self whipreports
+    CAN_ADD_ANNOTATIONS = "can_add_annotations"  # can add annotations
+    CAN_ADD_SELF_ANNOTATIONS = "can_add_self_annotations"  # can add self annotations
+
+
 class PolicyStrength(StrEnum):
     """
     This is the strength of the relationship between the motion and the policy.
