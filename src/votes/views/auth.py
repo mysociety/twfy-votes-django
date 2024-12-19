@@ -14,4 +14,4 @@ def can_view_advanced_info(user: AbstractBaseUser | AnonymousUser):
 
 
 def can_view_draft_content(user: AbstractBaseUser | AnonymousUser):
-    return super_users_or_group(user, "access_in_progress")
+    return super_users_or_group(user, "can_view_draft")

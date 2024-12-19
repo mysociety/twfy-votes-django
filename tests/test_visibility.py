@@ -19,7 +19,7 @@ def test_super_user():
 @pytest.fixture
 def test_has_draft_power_user():
     user = User.objects.create_user(username="testuserdraft", password="password")
-    group = Group.objects.get(name="access_in_progress")
+    group = Group.objects.get(name="can_view_draft")
     user.groups.add(group)
     yield user
     user.delete()
