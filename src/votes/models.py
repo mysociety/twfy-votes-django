@@ -12,6 +12,7 @@ from typing import (
     TypeVar,
 )
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -62,6 +63,19 @@ if TYPE_CHECKING:
         Vote,
         VoteDistribution,
     )
+
+
+class UserPersonLink(DjangoVoteModel):
+    """
+    For connecting users to specific people
+    Used to give reps the ability to add content
+    related to them.
+    """
+
+    user: DoNothingForeignKey[User] = related_name("user_person_links")
+    user_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("user_person_links")
+    person_id: Dummy[int] = 0
 
 
 class InstructionDict(TypedDict):
