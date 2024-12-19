@@ -10,7 +10,7 @@
         Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
     </div>
     <h2>{{ decision.safe_decision_name|safe }}</h2>
-    {% featureflag "advanced_info" %}
+    {% featureflag pg.ADVANCED_INFO %}
         <p>Decision Key: {{ decision.key }}</p>
     {% endfeatureflag %}
     <p>
@@ -96,7 +96,7 @@
     {% endif %}
     {% if decision.motion %}
         <h2>Motion</h2>
-        {% featureflag "advanced_info" %}
+        {% featureflag pg.ADVANCED_INFO %}
             <p>Motion ID: {{ decision.motion.id }}</p>
         {% endfeatureflag %}
         <p>
@@ -105,7 +105,7 @@
         <p class = "motion_type">
             Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
         </p>
-        {% featureflag "advanced_info" %}
+        {% featureflag pg.ADVANCED_INFO %}
             <p class = "motion_type">
                 Uses Parliamentary powers:
                 {% with decision.motion.motion_uses_powers.simple as sp %}
@@ -142,7 +142,7 @@
         <h2>Voting list</h2>
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
-        {% featureflag "advanced_info" %}
+        {% featureflag pg.ADVANCED_INFO %}
             <h2>Membership list</h2>
             <div class="alert alert-warning" role="alert">
                 <p>

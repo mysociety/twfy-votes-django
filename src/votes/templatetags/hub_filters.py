@@ -226,7 +226,7 @@ class UserFlagNode(Node):
 @register.tag(name="featureflag")
 def do_userflag(parser, token):
     """
-    Custom template block tag: {% featureflag "flag_name" %}...{% endfeatureflag %}
+    Custom template block tag: {% featureflag pg.ADVANCED_INFO %}...{% endfeatureflag %}
     Renders content only if the user has the specified flag access.
     """
     try:
