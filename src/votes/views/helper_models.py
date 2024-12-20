@@ -62,7 +62,6 @@ class ChamberPolicyGroup(BaseModel):
 
 class PolicyCollection(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
     groups: list[PolicyDisplayGroup]
 
     def __iter__(self):
@@ -70,7 +69,7 @@ class PolicyCollection(BaseModel):
 
     @classmethod
     def from_distributions(
-        cls, distributions: list[VoteDistribution]
+        cls, distributions: list[VoteDistribution], url_base: str
     ) -> list[PolicyDisplayGroup]:
         def get_key(v: VoteDistribution) -> str:
             return (
@@ -115,7 +114,11 @@ class PolicyCollection(BaseModel):
 
         sig_links = [x for x in pp_list if x.significant_difference]
         groups.append(
-            PolicyDisplayGroup(name="Significant Policies", paired_policies=sig_links)
+            PolicyDisplayGroup(
+                name="Significant Policies",
+                paired_policies=sig_links,
+                url_base=url_base,
+            )
         )
 
         slug_lookup = {x.slug: x for x in PolicyGroup.objects.all()}
@@ -131,6 +134,7 @@ class PolicyCollection(BaseModel):
                     PolicyDisplayGroup(
                         name=slug_lookup[group_slug].description,
                         paired_policies=grouped_items,
+                        url_base=url_base,
                     )
                 )
 
@@ -141,6 +145,7 @@ class PolicyDisplayGroup(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
+    url_base: str
     paired_policies: list[PairedPolicy]
 
     def model_dump(self):
@@ -170,7 +175,8 @@ class PolicyDisplayGroup(BaseModel):
             item = GroupTableItem(
                 policy_name=str(
                     UrlColumn(
-                        url=link.policy.url(),
+                        # url=link.policy.url(), # link direct to policy item
+                        url=self.url_base.replace("99999", str(link.policy.id)),
                         text=link.policy.context_description or link.policy.name,
                     )
                 ),

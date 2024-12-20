@@ -4,7 +4,7 @@
 
 {% block content.inner %}
     <h1>{{ person.name }}</h1>
-    <p>Being compared with {{ party.name }} in {{ chamber.name }}</p>
+    <p>Compared with {{ party.name }} {{ chamber.member_plural }} in {{ chamber.name }}</p>
     <p>This list contains candidate policies that have not been finalised for feeding into TheyWorkForYou.</p>
     {% for group in collection %}
         {% if group|length > 0 %}

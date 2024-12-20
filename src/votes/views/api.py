@@ -1,5 +1,5 @@
 import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -11,15 +11,18 @@ from pydantic import BaseModel
 from ..consts import PolicyStatus, RebellionPeriodType
 from ..models import (
     Agreement,
+    Chamber,
     Division,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
     DivisionTag,
     Motion,
+    Organization,
     Person,
     Policy,
     PolicyAgreementLink,
+    PolicyComparisonPeriod,
     PolicyDivisionLink,
     PolicyGroup,
     RebellionRate,
@@ -40,6 +43,24 @@ class AuthBearer(HttpBearer):
 
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
+
+
+class OrganizationSchema(ModelSchema):
+    class Meta:
+        model = Organization
+        fields = "__all__"
+
+
+class ChamberSchema(ModelSchema):
+    class Meta:
+        model = Chamber
+        fields = "__all__"
+
+
+class PolicyComparisonPeriodSchema(ModelSchema):
+    class Meta:
+        model = PolicyComparisonPeriod
+        fields = "__all__"
 
 
 class DivisionTagSchema(ModelSchema):
@@ -215,6 +236,17 @@ class TriggerSchema(Schema):
     shortcut: str
 
 
+class PersonPolicySchema(BaseModel):
+    person: PersonSchema
+    chamber: ChamberSchema
+    period: PolicyComparisonPeriodSchema
+    party: OrganizationSchema
+    policy: PolicySchema
+    own_distribution: VoteDistributionSchema
+    other_distribution: VoteDistributionSchema
+    decision_links_and_votes: dict[str, list[dict[str, Any]]]
+
+
 @api.post("/webhooks/refresh", include_in_schema=False, auth=AuthBearer())
 def refresh_webhook(request: HttpRequest, item: TriggerSchema):
     """
@@ -278,6 +310,36 @@ def get_person_policies(
     )
 
     return [PolicyDisplayGroupSchema.from_basic(x) for x in data["collection"]]
+
+
+@api.get(
+    "/person/{person_id}/policies/{chamber_slug}/{party_slug}/{period_slug}/{policy_id}.json",
+    response=PersonPolicySchema,
+)
+def get_person_policy(
+    request: HttpRequest,
+    person_id: int,
+    chamber_slug: str,
+    party_slug: str,
+    period_slug: str,
+    policy_id: int,
+):
+    from .views import PersonPolicyView
+
+    data = PersonPolicyView().get_context_data(
+        person_id, chamber_slug, party_slug, period_slug, policy_id
+    )
+
+    data.pop("view")
+
+    data["decision_links_and_votes"] = {
+        x: y.to_dict(orient="records")
+        for x, y in data["decision_links_and_votes"].items()
+    }
+
+    print(data)
+
+    return data
 
 
 @api.get(

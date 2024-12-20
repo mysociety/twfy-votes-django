@@ -1,0 +1,74 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>{{ policy.name }}</h1>
+    <p>{{ policy.policy_description }}</p>
+</p>
+View <a href="{{ policy.url }}">policy details</a>.
+</p>
+<h2>Analysis for {{ person.name }}</h2>
+{% if own_distribution %}
+    <p>
+        <b>{{ person.name }}</b> {{ own_distribution.verbose_score.lower }} ({{ own_distribution.str_similarity_percentage }} aligned) {{ policy.context_description|safe }}.
+    </p>
+{% endif %}
+{% if other_distribution %}
+    <p>
+        <b>Comparable {{ party.name }} {{ chamber.member_plural }}</b> {{ other_distribution.verbose_score.lower }} ({{ other_distribution.str_similarity_percentage }} aligned).
+    </p>
+{% endif %}
+{% for vote_group, df in decision_links_and_votes.items %}
+    {% if vote_group == "strong_votes" %}
+        <h2>Scoring Divisions</h2>
+        <div class = "group-desc">
+            {% markdown %}
+                Scoring divisions are used to calculate the headline alignment between a person and a policy.
+            {% endmarkdown %}
+        </div>
+    {% elif vote_group == "weak_votes" %}
+        <h2>Informative Divisions</h2>
+        <div class = "group-desc">
+            {% markdown %}
+                Informative votes are thematically related to a policy, but do not count towards the overall score.
+            {% endmarkdown %}
+        </div>
+    {% elif vote_group == "strong_agreements" %}
+        <h2>Scoring Agreements</h2>
+        <div class = "group-desc">
+            {% markdown %}
+                Scoring agreements contribute to the headline alignment between a person and a policy.
+                Agreements are when Parliament takes a decision [without holding a vote](https://www.theyworkforyou.com/voting-information/#agreements-and-divisions).
+                This does not necessarily mean universal approval, but does mean there were no (or few) objections made to the decision being made.
+            {% endmarkdown %}
+        </div>
+    {% elif vote_group == "weak_agreements" %}
+        <h2>Informative Agreements</h2>
+        <div class = "group-desc">
+            {% markdown %}
+                Scoring agreements are thematically related to a policy, but do not count towards the overall score.
+                Agreements are when Parliament takes a decision [without holding a vote](https://www.theyworkforyou.com/voting-information/#agreements-and-divisions).
+                This does not necessarily mean universal approval, but does mean there were no (or few) objections made to the decision being made.
+            {% endmarkdown %}
+        </div>
+    {% endif %}
+    {% style_df df %}
+{% endfor %}
+{% endblock content.inner %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                paging: false
+            });
+        });
+    </script>
+{% endblock extrajs %}
