@@ -493,6 +493,24 @@ class Motion(DjangoVoteModel):
     text: TextField
     motion_type: MotionType
 
+    def verison_agnostic_gid_match(self, banned_ids: list[str]) -> bool:
+        def version_agnostic_gid(gid: str) -> str:
+            """
+            Reduce 2020-01-01b, 2020-01-01c to 2020-01-01
+            """
+            parts = gid.split("/")
+            date = parts.pop(-1)
+            if date[10] != ".":
+                date = date[:10] + date[11:]
+
+            return "/".join(parts + [date])
+
+        self_gid = version_agnostic_gid(self.gid)
+        for banned_id in banned_ids:
+            if self_gid == version_agnostic_gid(banned_id):
+                return True
+        return False
+
     def is_nonaction_vote(self, quiet: bool = True) -> bool:
         """
         Analyse the text of a motion to determine if it is a non-action motion
@@ -642,11 +660,10 @@ class Division(DjangoVoteModel):
         override = self.analysis_override()
         if not override:
             return self
-
         if override.banned_motion_ids:
             banned_ids = [x for x in override.banned_motion_ids.split(",")]
             if self.motion:
-                if self.motion.gid in banned_ids:
+                if self.motion.verison_agnostic_gid_match(banned_ids):
                     self.motion = None
 
         return self
