@@ -1,0 +1,25 @@
+{% for vote_group_row in decision.vote_groups.values %}
+    <div class="row">
+        {% for vote_group in vote_group_row %}
+            <div class = "col-md-6">
+                <div class="division-section__vote division-section__vote__dots">
+                    <h2 id="{{ vote_group.grouping|slugify }}"
+                        title="{{ vote_group.grouping }}">
+                        {{ vote_group.grouping }}: {{ vote_group.count }}
+                        {% if vote_group.count > 1 %}
+                            {{ decision.chamber.member_plural }}
+                        {% else %}
+                            {{ decision.chamber.member_singular }}
+                        {% endif %}
+                    </h2>
+                    <ul class="division-dots">
+                        {% for vote in vote_group.members %}
+                            <li class="people-list__person__party {{ vote.Party|slugify }}"
+                                title="{{ vote.Person.text }} ({{ vote.Party }})"></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endfor %}

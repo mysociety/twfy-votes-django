@@ -94,13 +94,18 @@ class TestDivisionsMonth(BaseTestResponse):
     has_json = True
 
 
-class TestPersonPolicy(BaseTestResponse):
+class TestAgreementInfo(BaseTestResponse):
+    url = "/decisions/agreement/commons/2019-06-24/b.530.1.2"
+    has_json = True
+
+
+class TestPersonPolicies(BaseTestResponse):
     url = "/person/10001/policies/commons/labour/all_time"
     has_json = True
 
 
-class TestAgreementInfo(BaseTestResponse):
-    url = "/decisions/agreement/commons/2019-06-24/b.530.1.2"
+class TestPersonPolicy(BaseTestResponse):
+    url = "/person/10001/policies/commons/labour/all_time/363"
     has_json = True
 
 

@@ -6,29 +6,49 @@ import re
 from pathlib import Path
 from typing import Literal
 
-from django.http import Http404
+from django.http import Http404, HttpRequest
+from django.shortcuts import redirect
 from django.template import Context, Template
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 
 import markdown
+import pandas as pd
 from bs4 import BeautifulSoup
 
 from twfy_votes.helpers.routes import RouteApp
 
-from ..consts import ChamberSlug, PolicyStatus
+from ..consts import (
+    ChamberSlug,
+    PermissionGroupSlug,
+    PolicyDirection,
+    PolicyStatus,
+    VotePosition,
+)
+from ..forms import (
+    AgreementAnnotationForm,
+    DivisionAnnotationForm,
+    OpenRepAnnotationForm,
+    RepAnnotationForm,
+    RepWhipForm,
+    WhipForm,
+)
 from ..models import (
     Agreement,
     Chamber,
     Division,
+    Membership,
     Organization,
     Person,
     Policy,
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
+    UrlColumn,
+    UserPersonLink,
     Vote,
 )
+from .auth import can_view_draft_content, super_users_or_group
 from .helper_models import (
     ChamberPolicyGroup,
     DivisionSearch,
@@ -38,6 +58,98 @@ from .helper_models import (
 from .mixins import TitleMixin
 
 app = RouteApp(app_name="votes")
+
+
+@app.route("submit/{form_slug:slug}/{decision_id:int}", name="forms")
+class FormsView(TemplateView):
+    template_name = "votes/forms.html"
+
+    def get_form_model(self, form_slug: str):
+        match form_slug:
+            case "whip":
+                return WhipForm
+            case "rep_whip":
+                return RepWhipForm
+            case "division_annotation":
+                return DivisionAnnotationForm
+            case "agreement_annotation":
+                return AgreementAnnotationForm
+            case "open_rep_annotation":
+                return OpenRepAnnotationForm
+            case "rep_annotation":
+                return RepAnnotationForm
+            case _:
+                raise Http404("Form not found")
+
+    def user_has_permission(self, form_slug: str):
+        match form_slug:
+            case "whip":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_REPORT_WHIP
+                )
+            case "rep_whip":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_REPORT_SELF_WHIP
+                )
+            case "division_annotation":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+                )
+            case "agreement_annotation":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+                )
+            case "open_rep_annotation":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+                )
+            case "rep_annotation":
+                if not self.request.user.is_authenticated:
+                    return False
+                link = UserPersonLink.objects.get(user=self.request.user)
+                if not link:
+                    return False
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_SELF_ANNOTATIONS
+                )
+            case _:
+                return False
+
+    def get_decision_instance(self, form_slug: str, decision_id: int):
+        match form_slug:
+            case "agreement_annotation":
+                agreement = Agreement.objects.get(id=decision_id)
+                return agreement
+            case _:
+                division = Division.objects.get(id=decision_id)
+                return division
+
+    def post(self, request: HttpRequest, form_slug: str, decision_id: int, **kwargs):
+        form_model = self.get_form_model(form_slug)
+        decision = self.get_decision_instance(form_slug, decision_id)
+        if not self.user_has_permission(form_slug):
+            raise Http404(f"User does not have permission to save form {form_slug}")
+        form = form_model(request.POST)
+        if form.is_valid():
+            form.save(request, decision_id)
+
+            return redirect(decision.url())
+
+        else:
+            # return the form with errors
+            return self.render_to_response({"form": form, "decision": decision})
+
+    def get_context_data(self, form_slug: str, decision_id: int, **kwargs):
+        # decision_int could be division_id or agreement_id
+        form_model = self.get_form_model(form_slug)
+        if not self.user_has_permission(form_slug):
+            raise Http404(f"User does not have permission to access form {form_slug}")
+
+        decision = self.get_decision_instance(form_slug, decision_id)
+
+        form = form_model.from_decision_id(decision_id)
+
+        return {"form": form, "decision": decision}
 
 
 @app.route("help/{markdown_slug:slug}", name="help")
@@ -224,7 +336,8 @@ class DivisionPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Division.objects.get(
             chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
-        )
+        ).apply_analysis_override()
+
         context["decision"] = decision
         context["relevant_policies"] = [
             x.policy
@@ -232,6 +345,19 @@ class DivisionPageView(TitleMixin, TemplateView):
                 decision=decision
             ).prefetch_related("policy")
         ]
+        context["can_add_annotations"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+        )
+        context["can_report_whip"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_REPORT_WHIP
+        )
+        context["can_add_self_annotations"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_ADD_SELF_ANNOTATIONS
+        )
+        context["can_report_self_whip"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_REPORT_SELF_WHIP
+        )
+
         return context
 
 
@@ -253,7 +379,8 @@ class AgreementPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         decision = Agreement.objects.get(
             chamber__slug=chamber_slug, date=decision_date, decision_ref=decision_ref
-        )
+        ).apply_analysis_override()
+
         context["decision"] = decision
         context["decision"] = decision
         context["relevant_policies"] = [
@@ -262,6 +389,9 @@ class AgreementPageView(TitleMixin, TemplateView):
                 decision=decision
             ).prefetch_related("policy")
         ]
+        context["can_add_annotations"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+        )
         return context
 
 
@@ -330,6 +460,8 @@ class PoliciesPageView(TitleMixin, TemplateView):
         context["chambers"] = Chamber.with_votes()
         # get policy statuses
         do_not_display = [PolicyStatus.RETIRED, PolicyStatus.REJECTED]
+        if not can_view_draft_content(self.request.user):
+            do_not_display.append(PolicyStatus.DRAFT)
         context["statuses"] = [x for x in PolicyStatus if x not in do_not_display]
         return context
 
@@ -436,15 +568,22 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         period_slug: str,
         **kwargs,
     ):
+        # When called from the API view, the request object is not available
+        if hasattr(self, "request"):
+            rq = self.request
+        else:
+            rq = None
+
         context = super().get_context_data(**kwargs)
         person = Person.objects.get(id=person_id)
         chamber = Chamber.objects.get(slug=chamber_slug)
         party = Organization.objects.get(slug=party_slug)
         period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
 
-        valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
-
-        # add logic to show drafts here for admin user
+        if rq and can_view_draft_content(rq.user):
+            valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
+        else:
+            valid_status = [PolicyStatus.ACTIVE]
 
         distributions = list(
             person.vote_distributions.filter(
@@ -455,12 +594,202 @@ class PersonPoliciesView(TitleMixin, TemplateView):
             ).prefetch_related("policy")
         )
 
-        collection = PolicyCollection.from_distributions(distributions)
+        collection = PolicyCollection.from_distributions(
+            distributions, url_base=[person_id, chamber_slug, party_slug, period_slug]
+        )
 
         context["person"] = person
         context["chamber"] = chamber
         context["period"] = period
         context["party"] = party
         context["collection"] = collection
+
+        return context
+
+
+@app.route(
+    "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}/{policy_id:int}",
+    name="person_policy_solo",
+)
+class PersonPolicyView(TitleMixin, TemplateView):
+    page_title = "Person Policy"
+    template_name = "votes/person_policy.html"
+
+    def dfs_from_division_links(
+        self,
+        votes: list[Vote],
+        agreements: list[Agreement],
+        division_links: list[PolicyDivisionLink],
+        agreement_links: list[PolicyAgreementLink],
+    ) -> dict[str, pd.DataFrame]:
+        """
+        Create 4(or more?) dataframes of the different groupings of votes
+        """
+
+        division_vote_lookup = {v.division_id: v for v in votes}
+        df_lookup: dict[str, pd.DataFrame] = {}
+        division_items = []
+
+        def is_aligned(vote: Vote, link: PolicyDivisionLink) -> str:
+            if (
+                vote.effective_vote == VotePosition.AYE
+                and link.alignment == PolicyDirection.AGREE
+            ):
+                return "aligned"
+            if (
+                vote.effective_vote == VotePosition.NO
+                and link.alignment == PolicyDirection.AGAINST
+            ):
+                return "aligned"
+            if vote.effective_vote == VotePosition.ABSENT:
+                return "na"
+            return "not aligned"
+
+        for link in division_links:
+            vote = division_vote_lookup.get(link.decision_id)
+            if not vote:
+                raise ValueError(f"Vote for division {link.decision_id} not found")
+            division_items.append(
+                {
+                    "motion": UrlColumn(
+                        url=link.decision.url(), text=link.decision.division_name
+                    ),
+                    "date": link.decision.date,
+                    "person_vote": vote.vote_desc().lower(),
+                    "policy_direction": link.alignment,
+                    "policy_aligned": is_aligned(vote, link),
+                    "policy_strength": f"{link.strength.lower()}_votes",
+                }
+            )
+
+        if division_items:
+            df_lookup.update(
+                {
+                    str(group): ddf.drop(columns=["policy_strength"])
+                    for group, ddf in pd.DataFrame(division_items).groupby(
+                        "policy_strength"
+                    )
+                }
+            )
+
+        # now we add agreements
+        agreement_items = []
+
+        for link in agreement_links:
+            if link.decision not in agreements:
+                continue
+            agreement = link.decision
+            agreement_items.append(
+                {
+                    "motion": UrlColumn(
+                        url=agreement.url(), text=agreement.decision_name
+                    ),
+                    "date": agreement.date,
+                    "policy_direction": link.alignment,
+                    # by definition it's aligned unless the policy wasn't the *oppinion* of the agreement
+                    # generally don't want to make this happen in practice, but is possible
+                    "policy_aligned": "aligned"
+                    if link.alignment == PolicyDirection.AGREE
+                    else "not aligned",
+                    "policy_strength": f"{link.strength.lower()}_agreements",
+                }
+            )
+
+        if agreement_items:
+            df_lookup.update(
+                {
+                    str(group): ddf.drop(columns=["policy_strength"])
+                    for group, ddf in pd.DataFrame(agreement_items).groupby(
+                        "policy_strength"
+                    )
+                }
+            )
+
+        group_order = {
+            "strong_votes": 1,
+            "strong_agreements": 2,
+            "weak_votes": 3,
+            "weak_agreements": 4,
+        }
+
+        # resort df_lookup based on key
+        df_lookup = dict(sorted(df_lookup.items(), key=lambda x: group_order[x[0]]))
+
+        return df_lookup
+
+    def get_context_data(
+        self,
+        person_id: int,
+        chamber_slug: str,
+        party_slug: str,
+        period_slug: str,
+        policy_id: int,
+        **kwargs,
+    ):
+        context = super().get_context_data(**kwargs)
+        person = Person.objects.get(id=person_id)
+        chamber = Chamber.objects.get(slug=chamber_slug)
+        party = Organization.objects.get(slug=party_slug)
+        period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
+        policy = Policy.objects.get(id=policy_id)
+        own_distribution = person.vote_distributions.get(
+            chamber=chamber, period=period, party=party, policy=policy, is_target=1
+        )
+        other_distribution = person.vote_distributions.get(
+            chamber=chamber, period=period, party=party, policy=policy, is_target=0
+        )
+
+        votes = list(
+            Vote.objects.filter(
+                person=person,
+                division__chamber=chamber,
+                division__division_links__policy=policy,
+            ).prefetch_related("division")
+        )
+
+        division_links = list(
+            policy.division_links.filter(
+                decision__chamber=chamber,
+                decision__date__gte=period.start_date,
+                decision__date__lte=period.end_date,
+            ).prefetch_related("decision")
+        )
+        agreement_links = list(
+            policy.agreement_links.filter(
+                decision__chamber=chamber,
+                decision__date__gte=period.start_date,
+                decision__date__lte=period.end_date,
+            ).prefetch_related("decision")
+        )
+
+        relevant_memberships = list(
+            Membership.objects.filter(chamber=chamber, person=person)
+        )
+
+        def is_in_range_agreement(agreement: Agreement) -> bool:
+            for membership in relevant_memberships:
+                if membership.start_date <= agreement.date <= membership.end_date:
+                    return True
+            return False
+
+        agreements = [
+            x.decision for x in agreement_links if is_in_range_agreement(x.decision)
+        ]
+
+        decision_links_and_votes = self.dfs_from_division_links(
+            votes=votes,
+            agreements=agreements,
+            division_links=division_links,
+            agreement_links=agreement_links,
+        )
+
+        context["person"] = person
+        context["chamber"] = chamber
+        context["period"] = period
+        context["party"] = party
+        context["policy"] = policy
+        context["own_distribution"] = own_distribution
+        context["other_distribution"] = other_distribution
+        context["decision_links_and_votes"] = decision_links_and_votes
 
         return context

@@ -6,37 +6,16 @@
     {% elif decision.decision_type == "Agreement" %}
         <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.decision_ref }}</h1>
     {% endif %}
-    <h2>{{ decision.safe_decision_name|safe }}</h2>
-    <p>
-        <a href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
-    </p>
     <div class="alert alert-secondary" role="alert">
         Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
     </div>
-    {% if decision.motion %}
-        <h2>Motion</h2>
-        <p>
-            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
-        </p>
-        <p class = "motion_type">
-            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
-        </p>
-        <p class = "motion_type">
-            Uses Parliamentary powers:
-            {% with decision.motion.motion_uses_powers.simple as sp %}
-                {% if sp == True %}
-                    Yes
-                {% elif sp == False %}
-                    No
-                {% elif sp == None %}
-                    Unknown
-                {% endif %}
-            {% endwith %}
-        </p>
-        <div class = "motion_text">
-            <p>{{ decision.motion.nice_html|safe }}</p>
-        </div>
-    {% endif %}
+    <h2>{{ decision.safe_decision_name|safe }}</h2>
+    {% featureflag pg.ADVANCED_INFO %}
+        <p>Decision Key: {{ decision.key }}</p>
+    {% endfeatureflag %}
+    <p>
+        <a href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
+    </p>
     <h2>Result</h2>
     {% if decision.decision_type == "Agreement" %}
         {% if decision.negative %}
@@ -54,57 +33,77 @@
                 <p>🤝Motion tied (failed).</p>
             {% endif %}
         {% endwith %}
+
+        {% include 'votes/includes/division_dots.html' %}
+        <h3>Parliamentary analysis</h3>
+
+        {% include 'votes/includes/division_clusters.html' %}
     {% endif %}
-    {% if decision.decision_type == "Division" %}
-        <h2>Parliamentary dynamics</h2>
-        {% with decision.voting_cluster as dc %}
-            <strong>{{ dc.desc }}</strong>
-            {% with dc.tag as vc_tag %}
-                {% if vc_tag == "opp_strong_aye_gov_strong_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
-                        This usually suggests an important point of principle, or that it would have substantive effects if passed.
-                    {% endmarkdown %}
-                {% elif vc_tag == "gov_strong_aye_opp_strong_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
-                        This usually suggests an important point of principle, that even if the government is likely to win, is significant public signal of opposition.
-                    {% endmarkdown %}
-                {% elif vc_tag == "gov_aye_opp_lean_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the government is proposing a motion,
-                        but there is division among opposition MPs/parties in opposing it (but generally, leaning against).
-                    {% endmarkdown %}
-                {% elif vc_tag == "opp_aye_weak_gov_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the motion is proposed by the opposition, the
-                        result is quite polarized, but there is a medium level of participation (most MPs, but not all).
-                        This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
-                    {% endmarkdown %}
-                {% elif vc_tag == "gov_aye_opp_weak_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the government is proposing a motion,
-                        but opposition is less strongly opposing it (higher numbers of absences).
-                        This can reflect different views between opposition parties - where at least one party
-                        neither wants to be on the record as voting for or against.
-                    {% endmarkdown %}
-                {% elif vc_tag == "gov_no_opp_lean_no" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where the government is voting against a motion, and opposition MPs/parties are divided in their support.
-                        This can reflect an amendment or motion bought by one opposition party, which other opposition parties are not supportive of.
-                    {% endmarkdown %}
-                {% elif vc_tag == "low_participation" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where there is low participation from both sides.
-                        This might be non-contentious or procedural motions in the early stages of member proposed bills.
-                    {% endmarkdown %}
-                {% elif vc_tag == "cross_party_aye" %}
-                    {% markdown %}
-                        This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
-                        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/opposition lines.
-                    {% endmarkdown %}
+    {% if decision.motion %}
+        <h2>Motion</h2>
+        {% featureflag pg.ADVANCED_INFO %}
+            <p>Motion GID: {{ decision.motion.gid }}</p>
+        {% endfeatureflag %}
+        <p class = "motion_type">
+            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
+        </p>
+        {% featureflag pg.ADVANCED_INFO %}
+            <p class = "motion_type">
+                Uses Parliamentary powers:
+                {% with decision.motion.motion_uses_powers.simple as sp %}
+                    {% if sp == True %}
+                        Yes
+                    {% elif sp == False %}
+                        No
+                    {% elif sp == None %}
+                        Unknown
+                    {% endif %}
+                {% endwith %}
+            </p>
+        {% endfeatureflag %}
+        <div class = "motion_text">
+            <p>{{ decision.motion.nice_html|safe }}</p>
+        </div>
+        <p>
+            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
+        </p>
+    {% endif %}
+    {% with decision.get_annotations as annotations %}
+        {% if annotations or can_add_annotations %}
+            <h2>Annotations</h2>
+            <ul>
+                {% for annotation in annotations %}<li>{{ annotation.html|safe }}</li>{% endfor %}
+            </ul>
+            {% if can_add_annotations %}
+                {% if decision.decision_type == "Division" %}
+                    <p>
+                        <a href="{% url 'forms' 'division_annotation' decision.id %}">Add an annotation</a>
+                    </p>
+                {% elif decision.decision_type == "Agreement" %}
+                    <p>
+                        <a href="{% url 'forms' 'agreement_annotation' decision.id %}">Add an annotation</a>
+                    </p>
                 {% endif %}
-            {% endwith %}
+            {% endif %}
+        {% endif %}
+    {% endwith %}
+    {% if decision.decision_type == "Division" %}
+        {% with decision.whip_report_df as whip_report_df %}
+            {% if whip_report_df is not None or can_report_whip or can_report_self_whip %}
+                <h2>Whip reports</h2>
+                {% if whip_report_df is not None %}
+                    {% style_df whip_report_df %}
+                {% endif %}
+                {% if can_report_whip %}
+                    <p>
+                        <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
+                    </p>
+                {% elif can_report_self_whip %}
+                    <p>
+                        <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
+                    </p>
+                {% endif %}
+            {% endif %}
         {% endwith %}
     {% endif %}
     {% if relevant_policies %}
@@ -124,19 +123,30 @@
         <h2>Party voting breakdown</h2>
         {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
         <h2>Voting list</h2>
+        {% if can_add_annotations %}
+            <p>
+                <a href="{% url 'forms' 'open_rep_annotation' decision.id %}">Add a vote annotation</a>
+            </p>
+        {% elif can_add_self_annotations %}
+            <p>
+                <a href="{% url 'forms' 'rep_annotation' decision.id %}">Add your vote annotation</a>
+            </p>
+        {% endif %}
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
-        <h2>Membership list</h2>
-        <div class="alert alert-warning" role="alert">
-            <p>
-                This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
-            </p>
-            <p>
-                It shouldn't be taken as given that all of these people would have voted in favour of the motion, or that they were present.
-            </p>
-            <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
-        </div>
-        {% style_df decision.votes_df %}
+        {% featureflag pg.ADVANCED_INFO %}
+            <h2>Membership list</h2>
+            <div class="alert alert-warning" role="alert">
+                <p>
+                    This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
+                </p>
+                <p>
+                    It shouldn't be taken as given that all of these people would have voted in favour of the motion, or that they were present.
+                </p>
+                <p>This is included for transparency on the small number of agreements we include in voting summaries.</p>
+            </div>
+            {% style_df decision.votes_df %}
+        {% endfeatureflag %}
     {% endif %}
 {% endblock content.inner %}
 

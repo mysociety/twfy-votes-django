@@ -4,12 +4,14 @@ from typing import Any
 from urllib.parse import urlencode
 
 from django.contrib.auth import get_user_model
-from django.template import Library, Node
+from django.template import Library, Node, TemplateSyntaxError
 from django.template.defaultfilters import stringfilter
 from django.utils.safestring import mark_safe
 
 import markdown
 import pandas as pd
+
+from votes.views.auth import super_users_or_group
 
 register = Library()
 User = get_user_model()
@@ -114,9 +116,9 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
         percentage_columns = list(percentage_columns)  # type: ignore
 
     def format_percentage(value: float):
-        # if value is na return "-"
+        # if value is na return "n/a"
         if pd.isna(value):
-            return "-"
+            return "n/a"
         if isinstance(value, str):
             return value
         return "{:.2%}".format(value)
@@ -174,5 +176,68 @@ class MarkdownNode(Node):
                 [line[smallest_indent:] for line in markdown_text.splitlines()]
             )
 
+        # add an extra line space between all new lines
+        markdown_text = markdown_text.replace("\n", "\n\n\n")
+
         text = markdown.markdown(markdown_text, extensions=["toc"])
         return text
+
+
+class DraftNode(Node):
+    """
+    Node class to conditionally render content inside {% draft %}...{% enddraft %}
+    """
+
+    def __init__(self, nodelist):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        if context.get("can_view_draft_content"):
+            return self.nodelist.render(context)
+        return ""
+
+
+@register.tag(name="draft")
+def do_draft(parser, token):
+    """
+    Custom template block tag: {% draft %}...{% enddraft %}
+    Renders content only if the user has draft access.
+    """
+    nodelist = parser.parse(("enddraft",))  # Parse until {% enddraft %}
+    parser.delete_first_token()  # Remove 'enddraft'
+    return DraftNode(nodelist)
+
+
+class UserFlagNode(Node):
+    """
+    Node class to conditionally render content inside {% userflag "flag_name" %}...{% enduserflag %}
+    """
+
+    def __init__(self, nodelist, flag_name):
+        self.nodelist = nodelist
+        self.flag_name = flag_name
+
+    def render(self, context):
+        request = context.get("request")
+        if not request:
+            return ""
+        if super_users_or_group(request.user, self.flag_name):
+            return self.nodelist.render(context)
+        return ""
+
+
+@register.tag(name="featureflag")
+def do_userflag(parser, token):
+    """
+    Custom template block tag: {% featureflag pg.ADVANCED_INFO %}...{% endfeatureflag %}
+    Renders content only if the user has the specified flag access.
+    """
+    try:
+        tag_name, flag_name = token.split_contents()
+    except ValueError:
+        raise TemplateSyntaxError(
+            "%r tag requires a single argument" % token.contents.split()[0]
+        )
+    nodelist = parser.parse(("endfeatureflag",))
+    parser.delete_first_token()
+    return UserFlagNode(nodelist, flag_name.strip('"'))

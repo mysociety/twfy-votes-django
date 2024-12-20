@@ -12,6 +12,7 @@ from typing import (
     TypeVar,
 )
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -35,6 +36,7 @@ from twfy_votes.helpers.typed_django.models import (
 
 from .consts import (
     ChamberSlug,
+    EvidenceType,
     MotionType,
     OrganisationType,
     PolicyDirection,
@@ -46,6 +48,8 @@ from .consts import (
     StrengthMeaning,
     TagType,
     VotePosition,
+    WhipDirection,
+    WhipPriority,
 )
 from .policy_generation.scoring import (
     ScoringFuncProtocol,
@@ -60,6 +64,19 @@ if TYPE_CHECKING:
         Vote,
         VoteDistribution,
     )
+
+
+class UserPersonLink(DjangoVoteModel):
+    """
+    For connecting users to specific people
+    Used to give reps the ability to add content
+    related to them.
+    """
+
+    user: DoNothingForeignKey[User] = related_name("user_person_links")
+    user_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("user_person_links")
+    person_id: Dummy[int] = 0
 
 
 class InstructionDict(TypedDict):
@@ -80,6 +97,31 @@ class UrlColumn:
 
     def __str__(self) -> str:
         return f'<a href="{self.url}">{self.text}</a>'
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text == other.text
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text < other.text
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text <= other.text
+
+    def __gt__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text > other.text
+
+    def __ge__(self, other: object) -> bool:
+        if not isinstance(other, UrlColumn):
+            return NotImplemented
+        return self.text >= other.text
 
 
 class DecisionProtocol(Protocol):
@@ -313,6 +355,9 @@ class Organization(DjangoVoteModel):
     org_memberships: DummyOneToMany["Membership"] = related_name("organization")
     party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class OrgMembershipCount(DjangoVoteModel):
     chamber_slug: ChamberSlug
@@ -357,6 +402,9 @@ class Chamber(DjangoVoteModel):
     member_plural: str
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
+
+    def member_singular(self) -> str:
+        return self.member_plural[:-1]
 
     def last_decision_date(self) -> Optional[datetime.date]:
         last_division = Division.objects.filter(chamber=self).order_by("-date").first()
@@ -448,6 +496,24 @@ class Motion(DjangoVoteModel):
     title: str
     text: TextField
     motion_type: MotionType
+
+    def verison_agnostic_gid_match(self, banned_ids: list[str]) -> bool:
+        def version_agnostic_gid(gid: str) -> str:
+            """
+            Reduce 2020-01-01b, 2020-01-01c to 2020-01-01
+            """
+            parts = gid.split("/")
+            date = parts.pop(-1)
+            if date[10] != ".":
+                date = date[:10] + date[11:]
+
+            return "/".join(parts + [date])
+
+        self_gid = version_agnostic_gid(self.gid)
+        for banned_id in banned_ids:
+            if self_gid == version_agnostic_gid(banned_id):
+                return True
+        return False
 
     def is_nonaction_vote(self, quiet: bool = True) -> bool:
         """
@@ -575,6 +641,9 @@ class Division(DjangoVoteModel):
     is_gov_breakdowns: DummyOneToMany[DivisionsIsGovBreakdown] = related_name(
         "division"
     )
+    whip_reports: DummyOneToMany[WhipReport] = related_name("division")
+    division_annotations: DummyOneToMany[DivisionAnnotation] = related_name("division")
+    vote_annotations: DummyOneToMany[VoteAnnotation] = related_name("division")
     tags: DummyManyToMany[DivisionTag] = related_name("division")
     motion_id: Dummy[Optional[int]] = None
     motion: Optional[Motion] = field(
@@ -585,6 +654,43 @@ class Division(DjangoVoteModel):
         default=None,
         related_name="divisions",
     )
+
+    def whip_report_df(self) -> pd.DataFrame | None:
+        wf = list(
+            self.whip_reports.all().values(
+                "party__name", "whip_direction", "whip_priority"
+            )
+        )
+        if not wf:
+            return None
+        df = pd.DataFrame(data=wf)
+        df.columns = ["Party", "Whip direction", "Whip priority"]
+        # remove duplicates
+        df = df.drop_duplicates()
+        return df
+
+    def get_annotations(self) -> list[DivisionAnnotation]:
+        return list(self.division_annotations.all())
+
+    def analysis_override(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_override()
+        if not override:
+            return self
+        if override.banned_motion_ids:
+            banned_ids = [x for x in override.banned_motion_ids.split(",")]
+            if self.motion:
+                if self.motion.verison_agnostic_gid_match(banned_ids):
+                    self.motion = None
+
+        return self
 
     def motion_type(self) -> MotionType:
         if self.motion:
@@ -613,13 +719,23 @@ class Division(DjangoVoteModel):
             "low_participation": "Low participation vote",
             "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
             "cross_party_aye": "Cross party aye",
+            "free_vote": "Free vote",
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
         data = tag.analysis_data if tag else "Unknown"
+        bespoke = ""
+
+        analysis_override = self.analysis_override()
+        if analysis_override:
+            if analysis_override.parl_dynamics_group:
+                data = analysis_override.parl_dynamics_group
+            if analysis_override.manual_parl_dynamics_desc:
+                bespoke = analysis_override.manual_parl_dynamics_desc
+
         desc = lookup.get(data, "Unknown")
 
-        return {"tag": data, "desc": desc}
+        return {"tag": data, "desc": desc, "bespoke": bespoke}
 
     def twfy_link(self) -> str:
         gid = self.source_gid.split("/")[-1]
@@ -643,7 +759,7 @@ class Division(DjangoVoteModel):
         )
 
     def safe_decision_name(self) -> str:
-        if self.motion:
+        if self.motion and self.chamber_slug == ChamberSlug.SCOTLAND:
             return self.motion.title
         return self.division_name
 
@@ -660,7 +776,7 @@ class Division(DjangoVoteModel):
                 "Party turnout": x.signed_votes / x.vote_participant_count,
                 "For motion percentage": x.for_motion_percentage
                 if not pd.isna(x.for_motion_percentage)
-                else "-",
+                else "n/a",
             }
             for x in self.party_breakdowns.all()
         ]
@@ -707,11 +823,49 @@ class Division(DjangoVoteModel):
 
         return df
 
+    def vote_groups(self):
+        vote_groups = {
+            "directional": [],
+            "tellers": [],
+            "misc": [],
+        }
+
+        sdf = self.votes_df().sort_values("Person").sort_values("Party")
+
+        for group, df in sdf.groupby("Vote"):
+            if group == "Absent":
+                pass
+            if group == "Tellaye":
+                group = "Aye (Teller)"
+            if group == "Tellno":
+                group = "No (Teller)"
+            vote_group = {
+                "grouping": group,
+                "count": len(df),
+                "members": df.to_dict(orient="records"),
+            }
+            match group:
+                case "Aye" | "No":
+                    vote_groups["directional"].append(vote_group)
+                case "Absent" | "Abstain":
+                    vote_groups["misc"].append(vote_group)
+                case "Aye (Teller)" | "No (Teller)":
+                    vote_groups["tellers"].append(vote_group)
+
+        return vote_groups
+
     def votes_df(self) -> pd.DataFrame:
+        existing = getattr(self, "_votes_df", None)
+        if existing is not None:
+            return existing
+
         relevant_memberships = Membership.objects.filter(
             chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
         )
         person_to_membership_map = {x.person_id: x for x in relevant_memberships}
+
+        vote_annotations = self.vote_annotations.all()
+        vote_annotation_map = {x.person_id: x.url_column() for x in vote_annotations}
 
         data = [
             {
@@ -724,15 +878,23 @@ class Division(DjangoVoteModel):
                     if v.diff_from_party_average is not None
                     else nan
                 ),
+                "Annotation": vote_annotation_map.get(v.person_id, "-"),
             }
             for v in self.votes.all()
         ]
 
         for d in data:
             if pd.isna(d["Party alignment"]):
-                d["Party alignment"] = "-"
+                d["Party alignment"] = "n/a"
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        if len(vote_annotation_map) == 0:
+            df = df.drop(columns=["Annotation"])
+
+        setattr(self, "_votes_df", df)
+
+        return df
 
 
 class DivisionTag(DjangoVoteModel):
@@ -844,6 +1006,32 @@ class Agreement(DjangoVoteModel):
         related_name="agreements",
         default=None,
     )
+    agreement_annotations: DummyOneToMany[AgreementAnnotation] = related_name(
+        "agreement"
+    )
+
+    def get_annotations(self) -> list[AgreementAnnotation]:
+        return list(self.agreement_annotations.all())
+
+    def analysis_override(self) -> Optional[AnalysisOverride]:
+        existing = getattr(self, "_override", None)
+        if existing:
+            return existing
+        result = AnalysisOverride.objects.filter(decision_key=self.key).first()
+        setattr(self, "_override", result)
+        return result
+
+    def apply_analysis_override(self):
+        override = self.analysis_override()
+        if not override:
+            return self
+        if override.banned_motion_ids:
+            banned_ids = [x for x in override.banned_motion_ids.split(",")]
+            if self.motion:
+                if self.motion.gid in banned_ids:
+                    self.motion = None
+
+        return self
 
     def motion_type(self) -> MotionType:
         if self.motion:
@@ -865,7 +1053,8 @@ class Agreement(DjangoVoteModel):
     def twfy_link(self) -> str:
         gid = self.decision_ref.split("/")[-1]
         # remove the final .number
-        gid = f"{self.date.isoformat()}.".join(gid.split(".")[:-1])
+        gid = ".".join(gid.split(".")[:-1])
+        gid = f"{self.date.isoformat()}{gid}"
         return self.chamber.twfy_debate_link(gid)
 
     def votes_df(self) -> pd.DataFrame:
@@ -1049,6 +1238,14 @@ class VoteDistribution(DjangoVoteModel):
         )
 
     @property
+    def str_similarity_percentage(self) -> str:
+        return f"{round((1 - self.distance_score) * 100)}%"
+
+    @property
+    def str_distance_percentage(self) -> str:
+        return f"{round((self.distance_score) * 100)}%"
+
+    @property
     def verbose_score(self) -> str:
         match self.distance_score:
             case s if 0 <= s <= 0.05:
@@ -1081,3 +1278,72 @@ class RebellionRate(DjangoVoteModel):
 
     def composite_key(self) -> str:
         return f"{self.person_id}-{self.period_type}-{self.period_number}"
+
+
+class WhipReport(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("whip_reports")
+    party_id: Dummy[int] = 0
+    party: DoNothingForeignKey[Organization] = related_name("whip_reports")
+    whip_direction: WhipDirection
+    whip_priority: WhipPriority
+    evidence_type: EvidenceType
+    evidence_detail: TextField = field(default="", blank=True)
+
+
+class DivisionAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("division_annotations")
+    detail: str = ""
+    link: str = ""
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
+
+
+class AgreementAnnotation(DjangoVoteModel):
+    agreement_id: Dummy[int] = 0
+    agreement: DoNothingForeignKey[Agreement] = related_name("agreement_annotations")
+    detail: str = ""
+    link: str = ""
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
+
+
+class VoteAnnotation(DjangoVoteModel):
+    division_id: Dummy[int] = 0
+    division: DoNothingForeignKey[Division] = related_name("vote_annotations")
+    person_id: Dummy[int] = 0
+    person: DoNothingForeignKey[Person] = related_name("vote_annotations")
+    detail: str = ""
+    link: str
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
+
+    def url_column(self) -> UrlColumn:
+        return UrlColumn(url=self.link, text=self.detail)
+
+
+class AnalysisOverride(DjangoVoteModel):
+    """
+    This is an option to override automatically created division data.
+    """
+
+    decision_key: str
+    banned_motion_ids: TextField = field(blank=True, default="")
+    parl_dynamics_group: str = field(blank=True, default="")
+    manual_parl_dynamics_desc: TextField = field(blank=True, default="")

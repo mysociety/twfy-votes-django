@@ -51,7 +51,7 @@ blank_line_after_tag = "endblock"
 blank_line_before_tag = "load,extends,include,block"
 format_js = true
 format_css = true
-custom_blocks = "markdown,switch,case"
+custom_blocks = "markdown,switch,case,featureflag,draft"
 
 [tool.ruff]
 extend-exclude = ["migrations"]

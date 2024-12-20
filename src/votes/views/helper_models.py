@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from itertools import groupby
 
+from django.urls import reverse
+
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
@@ -62,7 +64,6 @@ class ChamberPolicyGroup(BaseModel):
 
 class PolicyCollection(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-
     groups: list[PolicyDisplayGroup]
 
     def __iter__(self):
@@ -70,7 +71,7 @@ class PolicyCollection(BaseModel):
 
     @classmethod
     def from_distributions(
-        cls, distributions: list[VoteDistribution]
+        cls, distributions: list[VoteDistribution], url_base: list[str | int]
     ) -> list[PolicyDisplayGroup]:
         def get_key(v: VoteDistribution) -> str:
             return (
@@ -115,7 +116,11 @@ class PolicyCollection(BaseModel):
 
         sig_links = [x for x in pp_list if x.significant_difference]
         groups.append(
-            PolicyDisplayGroup(name="Significant Policies", paired_policies=sig_links)
+            PolicyDisplayGroup(
+                name="Significant Policies",
+                paired_policies=sig_links,
+                url_base=url_base,
+            )
         )
 
         slug_lookup = {x.slug: x for x in PolicyGroup.objects.all()}
@@ -131,6 +136,7 @@ class PolicyCollection(BaseModel):
                     PolicyDisplayGroup(
                         name=slug_lookup[group_slug].description,
                         paired_policies=grouped_items,
+                        url_base=url_base,
                     )
                 )
 
@@ -141,6 +147,7 @@ class PolicyDisplayGroup(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
+    url_base: list[str | int]
     paired_policies: list[PairedPolicy]
 
     def model_dump(self):
@@ -167,10 +174,14 @@ class PolicyDisplayGroup(BaseModel):
 
         items: list[GroupTableItem] = []
         for link in self.paired_policies:
+            item_url = reverse(
+                "person_policy_solo", args=self.url_base + [str(link.policy.id)]
+            )
             item = GroupTableItem(
                 policy_name=str(
                     UrlColumn(
-                        url=link.policy.url(),
+                        # url=link.policy.url(), # link direct to policy item
+                        url=item_url,
                         text=link.policy.context_description or link.policy.name,
                     )
                 ),

@@ -23,7 +23,7 @@ fi
 if ! grep ^DEVENV .env ; then
     echo "DEVENV key not found in your environment."
     while [ -z "$devenv" ] ; do
-        read -p 'Would you prefer to run local intelligence natively ("native") or with Docker Compose ("docker")? ' devenv
+        read -p 'Would you prefer to run natively ("native") or with Docker Compose ("docker")? ' devenv
         case "$devenv" in
             native|docker)
                 echo "DEVENV=${devenv}" >>.env

@@ -3,6 +3,15 @@ from __future__ import annotations
 from enum import IntEnum, StrEnum
 
 
+class PermissionGroupSlug(StrEnum):
+    CAN_VIEW_DRAFT = "can_view_draft"  # can view draft features and info
+    ADVANCED_INFO = "advanced_info"  # can view extra ids and other admin info
+    CAN_REPORT_WHIP = "can_report_whip"  # can add whipreports
+    CAN_REPORT_SELF_WHIP = "can_report_self_whip"  # can add self whipreports
+    CAN_ADD_ANNOTATIONS = "can_add_annotations"  # can add annotations
+    CAN_ADD_SELF_ANNOTATIONS = "can_add_self_annotations"  # can add self annotations
+
+
 class PolicyStrength(StrEnum):
     """
     This is the strength of the relationship between the motion and the policy.
@@ -211,3 +220,34 @@ class OrganisationType(StrEnum):
 
 class TagType(StrEnum):
     GOV_CLUSTERS = "gov_clusters"
+
+
+class WhipPriority(StrEnum):
+    """
+    This is the priority of the whip.
+    """
+
+    FREE = "free"
+    ONE_LINE = "one_line"  # one line whip - preferred vote with no strong attendance
+    TWO_LINE = "two_line"  # two line, rare - instruct to attend without preference
+    THREE_LINE = (
+        "three_line"  # three line - instruct to attend and vote with preference
+    )
+
+
+class EvidenceType(StrEnum):
+    REP = "from_rep"
+    WHIP = "from_whip"
+    REPORTING = "from_reporting"
+    OTHER = "from_other"
+
+
+class WhipDirection(StrEnum):
+    """
+    This is the direction of the whip.
+    """
+
+    FOR = "for"
+    AGAINST = "against"
+    ABSTAIN = "abstain"
+    FREE = "free"

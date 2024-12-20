@@ -1,5 +1,5 @@
 import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from django.conf import settings
 from django.http import HttpRequest
@@ -8,20 +8,29 @@ from ninja import ModelSchema, NinjaAPI, Schema
 from ninja.security import HttpBearer
 from pydantic import BaseModel
 
-from ..consts import PolicyStatus
+from ..consts import PolicyStatus, RebellionPeriodType
 from ..models import (
     Agreement,
+    AgreementAnnotation,
+    Chamber,
     Division,
+    DivisionAnnotation,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
+    DivisionTag,
+    Motion,
+    Organization,
     Person,
     Policy,
     PolicyAgreementLink,
+    PolicyComparisonPeriod,
     PolicyDivisionLink,
     PolicyGroup,
+    RebellionRate,
     Update,
     Vote,
+    VoteAnnotation,
     VoteDistribution,
 )
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
@@ -37,6 +46,36 @@ class AuthBearer(HttpBearer):
 
 
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
+
+
+class OrganizationSchema(ModelSchema):
+    class Meta:
+        model = Organization
+        fields = "__all__"
+
+
+class ChamberSchema(ModelSchema):
+    class Meta:
+        model = Chamber
+        fields = "__all__"
+
+
+class PolicyComparisonPeriodSchema(ModelSchema):
+    class Meta:
+        model = PolicyComparisonPeriod
+        fields = "__all__"
+
+
+class DivisionTagSchema(ModelSchema):
+    class Meta:
+        model = DivisionTag
+        fields = "__all__"
+
+
+class MotionSchema(ModelSchema):
+    class Meta:
+        model = Motion
+        fields = "__all__"
 
 
 class VoteDistributionSchema(ModelSchema):
@@ -92,11 +131,50 @@ class DivisionSchema(ModelSchema):
         fields = "__all__"
 
 
+class AgreementAnnotationSchema(ModelSchema):
+    class Meta:
+        model = AgreementAnnotation
+        fields = "__all__"
+
+
+class DivisionAnnotationSchema(ModelSchema):
+    class Meta:
+        model = DivisionAnnotation
+        fields = "__all__"
+
+
+class VoteAnnotationSchema(ModelSchema):
+    class Meta:
+        model = VoteAnnotation
+        fields = "__all__"
+
+
 class DivisionWithInfoSchema(ModelSchema):
     votes: list[VoteSchema]
     overall_breakdowns: list[DivisionBreakdownSchema]
     party_breakdowns: list[DivisionPartyBreakdownSchema]
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
+    motion: MotionSchema | None
+    voting_cluster: dict[str, str]
+    division_annotations: list[DivisionAnnotationSchema]
+    vote_annotations: list[VoteAnnotationSchema]
+    whip_reports: list[dict[str, Any]]
+
+    @staticmethod
+    def resolve_whip_reports(obj: Division):
+        df = obj.whip_report_df()
+        if df is None:
+            return []
+        # for columns, drop to lower case and change spaces to underscores
+        df.columns = [x.lower().replace(" ", "_") for x in df.columns]
+        return df.to_dict(orient="records")
+
+    @staticmethod
+    def resolve_voting_cluster(obj: Division):
+        di = obj.voting_cluster()
+        if di["bespoke"] == "":
+            di.pop("bespoke")
+        return di
 
     class Meta:
         model = Division
@@ -104,6 +182,8 @@ class DivisionWithInfoSchema(ModelSchema):
 
 
 class AgreementSchema(ModelSchema):
+    agreement_annotations: list[AgreementAnnotationSchema]
+
     class Meta:
         model = Agreement
         fields = "__all__"
@@ -142,6 +222,13 @@ class PolicySchema(ModelSchema):
     class Meta:
         model = Policy
         fields = "__all__"
+
+
+class RebellionRateSchema(ModelSchema):
+    class Meta:
+        model = RebellionRate
+        fields = "__all__"
+        exclude = ["id"]
 
 
 class PairedPolicySchema(BaseModel):
@@ -184,6 +271,17 @@ class TriggerSchema(Schema):
     shortcut: str
 
 
+class PersonPolicySchema(BaseModel):
+    person: PersonSchema
+    chamber: ChamberSchema
+    period: PolicyComparisonPeriodSchema
+    party: OrganizationSchema
+    policy: PolicySchema
+    own_distribution: VoteDistributionSchema
+    other_distribution: VoteDistributionSchema
+    decision_links_and_votes: dict[str, list[dict[str, Any]]]
+
+
 @api.post("/webhooks/refresh", include_in_schema=False, auth=AuthBearer())
 def refresh_webhook(request: HttpRequest, item: TriggerSchema):
     """
@@ -208,7 +306,7 @@ def get_division(
 ):
     return Division.objects.get(
         chamber_slug=chamber_slug, date=date, division_number=division_number
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/people/{people_option}.json", response=list[PersonSchema])
@@ -250,6 +348,36 @@ def get_person_policies(
 
 
 @api.get(
+    "/person/{person_id}/policies/{chamber_slug}/{party_slug}/{period_slug}/{policy_id}.json",
+    response=PersonPolicySchema,
+)
+def get_person_policy(
+    request: HttpRequest,
+    person_id: int,
+    chamber_slug: str,
+    party_slug: str,
+    period_slug: str,
+    policy_id: int,
+):
+    from .views import PersonPolicyView
+
+    data = PersonPolicyView().get_context_data(
+        person_id, chamber_slug, party_slug, period_slug, policy_id
+    )
+
+    data.pop("view")
+
+    data["decision_links_and_votes"] = {
+        x: y.to_dict(orient="records")
+        for x, y in data["decision_links_and_votes"].items()
+    }
+
+    print(data)
+
+    return data
+
+
+@api.get(
     "/decisions/agreement/{chamber_slug}/{date}/{decision_ref}.json",
     response=AgreementSchema,
 )
@@ -258,21 +386,27 @@ def get_agreement(
 ):
     return Agreement.objects.get(
         chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
-    )
+    ).apply_analysis_override()
 
 
 @api.get("/decisions/{chamber_slug}/{year}.json", response=list[DivisionSchema])
 def get_divisions_by_year(request: HttpRequest, chamber_slug: str, year: int):
-    return Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(chamber_slug=chamber_slug, date__year=year)
+    ]
 
 
 @api.get("/decisions/{chamber_slug}/{year}/{month}.json", response=list[DivisionSchema])
 def get_divisions_by_month(
     request: HttpRequest, chamber_slug: str, year: int, month: int
 ):
-    return Division.objects.filter(
-        chamber_slug=chamber_slug, date__year=year, date__month=month
-    )
+    return [
+        x.apply_analysis_override()
+        for x in Division.objects.filter(
+            chamber_slug=chamber_slug, date__year=year, date__month=month
+        )
+    ]
 
 
 @api.get("/policies.json", response=list[PolicySchema])
@@ -324,3 +458,49 @@ def get_all_policy_reports(request: HttpRequest):
 @api.get("/twfy-compatible/popolo/{policy_id}.json", response=PopoloPolicy)
 def get_popolo_policy(request: HttpRequest, policy_id: int):
     return PopoloPolicy.from_policy_id(policy_id)
+
+
+@api.get(
+    "/party_alignment/{period_slug}/{period_number}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment_all(
+    request: HttpRequest, period_slug: Literal["year", "period"], period_number: int
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, period_number=period_number
+    ).order_by("person_id")
+
+
+@api.get(
+    "/party_alignment/person/{person_id}/{period_slug}.json",
+    response=list[RebellionRateSchema],
+)
+def get_party_alignment(
+    request: HttpRequest,
+    person_id: str,
+    period_slug: Literal["all_time", "year", "period"],
+):
+    match period_slug:
+        case "year":
+            period_int = RebellionPeriodType.YEAR
+        case "all_time":
+            period_int = RebellionPeriodType.ALLTIME
+        case "period":
+            period_int = RebellionPeriodType.PERIOD
+        case _:
+            raise ValueError(f"Unknown period slug {period_slug}")
+
+    return RebellionRate.objects.filter(
+        period_type=period_int, person_id=person_id
+    ).order_by("period_number")

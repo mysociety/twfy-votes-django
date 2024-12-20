@@ -18,7 +18,7 @@ compiled_dir = Path(BASE_DIR, "data", "compiled")
 votes_with_parties = compiled_dir / "votes_with_parties.parquet"
 votes_with_diff = compiled_dir / "votes_with_diff.parquet"
 divisions_party_with_counts = compiled_dir / "divisions_party_with_counts.parquet"
-
+existing_votes = compiled_dir / "existing_votes.parquet"
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
 
@@ -36,6 +36,11 @@ class pw_divisions_party_with_counts:
 @duck.as_alias
 class ps_divisions:
     alias_for = "postgres_db.votes_division"
+
+
+@duck.as_alias
+class ps_votes:
+    alias_for = "postgres_db.votes_vote"
 
 
 @duck.as_macro
@@ -59,6 +64,22 @@ class str_to_int_vote_position:
     """
 
 
+@duck.to_parquet(dest=existing_votes)
+class ps_existing_votes:
+    """
+    Get existing votes from the database
+    """
+
+    query = """
+    SELECT
+        id,
+        division_id,
+        person_id,
+    FROM
+        ps_votes
+    """
+
+
 @duck.to_parquet(dest=votes_with_diff)
 class pw_votes_with_party_difference:
     """
@@ -67,7 +88,6 @@ class pw_votes_with_party_difference:
 
     query = """
     SELECT
-        row_number() over() as id,
         cm_votes_with_people.* exclude(total_possible_members, division_id, vote, effective_vote),
         str_to_int_vote_position(cm_votes_with_people.vote) as vote,
         str_to_int_vote_position(cm_votes_with_people.effective_vote) as effective_vote,
@@ -90,11 +110,45 @@ class pw_votes_with_party_difference:
     """
 
 
+def extend_ids(col: pd.Series) -> pd.Series:
+    """
+    Given a series of ids, and some Nones,
+    add new ids starting from the max of the existing ids
+    """
+
+    max_id = col.max()
+    if pd.isna(max_id):
+        max_id = 0
+    max_id += 1
+
+    def add_id(x):
+        nonlocal max_id
+        if pd.isna(x):
+            x = max_id
+            max_id += 1
+        return x
+
+    col = col.apply(add_id)
+
+    return col
+
+
 def create_full_table(quiet: bool = False):
     # this is such a big table we're skipping the pydantic validation step
     # doing a basic set of checks on things not imposed by types
 
     df = pd.read_parquet(votes_with_diff)
+
+    # for consistency, we need to get the existing ids
+    df_existing = pd.read_parquet(existing_votes)
+
+    # join to get ids where they already exist
+    df = df.merge(df_existing, on=["division_id", "person_id"], how="left")
+
+    # now we need to add ids for the new votes - starting at the current max
+    df["id"] = extend_ids(df["id"])
+
+    df.to_parquet(votes_with_diff, index=False)
 
     # test that we've only got valid vote positions
     # at this point
