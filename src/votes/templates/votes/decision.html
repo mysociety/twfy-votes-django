@@ -68,6 +68,22 @@
             <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
         </p>
     {% endif %}
+    {% with decision.get_annotations as annotations %}
+        {% if annotations %}
+            <h2>Annotations</h2>
+            <ul>
+                {% for annotation in annotations %}<li>{{ annotation.html|safe }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    {% if decision.decision_type == "Division" %}
+        {% with decision.whip_report_df as whip_report_df %}
+            {% if whip_report_df is not None %}
+                <h2>Whip reports</h2>
+                {% style_df whip_report_df %}
+            {% endif %}
+        {% endwith %}
+    {% endif %}
     {% if relevant_policies %}
         <h2>Policies</h2>
         <p>This decision is part of the following policies:</p>

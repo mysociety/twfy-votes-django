@@ -36,6 +36,7 @@ from twfy_votes.helpers.typed_django.models import (
 
 from .consts import (
     ChamberSlug,
+    EvidenceType,
     MotionType,
     OrganisationType,
     PolicyDirection,
@@ -637,6 +638,9 @@ class Division(DjangoVoteModel):
     is_gov_breakdowns: DummyOneToMany[DivisionsIsGovBreakdown] = related_name(
         "division"
     )
+    whip_reports: DummyOneToMany[WhipReport] = related_name("division")
+    division_annotations: DummyOneToMany[DivisionAnnotation] = related_name("division")
+    vote_annotations: DummyOneToMany[VoteAnnotation] = related_name("division")
     tags: DummyManyToMany[DivisionTag] = related_name("division")
     motion_id: Dummy[Optional[int]] = None
     motion: Optional[Motion] = field(
@@ -647,6 +651,23 @@ class Division(DjangoVoteModel):
         default=None,
         related_name="divisions",
     )
+
+    def whip_report_df(self) -> pd.DataFrame | None:
+        wf = list(
+            self.whip_reports.all().values(
+                "party__name", "whip_direction", "whip_priority"
+            )
+        )
+        if not wf:
+            return None
+        df = pd.DataFrame(data=wf)
+        df.columns = ["Party", "Whip direction", "Whip priority"]
+        # remove duplicates
+        df = df.drop_duplicates()
+        return df
+
+    def get_annotations(self) -> list[DivisionAnnotation]:
+        return list(self.division_annotations.all())
 
     def analysis_override(self) -> Optional[AnalysisOverride]:
         existing = getattr(self, "_override", None)
@@ -840,6 +861,9 @@ class Division(DjangoVoteModel):
         )
         person_to_membership_map = {x.person_id: x for x in relevant_memberships}
 
+        vote_annotations = self.vote_annotations.all()
+        vote_annotation_map = {x.person_id: x.url_column() for x in vote_annotations}
+
         data = [
             {
                 "Person": UrlColumn(url=v.person.url(), text=v.person.name),
@@ -851,6 +875,7 @@ class Division(DjangoVoteModel):
                     if v.diff_from_party_average is not None
                     else nan
                 ),
+                "Annotation": vote_annotation_map.get(v.person_id, "-"),
             }
             for v in self.votes.all()
         ]
@@ -860,6 +885,9 @@ class Division(DjangoVoteModel):
                 d["Party alignment"] = "n/a"
 
         df = pd.DataFrame(data=data)
+
+        if len(vote_annotation_map) == 0:
+            df = df.drop(columns=["Annotation"])
 
         setattr(self, "_votes_df", df)
 
@@ -975,6 +1003,12 @@ class Agreement(DjangoVoteModel):
         related_name="agreements",
         default=None,
     )
+    agreement_annotations: DummyOneToMany[AgreementAnnotation] = related_name(
+        "agreement"
+    )
+
+    def get_annotations(self) -> list[AgreementAnnotation]:
+        return list(self.agreement_annotations.all())
 
     def analysis_override(self) -> Optional[AnalysisOverride]:
         existing = getattr(self, "_override", None)
@@ -1246,17 +1280,40 @@ class RebellionRate(DjangoVoteModel):
 class WhipReport(DjangoVoteModel):
     division_id: Dummy[int] = 0
     division: DoNothingForeignKey[Division] = related_name("whip_reports")
-    party = DoNothingForeignKey[Organization]
     party_id: Dummy[int] = 0
+    party: DoNothingForeignKey[Organization] = related_name("whip_reports")
     whip_direction: WhipDirection
     whip_priority: WhipPriority
+    evidence_type: EvidenceType
+    evidence_detai: TextField = field(default="", blank=True)
 
 
 class DivisionAnnotation(DjangoVoteModel):
     division_id: Dummy[int] = 0
     division: DoNothingForeignKey[Division] = related_name("division_annotations")
     detail: str = ""
-    link: str
+    link: str = ""
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
+
+
+class AgreementAnnotation(DjangoVoteModel):
+    agreement_id: Dummy[int] = 0
+    agreement: DoNothingForeignKey[Agreement] = related_name("agreement_annotations")
+    detail: str = ""
+    link: str = ""
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
 
 
 class VoteAnnotation(DjangoVoteModel):
@@ -1266,6 +1323,16 @@ class VoteAnnotation(DjangoVoteModel):
     person: DoNothingForeignKey[Person] = related_name("vote_annotations")
     detail: str = ""
     link: str
+
+    def html(self) -> str:
+        if self.detail and self.link:
+            return f"<a href='{self.link}'>{self.detail}</a>"
+        if self.link:
+            return f"<a href='{self.link}'>{self.link}</a>"
+        return self.detail
+
+    def url_column(self) -> UrlColumn:
+        return UrlColumn(url=self.link, text=self.detail)
 
 
 class AnalysisOverride(DjangoVoteModel):
