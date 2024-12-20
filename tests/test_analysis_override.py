@@ -11,7 +11,7 @@ pytestmark = pytest.mark.django_db
 def override():
     ao = AnalysisOverride(
         decision_key="pw-2024-12-03-52-commons",
-        banned_motion_ids="5755",
+        banned_motion_ids="uk.org.publicwhip/debate/2024-12-03b.193.2.1",
         parl_dynamics_group="free_vote",
         manual_parl_dynamics_desc="Manual text",
     )

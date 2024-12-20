@@ -644,9 +644,10 @@ class Division(DjangoVoteModel):
             return self
 
         if override.banned_motion_ids:
-            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
-            if self.motion_id in banned_ids:
-                self.motion = None
+            banned_ids = [x for x in override.banned_motion_ids.split(",")]
+            if self.motion:
+                if self.motion.gid in banned_ids:
+                    self.motion = None
 
         return self
 
@@ -971,9 +972,10 @@ class Agreement(DjangoVoteModel):
         if not override:
             return self
         if override.banned_motion_ids:
-            banned_ids = [int(x) for x in override.banned_motion_ids.split(",")]
-            if self.motion_id in banned_ids:
-                self.motion = None
+            banned_ids = [x for x in override.banned_motion_ids.split(",")]
+            if self.motion:
+                if self.motion.gid in banned_ids:
+                    self.motion = None
 
         return self
 
