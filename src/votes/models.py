@@ -717,7 +717,7 @@ class Division(DjangoVoteModel):
         )
 
     def safe_decision_name(self) -> str:
-        if self.motion:
+        if self.motion and self.chamber_slug == ChamberSlug.SCOTLAND:
             return self.motion.title
         return self.division_name
 
