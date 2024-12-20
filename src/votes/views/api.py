@@ -11,8 +11,10 @@ from pydantic import BaseModel
 from ..consts import PolicyStatus, RebellionPeriodType
 from ..models import (
     Agreement,
+    AgreementAnnotation,
     Chamber,
     Division,
+    DivisionAnnotation,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
@@ -28,6 +30,7 @@ from ..models import (
     RebellionRate,
     Update,
     Vote,
+    VoteAnnotation,
     VoteDistribution,
 )
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
@@ -128,6 +131,24 @@ class DivisionSchema(ModelSchema):
         fields = "__all__"
 
 
+class AgreementAnnotationSchema(ModelSchema):
+    class Meta:
+        model = AgreementAnnotation
+        fields = "__all__"
+
+
+class DivisionAnnotationSchema(ModelSchema):
+    class Meta:
+        model = DivisionAnnotation
+        fields = "__all__"
+
+
+class VoteAnnotationSchema(ModelSchema):
+    class Meta:
+        model = VoteAnnotation
+        fields = "__all__"
+
+
 class DivisionWithInfoSchema(ModelSchema):
     votes: list[VoteSchema]
     overall_breakdowns: list[DivisionBreakdownSchema]
@@ -135,6 +156,18 @@ class DivisionWithInfoSchema(ModelSchema):
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
     motion: MotionSchema | None
     voting_cluster: dict[str, str]
+    division_annotations: list[DivisionAnnotationSchema]
+    vote_annotations: list[VoteAnnotationSchema]
+    whip_reports: list[dict[str, Any]]
+
+    @staticmethod
+    def resolve_whip_reports(obj: Division):
+        df = obj.whip_report_df()
+        if df is None:
+            return []
+        # for columns, drop to lower case and change spaces to underscores
+        df.columns = [x.lower().replace(" ", "_") for x in df.columns]
+        return df.to_dict(orient="records")
 
     @staticmethod
     def resolve_voting_cluster(obj: Division):
@@ -149,6 +182,8 @@ class DivisionWithInfoSchema(ModelSchema):
 
 
 class AgreementSchema(ModelSchema):
+    agreement_annotations: list[AgreementAnnotationSchema]
+
     class Meta:
         model = Agreement
         fields = "__all__"
