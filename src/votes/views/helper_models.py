@@ -3,6 +3,8 @@ from __future__ import annotations
 import datetime
 from itertools import groupby
 
+from django.urls import reverse
+
 import pandas as pd
 from pydantic import BaseModel, ConfigDict, Field, computed_field
 
@@ -69,7 +71,7 @@ class PolicyCollection(BaseModel):
 
     @classmethod
     def from_distributions(
-        cls, distributions: list[VoteDistribution], url_base: str
+        cls, distributions: list[VoteDistribution], url_base: list[str | int]
     ) -> list[PolicyDisplayGroup]:
         def get_key(v: VoteDistribution) -> str:
             return (
@@ -145,7 +147,7 @@ class PolicyDisplayGroup(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
-    url_base: str
+    url_base: list[str | int]
     paired_policies: list[PairedPolicy]
 
     def model_dump(self):
@@ -172,11 +174,14 @@ class PolicyDisplayGroup(BaseModel):
 
         items: list[GroupTableItem] = []
         for link in self.paired_policies:
+            item_url = reverse(
+                "person_policy_solo", args=self.url_base + [str(link.policy.id)]
+            )
             item = GroupTableItem(
                 policy_name=str(
                     UrlColumn(
                         # url=link.policy.url(), # link direct to policy item
-                        url=self.url_base.replace("99999", str(link.policy.id)),
+                        url=item_url,
                         text=link.policy.context_description or link.policy.name,
                     )
                 ),

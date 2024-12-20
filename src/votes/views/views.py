@@ -8,7 +8,6 @@ from typing import Literal
 
 from django.http import Http404
 from django.template import Context, Template
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 
@@ -476,13 +475,8 @@ class PersonPoliciesView(TitleMixin, TemplateView):
             ).prefetch_related("policy")
         )
 
-        url_base = reverse(
-            "person_policy_solo",
-            args=[person_id, chamber_slug, party_slug, period_slug, 99999],
-        )
-
         collection = PolicyCollection.from_distributions(
-            distributions, url_base=url_base
+            distributions, url_base=[person_id, chamber_slug, party_slug, period_slug]
         )
 
         context["person"] = person
