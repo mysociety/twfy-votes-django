@@ -69,18 +69,40 @@
         </p>
     {% endif %}
     {% with decision.get_annotations as annotations %}
-        {% if annotations %}
+        {% if annotations or can_add_annotations %}
             <h2>Annotations</h2>
             <ul>
                 {% for annotation in annotations %}<li>{{ annotation.html|safe }}</li>{% endfor %}
             </ul>
+            {% if can_add_annotations %}
+                {% if decision.decision_type == "Division" %}
+                    <p>
+                        <a href="{% url 'forms' 'division_annotation' decision.id %}">Add an annotation</a>
+                    </p>
+                {% elif decision.decision_type == "Agreement" %}
+                    <p>
+                        <a href="{% url 'forms' 'agreement_annotation' decision.id %}">Add an annotation</a>
+                    </p>
+                {% endif %}
+            {% endif %}
         {% endif %}
     {% endwith %}
     {% if decision.decision_type == "Division" %}
         {% with decision.whip_report_df as whip_report_df %}
-            {% if whip_report_df is not None %}
+            {% if whip_report_df is not None or can_report_whip or can_report_self_whip %}
                 <h2>Whip reports</h2>
-                {% style_df whip_report_df %}
+                {% if whip_report_df is not None %}
+                    {% style_df whip_report_df %}
+                {% endif %}
+                {% if can_report_whip %}
+                    <p>
+                        <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
+                    </p>
+                {% elif can_report_self_whip %}
+                    <p>
+                        <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
+                    </p>
+                {% endif %}
             {% endif %}
         {% endwith %}
     {% endif %}
@@ -101,6 +123,15 @@
         <h2>Party voting breakdown</h2>
         {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
         <h2>Voting list</h2>
+        {% if can_add_annotations %}
+            <p>
+                <a href="{% url 'forms' 'open_rep_annotation' decision.id %}">Add a vote annotation</a>
+            </p>
+        {% elif can_add_self_annotations %}
+            <p>
+                <a href="{% url 'forms' 'rep_annotation' decision.id %}">Add your vote annotation</a>
+            </p>
+        {% endif %}
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
         {% featureflag pg.ADVANCED_INFO %}

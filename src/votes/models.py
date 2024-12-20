@@ -355,6 +355,9 @@ class Organization(DjangoVoteModel):
     org_memberships: DummyOneToMany["Membership"] = related_name("organization")
     party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class OrgMembershipCount(DjangoVoteModel):
     chamber_slug: ChamberSlug
@@ -1285,7 +1288,7 @@ class WhipReport(DjangoVoteModel):
     whip_direction: WhipDirection
     whip_priority: WhipPriority
     evidence_type: EvidenceType
-    evidence_detai: TextField = field(default="", blank=True)
+    evidence_detail: TextField = field(default="", blank=True)
 
 
 class DivisionAnnotation(DjangoVoteModel):
