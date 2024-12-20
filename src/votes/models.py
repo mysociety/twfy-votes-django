@@ -630,7 +630,7 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
-    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+    def analysis_override(self) -> Optional[AnalysisOverride]:
         existing = getattr(self, "_override", None)
         if existing:
             return existing
@@ -639,7 +639,7 @@ class Division(DjangoVoteModel):
         return result
 
     def apply_analysis_override(self):
-        override = self.analysis_overrde()
+        override = self.analysis_override()
         if not override:
             return self
 
@@ -684,7 +684,7 @@ class Division(DjangoVoteModel):
         data = tag.analysis_data if tag else "Unknown"
         bespoke = ""
 
-        analysis_override = self.analysis_overrde()
+        analysis_override = self.analysis_override()
         if analysis_override:
             if analysis_override.parl_dynamics_group:
                 data = analysis_override.parl_dynamics_group
@@ -958,7 +958,7 @@ class Agreement(DjangoVoteModel):
         default=None,
     )
 
-    def analysis_overrde(self) -> Optional[AnalysisOverride]:
+    def analysis_override(self) -> Optional[AnalysisOverride]:
         existing = getattr(self, "_override", None)
         if existing:
             return existing
@@ -967,7 +967,7 @@ class Agreement(DjangoVoteModel):
         return result
 
     def apply_analysis_override(self):
-        override = self.analysis_overrde()
+        override = self.analysis_override()
         if not override:
             return self
         if override.banned_motion_ids:
