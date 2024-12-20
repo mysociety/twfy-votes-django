@@ -235,6 +235,13 @@ class WhipPriority(StrEnum):
     )
 
 
+class EvidenceType(StrEnum):
+    REP = "from_rep"
+    WHIP = "from_whip"
+    REPORTING = "from_reporting"
+    OTHER = "from_other"
+
+
 class WhipDirection(StrEnum):
     """
     This is the direction of the whip.
