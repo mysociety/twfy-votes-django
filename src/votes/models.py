@@ -1182,6 +1182,14 @@ class VoteDistribution(DjangoVoteModel):
         )
 
     @property
+    def str_similarity_percentage(self) -> str:
+        return f"{round((1 - self.distance_score) * 100)}%"
+
+    @property
+    def str_distance_percentage(self) -> str:
+        return f"{round((self.distance_score) * 100)}%"
+
+    @property
     def verbose_score(self) -> str:
         match self.distance_score:
             case s if 0 <= s <= 0.05:

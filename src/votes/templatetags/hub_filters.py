@@ -176,6 +176,9 @@ class MarkdownNode(Node):
                 [line[smallest_indent:] for line in markdown_text.splitlines()]
             )
 
+        # add an extra line space between all new lines
+        markdown_text = markdown_text.replace("\n", "\n\n\n")
+
         text = markdown.markdown(markdown_text, extensions=["toc"])
         return text
 

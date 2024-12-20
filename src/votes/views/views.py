@@ -8,25 +8,34 @@ from typing import Literal
 
 from django.http import Http404
 from django.template import Context, Template
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.views.generic import TemplateView
 
 import markdown
+import pandas as pd
 from bs4 import BeautifulSoup
 
 from twfy_votes.helpers.routes import RouteApp
 
-from ..consts import ChamberSlug, PolicyStatus
+from ..consts import (
+    ChamberSlug,
+    PolicyDirection,
+    PolicyStatus,
+    VotePosition,
+)
 from ..models import (
     Agreement,
     Chamber,
     Division,
+    Membership,
     Organization,
     Person,
     Policy,
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
+    UrlColumn,
     Vote,
 )
 from .auth import can_view_draft_content
@@ -467,12 +476,207 @@ class PersonPoliciesView(TitleMixin, TemplateView):
             ).prefetch_related("policy")
         )
 
-        collection = PolicyCollection.from_distributions(distributions)
+        url_base = reverse(
+            "person_policy_solo",
+            args=[person_id, chamber_slug, party_slug, period_slug, 99999],
+        )
+
+        collection = PolicyCollection.from_distributions(
+            distributions, url_base=url_base
+        )
 
         context["person"] = person
         context["chamber"] = chamber
         context["period"] = period
         context["party"] = party
         context["collection"] = collection
+
+        return context
+
+
+@app.route(
+    "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}/{policy_id:int}",
+    name="person_policy_solo",
+)
+class PersonPolicyView(TitleMixin, TemplateView):
+    page_title = "Person Policy"
+    template_name = "votes/person_policy.html"
+
+    def dfs_from_division_links(
+        self,
+        votes: list[Vote],
+        agreements: list[Agreement],
+        division_links: list[PolicyDivisionLink],
+        agreement_links: list[PolicyAgreementLink],
+    ) -> dict[str, pd.DataFrame]:
+        """
+        Create 4(or more?) dataframes of the different groupings of votes
+        """
+
+        division_vote_lookup = {v.division_id: v for v in votes}
+        df_lookup: dict[str, pd.DataFrame] = {}
+        division_items = []
+
+        def is_aligned(vote: Vote, link: PolicyDivisionLink) -> str:
+            if (
+                vote.effective_vote == VotePosition.AYE
+                and link.alignment == PolicyDirection.AGREE
+            ):
+                return "aligned"
+            if (
+                vote.effective_vote == VotePosition.NO
+                and link.alignment == PolicyDirection.AGAINST
+            ):
+                return "aligned"
+            if vote.effective_vote == VotePosition.ABSENT:
+                return "na"
+            return "not aligned"
+
+        for link in division_links:
+            vote = division_vote_lookup.get(link.decision_id)
+            if not vote:
+                raise ValueError(f"Vote for division {link.decision_id} not found")
+            division_items.append(
+                {
+                    "motion": UrlColumn(
+                        url=link.decision.url(), text=link.decision.division_name
+                    ),
+                    "date": link.decision.date,
+                    "person_vote": vote.vote_desc().lower(),
+                    "policy_direction": link.alignment,
+                    "policy_aligned": is_aligned(vote, link),
+                    "policy_strength": f"{link.strength.lower()}_votes",
+                }
+            )
+
+        if division_items:
+            df_lookup.update(
+                {
+                    str(group): ddf.drop(columns=["policy_strength"])
+                    for group, ddf in pd.DataFrame(division_items).groupby(
+                        "policy_strength"
+                    )
+                }
+            )
+
+        # now we add agreements
+        agreement_items = []
+
+        for link in agreement_links:
+            if link.decision not in agreements:
+                continue
+            agreement = link.decision
+            agreement_items.append(
+                {
+                    "motion": UrlColumn(
+                        url=agreement.url(), text=agreement.decision_name
+                    ),
+                    "date": agreement.date,
+                    "policy_direction": link.alignment,
+                    # by definition it's aligned unless the policy wasn't the *oppinion* of the agreement
+                    # generally don't want to make this happen in practice, but is possible
+                    "policy_aligned": "aligned"
+                    if link.alignment == PolicyDirection.AGREE
+                    else "not aligned",
+                    "policy_strength": f"{link.strength.lower()}_agreements",
+                }
+            )
+
+        if agreement_items:
+            df_lookup.update(
+                {
+                    str(group): ddf.drop(columns=["policy_strength"])
+                    for group, ddf in pd.DataFrame(agreement_items).groupby(
+                        "policy_strength"
+                    )
+                }
+            )
+
+        group_order = {
+            "strong_votes": 1,
+            "strong_agreements": 2,
+            "weak_votes": 3,
+            "weak_agreements": 4,
+        }
+
+        # resort df_lookup based on key
+        df_lookup = dict(sorted(df_lookup.items(), key=lambda x: group_order[x[0]]))
+
+        return df_lookup
+
+    def get_context_data(
+        self,
+        person_id: int,
+        chamber_slug: str,
+        party_slug: str,
+        period_slug: str,
+        policy_id: int,
+        **kwargs,
+    ):
+        context = super().get_context_data(**kwargs)
+        person = Person.objects.get(id=person_id)
+        chamber = Chamber.objects.get(slug=chamber_slug)
+        party = Organization.objects.get(slug=party_slug)
+        period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
+        policy = Policy.objects.get(id=policy_id)
+        own_distribution = person.vote_distributions.get(
+            chamber=chamber, period=period, party=party, policy=policy, is_target=1
+        )
+        other_distribution = person.vote_distributions.get(
+            chamber=chamber, period=period, party=party, policy=policy, is_target=0
+        )
+
+        votes = list(
+            Vote.objects.filter(
+                person=person,
+                division__chamber=chamber,
+                division__division_links__policy=policy,
+            ).prefetch_related("division")
+        )
+
+        division_links = list(
+            policy.division_links.filter(
+                decision__chamber=chamber,
+                decision__date__gte=period.start_date,
+                decision__date__lte=period.end_date,
+            ).prefetch_related("decision")
+        )
+        agreement_links = list(
+            policy.agreement_links.filter(
+                decision__chamber=chamber,
+                decision__date__gte=period.start_date,
+                decision__date__lte=period.end_date,
+            ).prefetch_related("decision")
+        )
+
+        relevant_memberships = list(
+            Membership.objects.filter(chamber=chamber, person=person)
+        )
+
+        def is_in_range_agreement(agreement: Agreement) -> bool:
+            for membership in relevant_memberships:
+                if membership.start_date <= agreement.date <= membership.end_date:
+                    return True
+            return False
+
+        agreements = [
+            x.decision for x in agreement_links if is_in_range_agreement(x.decision)
+        ]
+
+        decision_links_and_votes = self.dfs_from_division_links(
+            votes=votes,
+            agreements=agreements,
+            division_links=division_links,
+            agreement_links=agreement_links,
+        )
+
+        context["person"] = person
+        context["chamber"] = chamber
+        context["period"] = period
+        context["party"] = party
+        context["policy"] = policy
+        context["own_distribution"] = own_distribution
+        context["other_distribution"] = other_distribution
+        context["decision_links_and_votes"] = decision_links_and_votes
 
         return context
