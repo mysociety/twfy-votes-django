@@ -116,9 +116,9 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
         percentage_columns = list(percentage_columns)  # type: ignore
 
     def format_percentage(value: float):
-        # if value is na return "-"
+        # if value is na return "n/a"
         if pd.isna(value):
-            return "-"
+            return "n/a"
         if isinstance(value, str):
             return value
         return "{:.2%}".format(value)

@@ -734,7 +734,7 @@ class Division(DjangoVoteModel):
                 "Party turnout": x.signed_votes / x.vote_participant_count,
                 "For motion percentage": x.for_motion_percentage
                 if not pd.isna(x.for_motion_percentage)
-                else "-",
+                else "n/a",
             }
             for x in self.party_breakdowns.all()
         ]
@@ -839,7 +839,7 @@ class Division(DjangoVoteModel):
 
         for d in data:
             if pd.isna(d["Party alignment"]):
-                d["Party alignment"] = "-"
+                d["Party alignment"] = "n/a"
 
         df = pd.DataFrame(data=data)
 

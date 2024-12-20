@@ -35,73 +35,16 @@
         {% endwith %}
 
         {% include 'votes/includes/division_dots.html' %}
-    {% endif %}
-    {% if decision.decision_type == "Division" %}
-        <h2>Parliamentary dynamics</h2>
-        {% with decision.voting_cluster as dc %}
-            <strong>{{ dc.desc }}</strong>
-            {% if dc.bespoke %}
-                {% markdown %}
-                    {{ dc.bespoke }}
-                {% endmarkdown %}
-            {% else %}
-                {% with dc.tag as vc_tag %}
-                    {% if vc_tag == "opp_strong_aye_gov_strong_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
-                            This usually suggests an important point of principle, or that it would have substantive effects if passed.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "gov_strong_aye_opp_strong_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
-                            This usually suggests an important point of principle, that even if the government is likely to win, is a significant public signal of opposition.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "gov_aye_opp_lean_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the government is proposing a motion,
-                            but there is division among opposition MPs/parties in opposing it (but generally, leaning against).
-                        {% endmarkdown %}
-                    {% elif vc_tag == "opp_aye_weak_gov_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the motion is proposed by the opposition, the
-                            result is quite polarized, but there is a medium level of participation (most MPs, but not all).
-                            This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "gov_aye_opp_weak_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the government is proposing a motion,
-                            but opposition is less strongly opposing it (higher numbers of absences).
-                            This can reflect different views between opposition parties - where at least one party
-                            neither wants to be on the record as voting for or against.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "gov_no_opp_lean_no" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where the government is voting against a motion, and opposition MPs/parties are divided in their support.
-                            This can reflect an amendment or motion bought by one opposition party, which other opposition parties are not supportive of.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "low_participation" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where there is low participation from both sides.
-                            This might be non-contentious or procedural motions in the early stages of member proposed bills.
-                        {% endmarkdown %}
-                    {% elif vc_tag == "cross_party_aye" %}
-                        {% markdown %}
-                            This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
-                            There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/opposition lines.
-                        {% endmarkdown %}
-                    {% endif %}
-                {% endwith %}
-            {% endif %}
-        {% endwith %}
+        <h3>Parliamentary analysis</h3>
+
+        {% include 'votes/includes/division_clusters.html' %}
     {% endif %}
     {% if decision.motion %}
         <h2>Motion</h2>
         {% featureflag pg.ADVANCED_INFO %}
             <p>Motion ID: {{ decision.motion.id }}</p>
         {% endfeatureflag %}
-        <p>
-            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
-        </p>
+
         <p class = "motion_type">
             Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
         </p>
@@ -122,6 +65,9 @@
         <div class = "motion_text">
             <p>{{ decision.motion.nice_html|safe }}</p>
         </div>
+        <p>
+            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
+        </p>
     {% endif %}
     {% if relevant_policies %}
         <h2>Policies</h2>
