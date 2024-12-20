@@ -44,7 +44,6 @@
         {% featureflag pg.ADVANCED_INFO %}
             <p>Motion ID: {{ decision.motion.id }}</p>
         {% endfeatureflag %}
-
         <p class = "motion_type">
             Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
         </p>
