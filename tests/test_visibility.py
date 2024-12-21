@@ -4,9 +4,14 @@ from django.test import Client
 import pytest
 
 from votes.consts import PermissionGroupSlug
-from votes.models import UserPersonLink
+from votes.models import Division, UserPersonLink
 
 pytestmark = pytest.mark.django_db
+
+
+@pytest.fixture
+def division_id():
+    return Division.objects.get(key="pw-2016-12-13-109-commons").id
 
 
 @pytest.fixture
@@ -64,69 +69,85 @@ def test_report_whip_power_user():
     user.delete()
 
 
-def test_whip_form_visible(client: Client):
-    response = client.get("/submit/whip/78288")
+def test_whip_form_visible(client: Client, division_id: int):
+    response = client.get(f"/submit/whip/{division_id}")
     assert response.status_code == 404
 
 
-def test_whip_form_visible_superuser(client: Client, test_super_user: User):
+def test_whip_form_visible_superuser(
+    client: Client, division_id: int, test_super_user: User
+):
     client.force_login(test_super_user)
-    response = client.get("/submit/whip/78288")
+    response = client.get(f"/submit/whip/{division_id}")
     assert response.status_code == 200
 
 
-def test_whip_form_visible_group(client: Client, test_report_whip_power_user: User):
+def test_whip_form_visible_group(
+    client: Client, division_id: int, test_report_whip_power_user: User
+):
     client.force_login(test_report_whip_power_user)
-    response = client.get("/submit/whip/78288")
+    response = client.get(f"/submit/whip/{division_id}")
     assert response.status_code == 200
 
 
 def test_whip_form_visible_group_incorrect(
-    client: Client, test_has_annotation_power_user: User
+    client: Client, division_id: int, test_has_annotation_power_user: User
 ):
     client.force_login(test_has_annotation_power_user)
-    response = client.get("/submit/whip/78288")
+    response = client.get(f"/submit/whip/{division_id}")
     assert response.status_code == 404
 
 
-def test_self_whip_visible(client: Client):
-    response = client.get("/submit/rep_whip/78288")
+def test_self_whip_visible(
+    client: Client,
+    division_id: int,
+):
+    response = client.get(f"/submit/rep_whip/{division_id}")
     assert response.status_code == 404
 
 
-def test_self_whip_visible_rep(client: Client, test_rep_user: User):
+def test_self_whip_visible_rep(client: Client, division_id: int, test_rep_user: User):
     client.force_login(test_rep_user)
-    response = client.get("/submit/rep_whip/78288")
+    response = client.get(f"/submit/rep_whip/{division_id}")
     assert response.status_code == 200
 
 
-def test_self_annotate_visible(client: Client):
+def test_self_annotate_visible(client: Client, division_id: int):
+    response = client.get(f"/submit/rep_annotation/{division_id}")
+
     response = client.get("/submit/rep_annotation/78288")
     assert response.status_code == 404
 
 
-def test_form_visible(client: Client):
-    response = client.get("/submit/division_annotation/78288")
+def test_form_visible(
+    client: Client,
+    division_id: int,
+):
+    response = client.get(f"/submit/division_annotation/{division_id}")
     assert response.status_code == 404
 
 
-def test_form_visible_superuser(client: Client, test_super_user: User):
+def test_form_visible_superuser(
+    client: Client, division_id: int, test_super_user: User
+):
     client.force_login(test_super_user)
-    response = client.get("/submit/division_annotation/78288")
+    response = client.get(f"/submit/division_annotation/{division_id}")
     assert response.status_code == 200
 
 
 def test_form_visible_group_incorrect(
-    client: Client, test_report_whip_power_user: User
+    client: Client, division_id: int, test_report_whip_power_user: User
 ):
     client.force_login(test_report_whip_power_user)
-    response = client.get("/submit/division_annotation/78288")
+    response = client.get(f"/submit/division_annotation/{division_id}")
     assert response.status_code == 404
 
 
-def test_form_visible_group(client: Client, test_has_annotation_power_user: User):
+def test_form_visible_group(
+    client: Client, division_id: int, test_has_annotation_power_user: User
+):
     client.force_login(test_has_annotation_power_user)
-    response = client.get("/submit/division_annotation/78288")
+    response = client.get(f"/submit/division_annotation/{division_id}")
     assert response.status_code == 200
 
 
