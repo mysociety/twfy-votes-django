@@ -12,7 +12,7 @@ It will introduce the topic area, but not the full details of the bill.
 
 This is the second reading or stage of a draft law. 
 
-It introuduces a complete bill that may be subject to future amendment. 
+It introduces a complete bill that may be subject to future amendment. 
 
 If this passes, in the House of Commons it will proceed to a committee stage. 
 
@@ -24,7 +24,7 @@ The chamber confirms the final text of the bill, and it will proceed to the Lord
 
 ## Programme
 
-A programme motion sets out the timetable and time avaliable for a bill to be debated.
+A programme motion sets out the timetable and time available for a bill to be debated.
 
 ## Closure
 
@@ -86,7 +86,7 @@ This is a vote to change the rules of the chamber.
 
 This is a vote to sit in private.
 
-Generally this isn't a real vote about sitting in private, but because its a vote that can be called by any MP, it's a way of ending debate but leading to a count of MPs for division. If there are less than 40 MPs present, the debate ends.
+Generally this isn't a real vote about sitting in private, but because it's a vote that can be called by any MP, it's a way of ending debate but leading to a count of MPs for division. If there are less than 40 MPs present, the debate ends.
 
 However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. 
 
