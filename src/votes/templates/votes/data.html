@@ -1,0 +1,20 @@
+{% extends "votes/base.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.inner %}
+    <h1>Data</h1>
+    <p>
+        For almost all pages on the site, the underlying information can be accessed via the <a href="{% url 'api-1.0.0:openapi-view' %}">API Docs</a>
+        <a href="{% url 'api-1.0.0:openapi-view' %}">API Docs</a> or by adding .json to the end of the url.
+    </p>
+    <p>We also republish as parquet files the underlying data tables for the site for bulk analysis.</p>
+    <h2>Tables</h2>
+    <ul>
+        {% for slug, desc in data.items %}
+            <li>
+                <a href="/static/data/{{ slug }}.parquet">{{ slug }}</a> - {{ desc }}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock content.inner %}
