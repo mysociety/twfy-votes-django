@@ -12,7 +12,7 @@
         {% for record in person.policy_distribution_groups %}
             <li>
                 <a href="{% url 'person_policy' person.id record.chamber.slug record.party.slug record.period.slug.lower %}">Voting
-                record comparison with {{ record.party.name }} ({{ record.period.description }})</a>
+                record comparison with {{ record.party.name }} (Period: {{ record.period.description }})</a>
             </li>
         {% endfor %}
     </ul>
