@@ -19,6 +19,7 @@ compiled_dir = Path(BASE_DIR, "data", "compiled")
 divisions_gov_with_counts = compiled_dir / "divisions_gov_with_counts.parquet"
 
 division_cluster_path = compiled_dir / "division_cluster_columns.parquet"
+clusters_labelled = compiled_dir / "clusters_labelled.parquet"
 cluster_centers = BASE_DIR / "data" / "lookups" / "cluster_centers.csv"
 
 
@@ -131,6 +132,8 @@ def import_cluster_analysis(
     clusters = get_commons_clusters(df, quiet=quiet)
 
     df["cluster"] = clusters
+
+    df.to_parquet(clusters_labelled)
 
     to_create = []
 

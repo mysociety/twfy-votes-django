@@ -236,6 +236,34 @@ class MarkdownView(TemplateView):
         return context
 
 
+@app.route("data", name="data")
+class DataView(TitleMixin, TemplateView):
+    page_title = "Data"
+    template_name = "votes/data.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # we want the last three votes for each chamber
+
+        data = {
+            "clusters_labelled": "Parliamentary dynamics vote clusters, by division.",
+            "division_with_counts": "Division information with basic counts",
+            "divisions_gov_with_counts": "Division breakdowns split by government/opposition",
+            "divisions_party_with_counts": "Division breakdowns split by party",
+            "organization": "Party ids and names",
+            "per_person_party_diff_all_time": "Voting alignment scores all time",
+            "per_person_party_diff_period": "Voting alignment scores by rolling period",
+            "per_person_party_diff_year": "Voting alignment scores by year",
+            "policy_calc_to_load": "The calculated policy alignment data",
+            "policy_comparison_period": "The policy comparison periods",
+            "votes_with_diff": "All individual votes with alignment scores",
+        }
+
+        context["data"] = data
+
+        return context
+
+
 @app.route("", name="home")
 class HomePageView(TitleMixin, TemplateView):
     page_title = ""
