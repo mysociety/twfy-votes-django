@@ -23,6 +23,7 @@ from ..consts import (
     PermissionGroupSlug,
     PolicyDirection,
     PolicyStatus,
+    StrVotePosition,
     VotePosition,
 )
 from ..forms import (
@@ -679,18 +680,33 @@ class PersonPolicyView(TitleMixin, TemplateView):
             if link.decision not in agreements:
                 continue
             agreement = link.decision
+            if not link.decision.negative:
+                status = StrVotePosition.AYE
+            else:
+                status = StrVotePosition.NO
+
+            if (
+                status == StrVotePosition.AYE
+                and link.alignment == PolicyDirection.AGREE
+            ):
+                alignment = "aligned"
+            elif (
+                status == StrVotePosition.NO
+                and link.alignment == PolicyDirection.AGAINST
+            ):
+                alignment = "aligned"
+            else:
+                alignment = "not aligned"
+
             agreement_items.append(
                 {
                     "motion": UrlColumn(
                         url=agreement.url(), text=agreement.decision_name
                     ),
                     "date": agreement.date,
+                    "collective_status": status,
                     "policy_direction": link.alignment,
-                    # by definition it's aligned unless the policy wasn't the *oppinion* of the agreement
-                    # generally don't want to make this happen in practice, but is possible
-                    "policy_aligned": "aligned"
-                    if link.alignment == PolicyDirection.AGREE
-                    else "not aligned",
+                    "policy_aligned": alignment,
                     "policy_strength": f"{link.strength.lower()}_agreements",
                 }
             )
