@@ -230,8 +230,9 @@ class MarkdownView(TemplateView):
             h for h in header_links if h["level"] <= 3 and h["parent"] is None
         ]
 
-        context["body"] = mark_safe(str(soup))
+        context["body"] = mark_safe(markdown_content)
         context["header_links"] = header_links
+        context["show_menu"] = True
         return context
 
 
