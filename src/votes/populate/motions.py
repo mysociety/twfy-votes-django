@@ -57,12 +57,16 @@ def catagorise_motion(motion: str) -> MotionType:
         return MotionType.STANDING_ORDER_CHANGE
     elif any_present(l_motion, ["first reading"]):
         return MotionType.FIRST_STAGE
+    elif any_present(l_motion, ["claimed to move the closure"]):
+        return MotionType.CLOSURE
     elif any_present(
         l_motion, ["second reading", "read a second time"]
     ) and any_present(l_motion, ["clause"]):
         return MotionType.SECOND_STAGE_COMMITTEE
     elif any_present(l_motion, ["clause stand part of the bill"]):
         return MotionType.COMMITEE_CLAUSE
+    elif any_present(l_motion, ["that the following provisions shall apply to the"]):
+        return MotionType.PROGRAMME
     elif any_present(
         l_motion, ["third reading", "read a third time", "read the third time"]
     ):

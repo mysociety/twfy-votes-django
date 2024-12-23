@@ -22,6 +22,13 @@ This is the third reading or stage of a draft law.
 
 The chamber confirms the final text of the bill, and it will proceed to the Lords if it is a Commons bill.
 
+## Programme
+
+A programme motion sets out the timetable and time avaliable for a bill to be debated.
+
+## Closure
+
+Motion to stop debate and move to a vote on the main issue.
 
 ## Amendment
 

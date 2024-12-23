@@ -151,6 +151,8 @@ class MotionType(StrEnum):
         "second_stage_committee"  # approval of clauses in committee
     )
     THIRD_STAGE = "third_stage"
+    CLOSURE = "closure"
+    PROGRAMME = "programme"
     APPROVE_STATUTORY_INSTRUMENT = "approve_statutory_instrument"
     REVOKE_STATUTORY_INSTRUMENT = "revoke_statutory_instrument"  # negative procedure
     ADJOURNMENT = "adjournment"
