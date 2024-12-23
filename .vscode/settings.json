@@ -21,5 +21,6 @@
         "**/templates/**/*.html": "django-html",
         "**/templates/**/*": "django-txt",
         "**/requirements{/**,*}.{txt,in}": "pip-requirements"
-    }
+    },
+    "ltex.language": "en-GB"
 }
