@@ -1,22 +1,81 @@
-{% extends "votes/base.html" %}
+{% extends "votes/base_with_menu.html" %}
+
+{% block content.title %}
+    <h1 id="top-header">{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.decision_number_or_ref }}</h1>
+    <h2>{{ decision.safe_decision_name|safe }}</h2>
+{% endblock content.title %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">{{ decision.date }} - {{ decision.decision_number_or_ref }}</a>
+    </p>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#result">Result</a>
+    </li>
+    {% if decision.decision_type == "Division" %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#parliamentary-analysis">Parliamentary analysis</a>
+        </li>
+    {% endif %}
+    {% if decision.motion %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#motion">Motion</a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#annotations">Annotations</a>
+    </li>
+    {% if decision.decision_type == "Division" %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#whip-reports">Whip reports</a>
+        </li>
+    {% endif %}
+    {% if relevant_policies %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#policies">Policies</a>
+        </li>
+    {% endif %}
+    {% if decision.decision_type == "Division" %}
+        <li class="nav-item">
+            <a class="nav-link h36 pl-0 mb-0" href="#voting-breakdown">Voting breakdown</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#party-breakdown">Party voting breakdown</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#voting-list">Voting list</a>
+        </li>
+    {% elif decision.decision_type == "Agreement" %}
+        {% featureflag pg.ADVANCED_INFO %}
+            <li class="nav-item">
+                <a class="nav-link h6 pl-0 mb-0" href="#membership-list">Membership list</a>
+            </li>
+        {% endfeatureflag %}
+    {% endif %}
+    <hr />
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
+    </li>
+    {% if decision.motion %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="{{ decision.motion_speech_url }}">View motion in TheyWorkForYou</a>
+        </li>
+    {% endif %}
+    <hr />
+    <li class="nav-item active">
+        <a class="nav-link h6 pl-0 mb-0"
+           href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Something wrong on this page? </a>
+    </li>
+{% endblock content.menu %}
 
 {% block content.inner %}
-    {% if decision.decision_type == "Division" %}
-        <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.division_number }}</h1>
-    {% elif decision.decision_type == "Agreement" %}
-        <h1>{{ decision.chamber.name }} - {{ decision.date }} - {{ decision.decision_ref }}</h1>
-    {% endif %}
-    <div class="alert alert-secondary" role="alert">
-        Something wrong on this page? <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">Let us know!</a>
-    </div>
-    <h2>{{ decision.safe_decision_name|safe }}</h2>
     {% featureflag pg.ADVANCED_INFO %}
         <p>Decision Key: {{ decision.key }}</p>
     {% endfeatureflag %}
-    <p>
-        <a href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
-    </p>
-    <h2>Result</h2>
+    <h2 class="section-header" id="result">Result</h2>
     {% if decision.decision_type == "Agreement" %}
         {% if decision.negative %}
             <p>❌Motion rejected without vote.</p>
@@ -35,12 +94,12 @@
         {% endwith %}
 
         {% include 'votes/includes/division_dots.html' %}
-        <h3>Parliamentary analysis</h3>
+        <h2 class="section-header" id="parliamentary-analysis">Parliamentary analysis</h2>
 
         {% include 'votes/includes/division_clusters.html' %}
     {% endif %}
     {% if decision.motion %}
-        <h2>Motion</h2>
+        <h2 class="section-header" id="motion">Motion</h2>
         {% featureflag pg.ADVANCED_INFO %}
             <p>Motion GID: {{ decision.motion.gid }}</p>
         {% endfeatureflag %}
@@ -69,45 +128,47 @@
         </p>
     {% endif %}
     {% with decision.get_annotations as annotations %}
-        {% if annotations or can_add_annotations %}
-            <h2>Annotations</h2>
+        <h2 class="section-header" id="annotations">Annotations</h2>
+        {% if annotations %}
             <ul>
                 {% for annotation in annotations %}<li>{{ annotation.html|safe }}</li>{% endfor %}
             </ul>
-            {% if can_add_annotations %}
-                {% if decision.decision_type == "Division" %}
-                    <p>
-                        <a href="{% url 'forms' 'division_annotation' decision.id %}">Add an annotation</a>
-                    </p>
-                {% elif decision.decision_type == "Agreement" %}
-                    <p>
-                        <a href="{% url 'forms' 'agreement_annotation' decision.id %}">Add an annotation</a>
-                    </p>
-                {% endif %}
+        {% else %}
+            <p>No annotations for this decision.</p>
+        {% endif %}
+        {% if can_add_annotations %}
+            {% if decision.decision_type == "Division" %}
+                <p>
+                    <a href="{% url 'forms' 'division_annotation' decision.id %}">Add an annotation</a>
+                </p>
+            {% elif decision.decision_type == "Agreement" %}
+                <p>
+                    <a href="{% url 'forms' 'agreement_annotation' decision.id %}">Add an annotation</a>
+                </p>
             {% endif %}
         {% endif %}
     {% endwith %}
     {% if decision.decision_type == "Division" %}
         {% with decision.whip_report_df as whip_report_df %}
-            {% if whip_report_df is not None or can_report_whip or can_report_self_whip %}
-                <h2>Whip reports</h2>
-                {% if whip_report_df is not None %}
-                    {% style_df whip_report_df %}
-                {% endif %}
-                {% if can_report_whip %}
-                    <p>
-                        <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
-                    </p>
-                {% elif can_report_self_whip %}
-                    <p>
-                        <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
-                    </p>
-                {% endif %}
+            <h2 class="section-header" id="whip-reports">Whip reports</h2>
+            {% if whip_report_df is not None %}
+                {% style_df whip_report_df %}
+            {% else %}
+                <p>No whip reports for this decision.</p>
+            {% endif %}
+            {% if can_report_whip %}
+                <p>
+                    <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
+                </p>
+            {% elif can_report_self_whip %}
+                <p>
+                    <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
+                </p>
             {% endif %}
         {% endwith %}
     {% endif %}
     {% if relevant_policies %}
-        <h2>Policies</h2>
+        <h2 class="section-header" id="policies">Policies</h2>
         <p>This decision is part of the following policies:</p>
         <ul>
             {% for policy in relevant_policies %}
@@ -118,11 +179,11 @@
         </ul>
     {% endif %}
     {% if decision.decision_type == "Division" %}
-        <h2>Voting breakdown</h2>
+        <h2 class="section-header" id="voting-breakdown">Voting breakdown</h2>
         {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
-        <h2>Party voting breakdown</h2>
+        <h2 class="section-header" id="party-breakdown">Party voting breakdown</h2>
         {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
-        <h2>Voting list</h2>
+        <h2 class="section-header" id ="voting-list">Voting list</h2>
         {% if can_add_annotations %}
             <p>
                 <a href="{% url 'forms' 'open_rep_annotation' decision.id %}">Add a vote annotation</a>
@@ -135,7 +196,7 @@
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
         {% featureflag pg.ADVANCED_INFO %}
-            <h2>Membership list</h2>
+            <h2 class="section-header" id="membership-list">Membership list</h2>
             <div class="alert alert-warning" role="alert">
                 <p>
                     This decision was made without a vote, so there is no voting list. The following is a list of people who were {{ decision.chamber.member_plural }} at the time of the decision.
