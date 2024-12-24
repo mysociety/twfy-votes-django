@@ -119,6 +119,7 @@ class PolicyCollection(BaseModel):
         groups.append(
             PolicyDisplayGroup(
                 name="Significant Policies",
+                slug="significant",
                 paired_policies=sig_links,
                 url_base=url_base,
             )
@@ -136,6 +137,7 @@ class PolicyCollection(BaseModel):
                 groups.append(
                     PolicyDisplayGroup(
                         name=slug_lookup[group_slug].description,
+                        slug=group_slug,
                         paired_policies=grouped_items,
                         url_base=url_base,
                     )
@@ -148,6 +150,7 @@ class PolicyDisplayGroup(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str
+    slug: str
     url_base: list[str | int]
     paired_policies: list[PairedPolicy]
 

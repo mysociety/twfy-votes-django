@@ -256,6 +256,14 @@ class Person(DjangoVoteModel):
     def votes_url(self, year: str = "all"):
         return reverse("person_votes", kwargs={"person_id": self.id, "year": year})
 
+    def recent_years_with_votes(self):
+        items = (
+            self.rebellion_rates.filter(period_type=RebellionPeriodType.YEAR)
+            .order_by("-period_number")
+            .values_list("period_number", flat=True)
+        )
+        return [str(x) for x in items]
+
     def rebellion_rate_df(self):
         items = self.rebellion_rates.filter(
             period_type=RebellionPeriodType.YEAR
