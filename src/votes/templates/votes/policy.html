@@ -1,9 +1,29 @@
-{% extends "votes/base.html" %}
+{% extends "votes/base_with_menu.html" %}
 
 {% block title %}{{ settings.site_name }}{% endblock %}
 
+{% block content.title %}<h1 id="top-header">{{ policy.name.title }}</h1>{% endblock %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">{{ policy.name.title }}</a>
+    </p>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#details">Details</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#description">Description</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#decisions">Decisions</a>
+    </li>
+{% endblock content.menu %}
+
 {% block content.inner %}
-    <h1>{{ policy.name.title }}</h1>
+    <h2 class="section-header" id="details">Details</h2>
     <p>Status: {{ policy.status.title }}</p>
     <p>
         Groups:
@@ -13,10 +33,10 @@
         {% endfor %}
     </p>
     {% if policy.highlightable %}<p>Policy may be highlighted in absence of interested votes.</p>{% endif %}
-    <h2>Description</h2>
+    <h2 class="section-header" id="description">Description</h2>
     <p>{{ policy.policy_description }}</p>
     <p>[Person name] voted for/against {{ policy.context_description|safe }}</p>
-    <h2>Decisions</h2>
+    <h2 class="section-header" id="decisions">Decisions</h2>
     <p>Decisions may be read as agreeing with the policy, or being against the policy.</p>
     <p>{% style_df policy.decision_df %}</p>
 {% endblock content.inner %}

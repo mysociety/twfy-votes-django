@@ -1,9 +1,28 @@
-{% extends "votes/base.html" %}
+{% extends "votes/base_with_menu.html" %}
 
 {% block title %}{{ settings.site_name }}{% endblock %}
 
+{% block content.title %}
+    <h1 id="top-header">TheyWorkForYou Policies</h1>
+{% endblock content.title %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">Policies - All</a>
+    </p>
+    {% for chamber in chambers %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#{{ chamber.slug }}">{{ chamber.name }}</a>
+        </li>
+    {% endfor %}
+{% endblock content.menu %}
+
+<h3>{{ chamber.name }}</h3>
+
 {% block content.inner %}
-    <h1>Policies</h1>
     <p>Policies are collections of votes that are linked thematically.</p>
     <p>These power TheyWorkForYou's voting records.</p>
     Status:
@@ -20,7 +39,9 @@
         </li>
     </ul>
     {% for chamber in chambers %}
-        <h3>{{ chamber.name }}</h3>
+        <h2 class="section-header" id="{{ chamber.slug }}">
+            {{ chamber.name }}
+        </h3>
         <ul>
             {% for p in statuses %}
                 <li>

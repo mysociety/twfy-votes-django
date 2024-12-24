@@ -574,7 +574,9 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
                 policy for policy in policies if group in policy.groups.all()
             ]
             policy_collection.append(
-                ChamberPolicyGroup(name=group.description, policies=group_policies)
+                ChamberPolicyGroup(
+                    name=group.description, slug=group.slug, policies=group_policies
+                )
             )
 
         context["policy_collection"] = policy_collection
