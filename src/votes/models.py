@@ -146,6 +146,8 @@ class DecisionProtocol(Protocol):
 
     def motion_speech_url(self) -> str: ...
 
+    def decision_number_or_ref(self) -> str: ...
+
 
 DecisionProtocolType = TypeVar("DecisionProtocolType", bound=DecisionProtocol)
 
@@ -655,6 +657,9 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def decision_number_or_ref(self) -> str:
+        return str(self.division_number)
+
     def whip_report_df(self) -> pd.DataFrame | None:
         wf = list(
             self.whip_reports.all().values(
@@ -1009,6 +1014,9 @@ class Agreement(DjangoVoteModel):
     agreement_annotations: DummyOneToMany[AgreementAnnotation] = related_name(
         "agreement"
     )
+
+    def decision_number_or_ref(self) -> str:
+        return str(self.decision_ref)
 
     def get_annotations(self) -> list[AgreementAnnotation]:
         return list(self.agreement_annotations.all())
