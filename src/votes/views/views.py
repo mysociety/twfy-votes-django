@@ -327,6 +327,7 @@ class PersonPageView(TitleMixin, TemplateView):
     def get_context_data(self, person_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
         context["person"] = Person.objects.get(id=person_id)
+        context["person_view"] = "overview"
         return context
 
 
@@ -339,6 +340,7 @@ class PersonVotesPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         person = Person.objects.get(id=person_id)
+        context["year"] = year
         context["person"] = person
         if year == "all":
             context["period"] = "All time"
