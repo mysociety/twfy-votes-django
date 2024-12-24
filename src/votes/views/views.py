@@ -292,10 +292,30 @@ class PeoplePageView(TitleMixin, TemplateView):
 
     def get_context_data(self, filter: Literal["all", "current"], **kwargs):
         context = super().get_context_data(**kwargs)
-        if filter == "all":
-            context["people"] = Person.objects.all()
-        elif filter == "current":
-            context["people"] = Person.current()
+        match filter:
+            case "all":
+                context["people"] = Person.objects.all()
+            case "current":
+                context["people"] = Person.current()
+            case "current_commons":
+                context["people"] = Person.current_in_chamber(ChamberSlug.COMMONS)
+            case "current_lords":
+                context["people"] = Person.current_in_chamber(ChamberSlug.LORDS)
+            case "current_scottish_parliament":
+                context["people"] = Person.current_in_chamber(ChamberSlug.SCOTLAND)
+            case "current_senedd":
+                context["people"] = Person.current_in_chamber(ChamberSlug.WALES)
+            case _:
+                raise ValueError("Invalid filter")
+        context["filter"] = filter
+        context["filter_options"] = {
+            "all": "All",
+            "current": "Current",
+            "current_commons": "Current Commons",
+            "current_lords": "Current Lords",
+            "current_scottish_parliament": "Current Scottish Parliament",
+            "current_senedd": "Current Senedd",
+        }
         return context
 
 
