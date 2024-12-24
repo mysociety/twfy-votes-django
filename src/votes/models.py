@@ -302,7 +302,16 @@ class Person(DjangoVoteModel):
         """
         Those with a membership that is current.
         """
-        return cls.objects.filter(memberships__end_date__gte=datetime.date.today())
+        return cls.objects.filter(
+            memberships__end_date__gte=datetime.date.today()
+        ).order_by("id")
+
+    @classmethod
+    def current_in_chamber(cls, chamber_slug: ChamberSlug):
+        memberships = Membership.objects.filter(
+            chamber_slug=chamber_slug, end_date__gte=datetime.date.today()
+        )
+        return cls.objects.filter(memberships__in=memberships).order_by("id")
 
     def membership_in_chamber_on_date(
         self, chamber_slug: ChamberSlug, date: datetime.date
