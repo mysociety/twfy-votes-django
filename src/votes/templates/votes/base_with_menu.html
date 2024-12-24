@@ -1,0 +1,94 @@
+{% extends "votes/base.html" %}
+
+{% block content %}
+    <div class="main-content">
+        <div class="container" style="padding-bottom: 50px">
+            <div class="page-title-header"
+                 style="padding-bottom:20px;
+                        padding-top:10px">
+
+                {% block content.title %}
+                {% endblock content.title %}
+
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-lg-3">
+                    <ul class="nav nav-pills flex-column sticky-top mb-4 mb-md-0"
+                        style="top: 1rem">
+
+                        {% block content.menu %}
+                        {% endblock content.menu %}
+
+                    </ul>
+                </div>
+                <div class="col-md-8">
+
+                    {% block content.inner %}
+                    {% endblock content.inner %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block menujs %}
+    <script>
+        // side-top-header is only being visible when top-header isn't
+        // only do this if the window is past a minimum width (770px) to handle mobile
+        var topHeader = document.getElementById("top-header");
+        var sideTopHeader = document.getElementById("side-top-header");
+
+        window.addEventListener("scroll", function() {
+            if (window.pageYOffset > (topHeader.offsetTop + 100) && window.innerWidth > 770) {
+                sideTopHeader.style.display = "block";
+            } else {
+                sideTopHeader.style.display = "none";
+            }
+        });
+    </script>
+
+    {% block menujs.section %}
+        <script>
+            const sectionHeaders = document.querySelectorAll(".section-header");
+            const navItems = document.querySelectorAll(".nav-link");
+
+            function setActiveNavItem() {
+                let closestSection = null;
+                let closestOffset = Infinity;
+                sectionHeaders.forEach((section) => {
+                    const rect = section.getBoundingClientRect();
+                    const offset = Math.abs(rect.top);
+
+                    if (offset < closestOffset) {
+                        closestSection = section;
+                        closestOffset = offset;
+                    }
+                });
+
+                navItems.forEach((item) => {
+                    item.classList.remove("active");
+                });
+
+                if (closestSection) {
+                    const targetId = closestSection.id;
+                    const activeNavItem = document.querySelector(`.nav-link[href="#${targetId}"]`);
+                    if (activeNavItem) {
+                        console.log("yes");
+                        activeNavItem.classList.add("active");
+                    }
+                }
+            }
+
+            window.addEventListener("scroll", setActiveNavItem);
+
+            // Run on page load
+            setActiveNavItem();
+        </script>
+    {% endblock menujs.section %}
+{% endblock menujs %}
