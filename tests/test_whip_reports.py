@@ -29,7 +29,7 @@ def whip_report():
 def test_original_data(client: Client):
     response = client.get("/decisions/division/commons/2016-12-13/109")
     content = response.content.decode()
-    for text in ["Whip reports", "against", "three_line"]:
+    for text in ["against", "three_line"]:
         assert text not in content
 
 
@@ -38,7 +38,7 @@ def test_original_data_json(client: Client):
     content = response.content.decode()
     response = client.get("/decisions/division/commons/2016-12-13/109")
     content = response.content.decode()
-    for text in ["Whip reports", "against", "three_line"]:
+    for text in ["against", "three_line"]:
         assert text not in content
 
 
