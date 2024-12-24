@@ -1,10 +1,13 @@
 import datetime
 from pathlib import Path
+from typing import Callable
 
 from django.conf import settings
 
 import pandas as pd
 import rich
+
+from twfy_votes.helpers.detector import AndPhraseDetector, PhraseDetector
 
 from ..consts import MotionType
 from ..models import Motion
@@ -31,88 +34,144 @@ def any_present(search: str, items: list[str]) -> bool:
     return any([x in search for x in items])
 
 
+approve_si = AndPhraseDetector(criteria=["be approved", "laid before this house"])
+
+revoke_si = AndPhraseDetector(criteria=["be revoked", "laid before this house"])
+
+reasoned_amendment = PhraseDetector(
+    criteria=[
+        "reasoned amendment",
+        "declines to give the bill a",
+        "declines to give a second reading",
+        AndPhraseDetector(criteria=["second reading", "this house declines to give"]),
+    ],
+)
+
+timetable_change = PhraseDetector(
+    criteria=["makes provision as set out in this order"],
+)
+
+standing_order_change = PhraseDetector(
+    criteria=[
+        "following standing order be made",
+        "orders be standing orders of the house",
+    ],
+)
+
+first_reading = PhraseDetector(
+    criteria=["first reading"],
+)
+
+closure = PhraseDetector(
+    criteria=["claimed to move the closure"],
+)
+
+second_stage_committee = AndPhraseDetector(
+    criteria=[
+        PhraseDetector(criteria=["second reading", "read a second time"]),
+        "clause",
+    ]
+)
+
+committee_clause = PhraseDetector(criteria=["clause stand part of the bill"])
+
+programme_change = PhraseDetector(
+    criteria=["that the following provisions shall apply to the"],
+)
+
+third_stage = PhraseDetector(
+    criteria=["third reading", "read a third time", "read the third time"],
+)
+
+second_stage = PhraseDetector(
+    criteria=["second reading", "read a second time"],
+)
+
+ten_minute_rule = PhraseDetector(
+    criteria=["standing order", "23"],
+)
+
+adjournment = PhraseDetector(
+    criteria=["do adjourn until", "do now adjourn"],
+)
+
+european_document = PhraseDetector(
+    criteria=[
+        PhraseDetector(
+            criteria=[
+                "takes note of european union document",
+                "takes note of european document",
+                "takes note of draft european council decision",
+            ],
+        ),
+        PhraseDetector(
+            criteria=["takes note of regulation", "of the european parliament"]
+        ),
+    ]
+)
+
+gracious_speech = PhraseDetector(
+    criteria=["gracious speech"],
+)
+
+lords_amendment = PhraseDetector(criteria=["lords", "amendment"])
+
+
+any_amendment = PhraseDetector(criteria=["amendment", "clause be added to the bill"])
+
+humble_address = PhraseDetector(criteria=["humble address be presented"])
+
+private_sitting = PhraseDetector(criteria=["that the house sit in private"])
+
+confidence = PhraseDetector(criteria=["confidence in the government"])
+
+financial = PhraseDetector(
+    criteria=[
+        "be granted to his Majesty to be issued by the treasury out of the consolidated fund"
+    ]
+)
+
+new_clause = PhraseDetector(criteria=["new clause"])
+
+bill_introduction = PhraseDetector(criteria=["that leave be given to bring in a bill"])
+
+# this is in priority order, the first matched will be used
+criteria_map: dict[Callable[[str], bool], MotionType] = {
+    approve_si: MotionType.APPROVE_STATUTORY_INSTRUMENT,
+    revoke_si: MotionType.REVOKE_STATUTORY_INSTRUMENT,
+    reasoned_amendment: MotionType.REASONED_AMENDMENT,
+    timetable_change: MotionType.TIMETABLE_CHANGE,
+    standing_order_change: MotionType.STANDING_ORDER_CHANGE,
+    first_reading: MotionType.FIRST_STAGE,
+    closure: MotionType.CLOSURE,
+    second_stage_committee: MotionType.SECOND_STAGE_COMMITTEE,
+    committee_clause: MotionType.COMMITEE_CLAUSE,
+    programme_change: MotionType.PROGRAMME,
+    third_stage: MotionType.THIRD_STAGE,
+    second_stage: MotionType.SECOND_STAGE,
+    ten_minute_rule: MotionType.TEN_MINUTE_RULE,
+    adjournment: MotionType.ADJOURNMENT,
+    european_document: MotionType.EU_DOCUMENT_SCRUTINY,
+    gracious_speech: MotionType.GOVERNMENT_AGENDA,
+    lords_amendment: MotionType.LORDS_AMENDMENT,
+    any_amendment: MotionType.AMENDMENT,
+    humble_address: MotionType.HUMBLE_ADDRESS,
+    private_sitting: MotionType.PRIVATE_SITTING,
+    confidence: MotionType.CONFIDENCE,
+    financial: MotionType.FINANCIAL,
+    new_clause: MotionType.PROPOSED_CLAUSE,
+    bill_introduction: MotionType.BILL_INTRODUCTION,
+}
+
+
 def catagorise_motion(motion: str) -> MotionType:
     l_motion = motion.lower()
-    if all_present(l_motion, ["be approved", "laid before this house"]):
-        return MotionType.APPROVE_STATUTORY_INSTRUMENT
-    elif all_present(l_motion, ["be revoked", "laid before this house"]):
-        return MotionType.REVOKE_STATUTORY_INSTRUMENT
-    elif any_present(
-        l_motion,
-        [
-            "reasoned amendment",
-            "declines to give the bill a",
-            "declines to give a second reading",
-        ],
-    ):
-        return MotionType.REASONED_AMENDMENT
-    elif all_present(l_motion, ["second reading", "this house declines to give"]):
-        return MotionType.REASONED_AMENDMENT
-    elif any_present(l_motion, ["makes provision as set out in this order"]):
-        return MotionType.TIMETABLE_CHANGE
-    elif any_present(
-        l_motion,
-        ["following standing order be made", "orders be standing orders of the house"],
-    ):
-        return MotionType.STANDING_ORDER_CHANGE
-    elif any_present(l_motion, ["first reading"]):
-        return MotionType.FIRST_STAGE
-    elif any_present(l_motion, ["claimed to move the closure"]):
-        return MotionType.CLOSURE
-    elif any_present(
-        l_motion, ["second reading", "read a second time"]
-    ) and any_present(l_motion, ["clause"]):
-        return MotionType.SECOND_STAGE_COMMITTEE
-    elif any_present(l_motion, ["clause stand part of the bill"]):
-        return MotionType.COMMITEE_CLAUSE
-    elif any_present(l_motion, ["that the following provisions shall apply to the"]):
-        return MotionType.PROGRAMME
-    elif any_present(
-        l_motion, ["third reading", "read a third time", "read the third time"]
-    ):
-        return MotionType.THIRD_STAGE
-    elif any_present(l_motion, ["second reading", "read a second time"]):
-        return MotionType.SECOND_STAGE
-    elif all_present(l_motion, ["standing order", "23"]):
-        return MotionType.TEN_MINUTE_RULE
-    elif any_present(l_motion, ["do adjourn until", "do now adjourn"]):
-        return MotionType.ADJOURNMENT
-    elif any_present(
-        l_motion,
-        [
-            "takes note of european union document",
-            "takes note of european document",
-            "takes note of draft european council decision",
-        ],
-    ) or all_present(
-        l_motion, ["takes note of regulation", "of the european parliament"]
-    ):
-        return MotionType.EU_DOCUMENT_SCRUTINY
-    elif any_present(l_motion, ["gracious speech"]):
-        return MotionType.GOVERNMENT_AGENDA
-    elif all_present(l_motion, ["amendment", "lords"]):
-        return MotionType.LORDS_AMENDMENT
-    elif any_present(l_motion, ["amendment", "clause be added to the bill"]):
-        return MotionType.AMENDMENT
-    elif any_present(l_motion, ["humble address be presented"]):
-        return MotionType.HUMBLE_ADDRESS
-    elif any_present(l_motion, ["that the house sit in private"]):
-        return MotionType.PRIVATE_SITTING
-    elif all_present(l_motion, ["confidence in", "government"]):
-        return MotionType.CONFIDENCE
-    elif all_present(
-        l_motion,
-        [
-            "be granted to his Majesty to be issued by the treasury out of the consolidated fund"
-        ],
-    ):
-        return MotionType.FINANCIAL
-    elif l_motion.startswith("new clause"):
-        return MotionType.PROPOSED_CLAUSE
-    elif any_present(l_motion, ["that leave be given to bring in a bill"]):
-        return MotionType.BILL_INTRODUCTION
-    else:
-        return MotionType.OTHER
+
+    for detector, motion_type in criteria_map.items():
+        if detector(l_motion):
+            return motion_type
+
+    return MotionType.OTHER
 
 
 @import_register.register("motions", group=ImportOrder.MOTIONS)
