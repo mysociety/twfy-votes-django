@@ -332,6 +332,8 @@ class Person(DjangoVoteModel):
         else:
             votes_query = self.votes.all()
 
+        votes_query = votes_query.prefetch_related("division")
+
         data = [
             {
                 "Date": v.division.date,
@@ -792,7 +794,7 @@ class Division(DjangoVoteModel):
                 if not pd.isna(x.for_motion_percentage)
                 else "n/a",
             }
-            for x in self.party_breakdowns.all()
+            for x in self.party_breakdowns.all().prefetch_related("party")
         ]
 
         return pd.DataFrame(data=data)
@@ -875,7 +877,7 @@ class Division(DjangoVoteModel):
 
         relevant_memberships = Membership.objects.filter(
             chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
-        )
+        ).prefetch_related("party", "person")
         person_to_membership_map = {x.person_id: x for x in relevant_memberships}
 
         vote_annotations = self.vote_annotations.all()
@@ -894,7 +896,7 @@ class Division(DjangoVoteModel):
                 ),
                 "Annotation": vote_annotation_map.get(v.person_id, "-"),
             }
-            for v in self.votes.all()
+            for v in self.votes.all().prefetch_related("person")
         ]
 
         for d in data:
