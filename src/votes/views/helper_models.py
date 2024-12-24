@@ -59,6 +59,7 @@ class DivisionSearch(BaseModel):
 class ChamberPolicyGroup(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     name: str
+    slug: str
     policies: list[Policy]
 
 
