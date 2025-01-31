@@ -19,4 +19,4 @@ jobs:
           pip install ruff==0.6.2 djlint==1.35.4
           ruff check .
           ruff format . --check
-          djlint src/votes/templates --reformat --quiet
+          djlint votes/templates --reformat --quiet
