@@ -8,5 +8,5 @@ cd `dirname $0`/..
 
 script/bootstrap
 
-poetry install
+poetry install --no-root
 script/manage migrate
