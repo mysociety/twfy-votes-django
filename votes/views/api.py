@@ -39,8 +39,6 @@ from .twfy_bridge import PopoloPolicy
 
 class AuthBearer(HttpBearer):
     def authenticate(self, request, token):
-        print(token)
-        print(settings.REFRESH_TOKEN)
         if token == settings.REFRESH_TOKEN:
             return token
 
