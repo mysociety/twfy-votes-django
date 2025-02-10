@@ -16,8 +16,6 @@ import markdown
 import pandas as pd
 from bs4 import BeautifulSoup
 
-from twfy_votes.helpers.routes import RouteApp
-
 from ..consts import (
     ChamberSlug,
     PermissionGroupSlug,
@@ -58,10 +56,7 @@ from .helper_models import (
 )
 from .mixins import TitleMixin
 
-app = RouteApp(app_name="votes")
 
-
-@app.route("submit/{form_slug:slug}/{decision_id:int}", name="forms")
 class FormsView(TemplateView):
     template_name = "votes/forms.html"
 
@@ -153,7 +148,6 @@ class FormsView(TemplateView):
         return {"form": form, "decision": decision}
 
 
-@app.route("help/{markdown_slug:slug}", name="help")
 class MarkdownView(TemplateView):
     """
     View that accepts a markdown slug and renders the markdown file
@@ -236,7 +230,6 @@ class MarkdownView(TemplateView):
         return context
 
 
-@app.route("data", name="data")
 class DataView(TitleMixin, TemplateView):
     page_title = "Data"
     template_name = "votes/data.html"
@@ -264,7 +257,6 @@ class DataView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("", name="home")
 class HomePageView(TitleMixin, TemplateView):
     page_title = ""
     template_name = "votes/home.html"
@@ -285,7 +277,6 @@ class HomePageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("people/{filter:slug}", name="people")
 class PeoplePageView(TitleMixin, TemplateView):
     page_title = "People"
     template_name = "votes/people.html"
@@ -319,7 +310,6 @@ class PeoplePageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("person/{person_id:int}", name="person")
 class PersonPageView(TitleMixin, TemplateView):
     page_title = "Person"
     template_name = "votes/person.html"
@@ -331,7 +321,6 @@ class PersonPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("person/{person_id:int}/votes/{year:str}", name="person_votes")
 class PersonVotesPageView(TitleMixin, TemplateView):
     page_title = "Person Votes"
     template_name = "votes/person_votes.html"
@@ -359,7 +348,6 @@ class PersonVotesPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("decisions", name="decisions")
 class DecisionsPageView(TitleMixin, TemplateView):
     page_title = "Decisions"
     template_name = "votes/decisions.html"
@@ -370,10 +358,6 @@ class DecisionsPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "decisions/division/{chamber_slug:str}/{decision_date:date}/{decision_num:int}",
-    name="division",
-)
 class DivisionPageView(TitleMixin, TemplateView):
     page_title = "Division"
     template_name = "votes/decision.html"
@@ -413,10 +397,6 @@ class DivisionPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str_not_json}",
-    name="agreement",
-)
 class AgreementPageView(TitleMixin, TemplateView):
     page_title = "Agreement"
     template_name = "votes/decision.html"
@@ -447,7 +427,6 @@ class AgreementPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("decisions/{chamber_slug:str}/{year:int}", name="decisions_list")
 class DecisionsListPageView(TitleMixin, TemplateView):
     page_title = "Decisions List"
     template_name = "votes/decisions_list.html"
@@ -482,9 +461,6 @@ class DecisionsListPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "decisions/{chamber_slug:str}/{year:int}/{month:int}", name="decisions_list_month"
-)
 class DecisionsListMonthPageView(DecisionsListPageView):
     page_title = "Decisions List Month"
     template_name = "votes/decisions_list_month.html"
@@ -501,7 +477,6 @@ class DecisionsListMonthPageView(DecisionsListPageView):
         return context
 
 
-@app.route("policies", name="policies")
 class PoliciesPageView(TitleMixin, TemplateView):
     page_title = "Policies"
     template_name = "votes/policies.html"
@@ -518,7 +493,6 @@ class PoliciesPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("policies/reports", name="policies_reports")
 class PoliciesReportsPageView(TitleMixin, TemplateView):
     page_title = "Policies Reports"
     template_name = "votes/policy_reports.html"
@@ -541,7 +515,6 @@ class PoliciesReportsPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("policy/{policy_id:int}", name="policy")
 class PolicyPageView(TitleMixin, TemplateView):
     page_title = "Policy"
     template_name = "votes/policy.html"
@@ -552,7 +525,6 @@ class PolicyPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route("policy/{policy_id:int}/report", name="policy_reports")
 class PolicyReportPageView(TitleMixin, TemplateView):
     page_title = "Policy Reports"
     template_name = "votes/policy_report.html"
@@ -564,10 +536,6 @@ class PolicyReportPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "policies/{chamber_slug:slug}/{status_slug:slug}/{group_slug:slug}",
-    name="policy_collection",
-)
 class PolicyCollectionPageView(TitleMixin, TemplateView):
     page_title = "Policy Collection"
     template_name = "votes/policy_collection.html"
@@ -606,10 +574,6 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}",
-    name="person_policy",
-)
 class PersonPoliciesView(TitleMixin, TemplateView):
     page_title = "Person Policies"
     template_name = "votes/person_policies.html"
@@ -661,10 +625,6 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         return context
 
 
-@app.route(
-    "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}/{policy_id:int}",
-    name="person_policy_solo",
-)
 class PersonPolicyView(TitleMixin, TemplateView):
     page_title = "Person Policy"
     template_name = "votes/person_policy.html"
