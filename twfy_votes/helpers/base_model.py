@@ -24,14 +24,14 @@ def disable_constraints(table_name: str):
     try:
         # Disable foreign key constraints
         with connection.cursor() as cursor:
-            cursor.execute(f"ALTER TABLE {table_name} DISABLE TRIGGER USER;")
+            cursor.execute(f"SET session_replication_role = replica;")
 
         # Yield control back to the caller
         yield
     finally:
         # Re-enable foreign key constraints
         with connection.cursor() as cursor:
-            cursor.execute(f"ALTER TABLE {table_name} ENABLE TRIGGER USER;")
+            cursor.execute(f"SET session_replication_role = DEFAULT;")
 
 
 @dataclass
