@@ -181,14 +181,13 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
             )
         )
 
-    with DivisionBreakdown.disable_constraints():
-        if update_since:
-            DivisionBreakdown.objects.filter(
-                division_id__in=affected_divisions_ids
-            ).delete()
-        else:
-            DivisionBreakdown.objects.all().delete()
-        DivisionBreakdown.objects.bulk_create(to_create, batch_size=10000)
+    if update_since:
+        DivisionBreakdown.objects.filter(
+            division_id__in=affected_divisions_ids
+        ).delete()
+    else:
+        DivisionBreakdown.objects.all().delete()
+    DivisionBreakdown.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Creating [green]{len(to_create)}[/green] division breakdowns")
@@ -224,14 +223,13 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
             )
         )
 
-    with DivisionPartyBreakdown.disable_constraints():
-        if update_since:
-            DivisionPartyBreakdown.objects.filter(
-                division_id__in=affected_divisions_ids
-            ).delete()
-        else:
-            DivisionPartyBreakdown.objects.all().delete()
-        DivisionPartyBreakdown.objects.bulk_create(to_create, batch_size=50000)
+    if update_since:
+        DivisionPartyBreakdown.objects.filter(
+            division_id__in=affected_divisions_ids
+        ).delete()
+    else:
+        DivisionPartyBreakdown.objects.all().delete()
+    DivisionPartyBreakdown.objects.bulk_create(to_create, batch_size=50000)
 
     if not quiet:
         rich.print(f"Creating [green]{len(to_create)}[/green] party breakdowns")
@@ -263,14 +261,13 @@ def import_breakdowns(quiet: bool = False, update_since: datetime.date | None = 
             )
         )
 
-    with DivisionsIsGovBreakdown.disable_constraints():
-        if update_since:
-            DivisionsIsGovBreakdown.objects.filter(
-                division_id__in=affected_divisions_ids
-            ).delete()
-        else:
-            DivisionsIsGovBreakdown.objects.all().delete()
-        DivisionsIsGovBreakdown.objects.bulk_create(to_create, batch_size=10000)
+    if update_since:
+        DivisionsIsGovBreakdown.objects.filter(
+            division_id__in=affected_divisions_ids
+        ).delete()
+    else:
+        DivisionsIsGovBreakdown.objects.all().delete()
+    DivisionsIsGovBreakdown.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Creating [green]{len(to_create)}[/green] government breakdowns")

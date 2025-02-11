@@ -206,9 +206,8 @@ def import_motions(quiet: bool = False, update_since: datetime.date | None = Non
         to_delete = Motion.objects.all()
 
     to_create = Motion.get_lookup_manager("gid").add_ids(to_create)
-    with Motion.disable_constraints():
-        to_delete.delete()
-        Motion.objects.bulk_create(to_create, batch_size=10000)
+    to_delete.delete()
+    Motion.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] motions")

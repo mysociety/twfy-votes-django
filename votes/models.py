@@ -671,6 +671,7 @@ class Division(DjangoVoteModel):
         models.ForeignKey,
         to=Motion,
         on_delete=models.DO_NOTHING,
+        db_constraint=False,
         null=True,
         default=None,
         related_name="divisions",
@@ -798,9 +799,11 @@ class Division(DjangoVoteModel):
                 "Neutral motion": x.neutral_motion,
                 "Absent motion": x.absent_motion,
                 "Party turnout": x.signed_votes / x.vote_participant_count,
-                "For motion percentage": x.for_motion_percentage
-                if not pd.isna(x.for_motion_percentage)
-                else "n/a",
+                "For motion percentage": (
+                    x.for_motion_percentage
+                    if not pd.isna(x.for_motion_percentage)
+                    else "n/a"
+                ),
             }
             for x in self.party_breakdowns.all().prefetch_related("party")
         ]
@@ -1026,6 +1029,7 @@ class Agreement(DjangoVoteModel):
         models.ForeignKey,
         to=Motion,
         on_delete=models.DO_NOTHING,
+        db_constraint=False,
         null=True,
         related_name="agreements",
         default=None,

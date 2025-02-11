@@ -147,11 +147,10 @@ def import_cluster_analysis(
         )
         to_create.append(item)
 
-    with DivisionTag.disable_constraints():
-        if update_since:
-            DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
-        else:
-            DivisionTag.objects.all().delete()
+    if update_since:
+        DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
+    else:
+        DivisionTag.objects.all().delete()
         DivisionTag.objects.bulk_create(to_create)
 
     if not quiet:

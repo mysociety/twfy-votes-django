@@ -81,9 +81,8 @@ def import_agreements(quiet: bool = False):
 
     to_create = Agreement.get_lookup_manager("key").add_ids(to_create)
 
-    with Agreement.disable_constraints():
-        Agreement.objects.all().delete()
-        Agreement.objects.bulk_create(to_create, batch_size=1000)
+    Agreement.objects.all().delete()
+    Agreement.objects.bulk_create(to_create, batch_size=1000)
 
     if not quiet:
         rich.print(f"Creating [green]{len(to_create)}[/green] agreements")

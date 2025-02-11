@@ -222,9 +222,8 @@ def import_popolo(quiet: bool = False):
 
             to_create.append(item)
 
-    with Person.disable_constraints():
-        Person.objects.all().delete()
-        Person.objects.bulk_create(to_create, batch_size=10000)
+    Person.objects.all().delete()
+    Person.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] people")
@@ -247,9 +246,8 @@ def import_popolo(quiet: bool = False):
 
     to_create = Organization.get_lookup_manager("slug").add_ids(to_create)
 
-    with Organization.disable_constraints():
-        Organization.objects.all().delete()
-        Organization.objects.bulk_create(to_create, batch_size=10000)
+    Organization.objects.all().delete()
+    Organization.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] organizations")
@@ -286,12 +284,11 @@ def import_popolo(quiet: bool = False):
                 area_name=area_name,
                 post_label=post_label,
             )
+            if chamber_id != 0:
+                to_create.append(item)
 
-            to_create.append(item)
-
-    with Membership.disable_constraints():
-        Membership.objects.all().delete()
-        Membership.objects.bulk_create(to_create, batch_size=50000)
+    Membership.objects.all().delete()
+    Membership.objects.bulk_create(to_create, batch_size=50000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] memberships")
@@ -311,9 +308,8 @@ def import_popolo(quiet: bool = False):
 
         to_create.append(item)
 
-    with OrgMembershipCount.disable_constraints():
-        OrgMembershipCount.objects.all().delete()
-        OrgMembershipCount.objects.bulk_create(to_create, batch_size=10000)
+    OrgMembershipCount.objects.all().delete()
+    OrgMembershipCount.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] membership counts")

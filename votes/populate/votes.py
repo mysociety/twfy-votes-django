@@ -161,8 +161,7 @@ def create_full_table(quiet: bool = False):
     # now we're just sucking the data straight into the database from
     # parquet
     start = datetime.datetime.now()
-    with Vote.disable_constraints():
-        count = Vote.replace_with_parquet(votes_with_diff)
+    count = Vote.replace_with_parquet(votes_with_diff)
     end = datetime.datetime.now()
     seconds = (end - start).total_seconds()
 
@@ -228,9 +227,8 @@ def import_votes(quiet: bool = False, update_since: datetime.date | None = None)
         )
 
     # Bulk create votes
-    with Vote.disable_constraints():
-        Vote.objects.filter(division_id__in=rel_division_ids).delete()
-        Vote.objects.bulk_create(to_create)
+    Vote.objects.filter(division_id__in=rel_division_ids).delete()
+    Vote.objects.bulk_create(to_create)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] votes")
