@@ -20,7 +20,8 @@ def get_external_data(quiet: bool = False):
 
     source_dir = BASE_DIR / "data" / "source"
 
-    source_dir.mkdir(parents=True, exist_ok=True)
+    if not source_dir.exists():
+        source_dir.mkdir(parents=True, exist_ok=True)
 
     for url in to_fetch:
         filename = url.split("/")[-1]
