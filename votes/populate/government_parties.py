@@ -42,6 +42,5 @@ def populate_government_parties(quiet: bool = False):
     )
     to_create = lookup_manager.add_ids(to_create)
 
-    with GovernmentParty.disable_constraints():
-        GovernmentParty.objects.all().delete()
-        GovernmentParty.objects.bulk_create(to_create, batch_size=1000)
+    GovernmentParty.objects.all().delete()
+    GovernmentParty.objects.bulk_create(to_create, batch_size=1000)

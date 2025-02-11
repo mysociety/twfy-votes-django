@@ -39,6 +39,5 @@ def populate_comparison_periods(quiet: bool = False):
     lookup_manager = PolicyComparisonPeriod.get_lookup_manager("chamber_id", "slug")
     to_create = lookup_manager.add_ids(to_create)
 
-    with PolicyComparisonPeriod.disable_constraints():
-        PolicyComparisonPeriod.objects.all().delete()
-        PolicyComparisonPeriod.objects.bulk_create(to_create, batch_size=1000)
+    PolicyComparisonPeriod.objects.all().delete()
+    PolicyComparisonPeriod.objects.bulk_create(to_create, batch_size=1000)

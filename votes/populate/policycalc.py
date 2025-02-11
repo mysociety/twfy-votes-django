@@ -573,8 +573,7 @@ def run_policy_calculations(
     generate_combo_with_id(source_path, joined_path)
 
     if count:
-        with VoteDistribution.disable_constraints():
-            count = VoteDistribution.replace_with_parquet(joined_path)
+        count = VoteDistribution.replace_with_parquet(joined_path)
 
     if not quiet:
         rich.print(

@@ -151,9 +151,8 @@ def import_rebellions(quiet: bool = False):
         if key in existing_keys:
             item.id = existing_keys[key]
 
-    with RebellionRate.disable_constraints():
-        RebellionRate.objects.all().delete()
-        RebellionRate.objects.bulk_create(to_create)
+    RebellionRate.objects.all().delete()
+    RebellionRate.objects.bulk_create(to_create)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] rebellion rates")

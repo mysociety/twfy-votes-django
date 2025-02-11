@@ -35,8 +35,7 @@ def import_policy_groups(quiet: bool = False):
 
     to_create = PolicyGroup.get_lookup_manager("slug").add_ids(to_create)
 
-    with PolicyGroup.disable_constraints():
-        PolicyGroup.objects.all().delete()
-        PolicyGroup.objects.bulk_create(to_create, batch_size=1000)
+    PolicyGroup.objects.all().delete()
+    PolicyGroup.objects.bulk_create(to_create, batch_size=1000)
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] policy groups")

@@ -1,37 +1,11 @@
-from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
 from django.conf import settings
-from django.db import connection
 
 from .duck import sync_to_postgres
 from .typed_django.models import ModelType, TypedModel
-
-
-@contextmanager
-def disable_constraints(table_name: str):
-    """
-    Postgres specific context manager to disable foreign key constraints.
-
-    We do this because we're generally importing whole database tables from elsewhere.
-    So by definition, we can preserve foreign key relationships.
-
-    We don't want to get into complicated checks of differences between tables, just dump,
-    reimport and then re-enable constraints.
-    """
-    try:
-        # Disable foreign key constraints
-        with connection.cursor() as cursor:
-            cursor.execute(f"SET session_replication_role = replica;")
-
-        # Yield control back to the caller
-        yield
-    finally:
-        # Re-enable foreign key constraints
-        with connection.cursor() as cursor:
-            cursor.execute(f"SET session_replication_role = DEFAULT;")
 
 
 @dataclass
@@ -77,19 +51,6 @@ class DjangoVoteModel(TypedModel, abstract=True):
     @classmethod
     def get_lookup_manager(cls, *slug_fields: str):
         return LookupManager(list(slug_fields), cls.id_from_slugs(*slug_fields))
-
-    @classmethod
-    def disable_constraints(cls):
-        """
-        Postgres specific context manager to disable foreign key constraints.
-
-        We do this because we're generally importing whole database tables from elsewhere.
-        So by definition, we can preserve foreign key relationships.
-
-        We don't want to get into complicated checks of differences between tables, just dump,
-        reimport and then re-enable constraints.
-        """
-        return disable_constraints(cls._meta.db_table)
 
     @classmethod
     def maintain_existing_ids(cls, items: list[Self], *, slug_field: str) -> list[Self]:

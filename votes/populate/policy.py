@@ -7,7 +7,6 @@ from django.db import models
 import rich
 from ruamel.yaml import YAML
 
-from twfy_votes.helpers.base_model import disable_constraints
 from twfy_votes.policy.models import (
     PartialPolicy,
 )
@@ -70,9 +69,8 @@ def populate_policies(quiet: bool = False) -> None:
         )
         to_create.append(policy)
 
-    with Policy.disable_constraints():
-        Policy.objects.all().delete()
-        Policy.objects.bulk_create(to_create, batch_size=1000)
+    Policy.objects.all().delete()
+    Policy.objects.bulk_create(to_create, batch_size=1000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] policies")
@@ -91,9 +89,8 @@ def populate_policies(quiet: bool = False) -> None:
                 )
             )
 
-    with disable_constraints(ThroughModel._meta.db_table):
-        ThroughModel.objects.all().delete()
-        ThroughModel.objects.bulk_create(to_create, batch_size=1000)
+    ThroughModel.objects.all().delete()
+    ThroughModel.objects.bulk_create(to_create, batch_size=1000)
 
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] policy group connection")
@@ -127,16 +124,14 @@ def populate_policies(quiet: bool = False) -> None:
                 )
             )
 
-    with PolicyDivisionLink.disable_constraints():
-        PolicyDivisionLink.objects.all().delete()
-        PolicyDivisionLink.objects.bulk_create(division_links, batch_size=1000)
+    PolicyDivisionLink.objects.all().delete()
+    PolicyDivisionLink.objects.bulk_create(division_links, batch_size=1000)
 
     if not quiet:
         rich.print(f"Created [green]{len(division_links)}[/green] division links")
 
-    with PolicyAgreementLink.disable_constraints():
-        PolicyAgreementLink.objects.all().delete()
-        PolicyAgreementLink.objects.bulk_create(agreement_links, batch_size=1000)
+    PolicyAgreementLink.objects.all().delete()
+    PolicyAgreementLink.objects.bulk_create(agreement_links, batch_size=1000)
 
     if not quiet:
         rich.print(f"Created [green]{len(agreement_links)}[/green] agreement links")

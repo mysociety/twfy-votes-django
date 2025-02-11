@@ -180,10 +180,9 @@ def import_divisions(quiet: bool = False, update_since: datetime.date | None = N
     to_create = Division.get_lookup_manager("key").add_ids(to_create)
     api_to_create = Division.get_lookup_manager("key").add_ids(api_to_create)
 
-    with Division.disable_constraints():
-        to_delete.delete()
-        Division.objects.bulk_create(to_create, batch_size=10000)
-        Division.objects.bulk_create(api_to_create, batch_size=10000)
+    to_delete.delete()
+    Division.objects.bulk_create(to_create, batch_size=10000)
+    Division.objects.bulk_create(api_to_create, batch_size=10000)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] divisions")

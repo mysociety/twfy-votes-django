@@ -38,8 +38,7 @@ def import_chambers(quiet: bool = False):
 
     to_create = Chamber.get_lookup_manager("slug").add_ids(to_create)
 
-    with Chamber.disable_constraints():
-        Chamber.objects.all().delete()
-        Chamber.objects.bulk_create(to_create, batch_size=1000)
+    Chamber.objects.all().delete()
+    Chamber.objects.bulk_create(to_create, batch_size=1000)
     if not quiet:
         rich.print(f"Created [green]{len(to_create)}[/green] chambers")

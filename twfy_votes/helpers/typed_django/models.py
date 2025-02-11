@@ -132,7 +132,10 @@ ForeignKey = Annotated[
     ModelType, lambda x: field(models.ForeignKey, to=x, on_delete=models.CASCADE)
 ]
 DoNothingForeignKey = Annotated[
-    ModelType, lambda x: field(models.ForeignKey, to=x, on_delete=models.DO_NOTHING)
+    ModelType,
+    lambda x: field(
+        models.ForeignKey, to=x, on_delete=models.DO_NOTHING, db_constraint=False
+    ),
 ]
 ManyToMany = Annotated[
     DummyManager[ModelType],
