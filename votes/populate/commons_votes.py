@@ -67,8 +67,8 @@ class Division(BaseModel):
     NoCount: int
     DoubleMajorityAyeCount: None
     DoubleMajorityNoCount: None
-    AyeTellers: list[Member] = Field(default_factory=list)
-    NoTellers: list[Member] = Field(default_factory=list)
+    AyeTellers: Optional[list[Member]] = Field(default_factory=list)
+    NoTellers: Optional[list[Member]] = Field(default_factory=list)
     Ayes: list[Member] = Field(default_factory=list)
     Noes: list[Member] = Field(default_factory=list)
     FriendlyDescription: None
@@ -107,8 +107,12 @@ class Division(BaseModel):
         if both_ids:
             yes_ids = [x for x in yes_ids if x not in both_ids]
             no_ids = [x for x in no_ids if x not in both_ids]
-        yes_teller_ids = [person.MemberId for person in self.AyeTellers]
-        no_teller_ids = [person.MemberId for person in self.NoTellers]
+        yes_teller_ids = []
+        no_teller_ids = []
+        if self.AyeTellers:
+            yes_teller_ids = [person.MemberId for person in self.AyeTellers]
+        if self.NoTellers:
+            no_teller_ids = [person.MemberId for person in self.NoTellers]
 
         votes: list[MiniVote] = []
 
