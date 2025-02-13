@@ -20,6 +20,10 @@ shortcuts: dict[str, InstructionDict] = {
         "update_last": 1,
         "all": True,
     },
+    "refresh_recent": {
+        "update_last": 10,
+        "all": True,
+    },
 }
 
 
