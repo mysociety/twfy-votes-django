@@ -19,7 +19,7 @@ division_links:
     date: 2010-06-07
     division_number: 1
   alignment: against
-  strength: strong
+  strength: weak
   notes: ''
 - decision:
     chamber_slug: commons
