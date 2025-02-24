@@ -39,7 +39,7 @@ division_links:
     date: 2011-03-16
     division_number: 231
   alignment: agree
-  strength: strong
+  strength: weak
   notes: ''
 - decision:
     chamber_slug: commons

@@ -1033,7 +1033,7 @@ division_links:
     date: 2019-10-24
     division_number: 11
   alignment: agree
-  strength: strong
+  strength: weak
   notes: ''
 - decision:
     chamber_slug: commons

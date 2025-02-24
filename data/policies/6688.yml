@@ -38,7 +38,7 @@ division_links:
     division_number: 118
   alignment: agree
   strength: strong
-  notes: ''
+  notes: 'ignore:strong_without_power'
 - decision:
     chamber_slug: commons
     date: 2010-09-09
