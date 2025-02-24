@@ -3,7 +3,7 @@ name: Increase stamp duty
 context_description: increasing <b>stamp duty</b>
 policy_description: Votes that increase stamp duty on property purchases.
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons

@@ -3,7 +3,7 @@ name: National insurance contributions
 context_description: "increasing in <b>employers' national insurance contributions</b>"
 policy_description: ''
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons
