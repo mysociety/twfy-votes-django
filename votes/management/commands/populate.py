@@ -24,6 +24,11 @@ shortcuts: dict[str, InstructionDict] = {
         "update_last": 10,
         "all": True,
     },
+    "refresh_policies": {
+        "update_last": 7,
+        "start_group": "policies",
+        "end_group": "policycalc",
+    },
 }
 
 
