@@ -405,7 +405,12 @@ class PolicyReport(BaseModel):
                     ):
                         strong_without_power += 1
 
-            if division.strength == PolicyStrength.STRONG and not uses_powers:
+            # decisions before this date were cleared manually
+            if (
+                division.strength == PolicyStrength.STRONG
+                and not uses_powers
+                and division.decision.motion
+            ):
                 if report.add_from_division_issue(
                     division_link=division, issue=IssueType.STRONG_WITHOUT_POWER
                 ):
