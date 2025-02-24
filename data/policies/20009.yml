@@ -1,9 +1,9 @@
-id: 6754
-name: Reduce capital gains tax
-context_description: reducing <b>capital gains tax</b>
-policy_description: Capital gains taxes should be reduced.
-notes: ''
-status: retired
+id: 20009
+name: Increase capital gains tax
+context_description: increase <b>capital gains tax</b>
+policy_description: Votes on increasing capital gains tax
+notes: Reverse of old 6754 policy - for consistency that tax votes are up
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons
@@ -14,63 +14,64 @@ division_links:
     chamber_slug: commons
     date: 2010-07-06
     division_number: 14
-  alignment: against
+  alignment: agree
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2013-03-25
     division_number: 198
-  alignment: agree
+  alignment: against
   strength: weak
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-03-22
     division_number: 221
-  alignment: agree
+  alignment: against
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-03-22
     division_number: 223
-  alignment: agree
+  alignment: against
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-03-22
     division_number: 225
-  alignment: agree
+  alignment: against
   strength: weak
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-04-11
     division_number: 233
-  alignment: agree
+  alignment: against
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-06-28
     division_number: 28
-  alignment: agree
-  strength: strong
-  notes: ''
-- decision:
-    chamber_slug: commons
-    date: 2016-09-06
-    division_number: 58
   alignment: against
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
     date: 2016-09-06
-    division_number: 61
+    division_number: 58
   alignment: agree
+  strength: weak
+  notes: 'This was downgraded to weak after the policy was flipped, because its a
+    no/neutral vote - not a yes/no yes/neutral vote. '
+- decision:
+    chamber_slug: commons
+    date: 2016-09-06
+    division_number: 61
+  alignment: against
   strength: strong
   notes: ''
 - policy_id:
@@ -79,6 +80,27 @@ division_links:
     date: 2024-03-12
     division_number: 89
     key: commons-2024-03-12-89
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-06
+    division_number: 28
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-06
+    division_number: 29
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-06
+    division_number: 30
   alignment: agree
   strength: strong
   notes: ''

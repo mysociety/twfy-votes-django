@@ -1,8 +1,8 @@
 id: 6928
 name: Environmental Water Quality
 context_description: improving <b>environmental water quality</b>
-policy_description: There have been votes in Parliament on enviornmental water quality, including reducing the harm caused
-  by untreated sewage discharges.
+policy_description: There have been votes in Parliament on enviornmental water quality,
+  including reducing the harm caused by untreated sewage discharges.
 notes: ''
 status: active
 strength_meaning: simplified
@@ -44,6 +44,13 @@ division_links:
     date: 2021-10-20
     division_number: 91
   alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-05-15
+    division_number: 153
+  alignment: agree
   strength: strong
   notes: ''
 agreement_links: []

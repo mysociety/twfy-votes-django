@@ -1,0 +1,28 @@
+id: 20003
+name: Increase stamp duty
+context_description: increasing <b>stamp duty</b>
+policy_description: Votes that increase stamp duty on property purchases.
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+- housing
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2024-11-06
+    division_number: 35
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-06
+    division_number: 36
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

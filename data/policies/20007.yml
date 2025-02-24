@@ -1,0 +1,21 @@
+id: 20007
+name: Great British Energy
+context_description: creating a <b>publically owned energy investment company</b> (Great
+  British Energy)
+policy_description: ''
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2024-10-29
+    division_number: 27
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []
