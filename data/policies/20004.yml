@@ -1,0 +1,28 @@
+id: 20004
+name: Minimum detention requirements
+context_description: reducing (for some kinds of offenders) the <b>minimum detention requirement</b>
+  before release
+policy_description: 'Votes on reducing the minimum required detention period before being considered for release.'
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2024-12-10
+    division_number: 62
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-07-25
+    division_number: 5
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

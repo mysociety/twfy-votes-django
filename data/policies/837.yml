@@ -111,4 +111,11 @@ division_links:
   alignment: agree
   strength: weak
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-12
+    division_number: 40
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []

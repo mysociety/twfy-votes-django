@@ -1,0 +1,20 @@
+id: 20005
+name: National insurance contributions
+context_description: "increasing in <b>employers' national insurance contributions</b>"
+policy_description: ''
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2024-12-17
+    division_number: 73
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

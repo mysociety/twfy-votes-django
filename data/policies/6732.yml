@@ -2,8 +2,8 @@ id: 6732
 name: Assisted Dying
 context_description: allowing <b>terminally ill people</b> to be given <b>assistance
   to end their life</b>
-policy_description: There have been votes in Parliament on whether it should be legal to
-  assist terminally ill people who have decided they want to end their life.
+policy_description: There have been votes in Parliament on whether it should be legal
+  to assist terminally ill people who have decided they want to end their life.
 notes: ''
 status: active
 strength_meaning: simplified
@@ -24,6 +24,13 @@ division_links:
     chamber_slug: commons
     date: 2015-09-11
     division_number: 69
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2024-11-29
+    division_number: 51
   alignment: agree
   strength: strong
   notes: ''

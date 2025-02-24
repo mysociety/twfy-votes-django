@@ -1,0 +1,22 @@
+id: 20006
+name: Means-testing winter fuel
+context_description: means-testing/removing universality on <b>winter fuel payments</b> for
+  pensioners
+policy_description: 'Votes on whether to means-test.remove universality on winter
+  fuel payments for pensioners'
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2024-09-10
+    division_number: 14
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []
