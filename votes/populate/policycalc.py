@@ -112,13 +112,13 @@ class agreement_count:
         person_id,
         policy_id,
         -- count agreement where strength is strong and alignment is agree
-        count(*) filter (where strong_int = 1 and agree_int = 1) as num_strong_agreements_same,
+        num_strong_agreements_same: count(*) filter (where strong_int = 1 and agree_int = 1),
         -- count agreement where strength is weak and alignment is agree
-        count(*) filter (where strong_int = 0 and agree_int = 1) as num_agreements_same,
+        num_agreements_same: count(*) filter (where strong_int = 0 and agree_int = 1),
         -- count agreement where strength is strong and alignment is disagree
-        count(*) filter (where strong_int = 1 and agree_int = 0) as num_strong_agreements_different,
+        num_strong_agreements_different: count(*) filter (where strong_int = 1 and agree_int = 0) ,
         -- count agreement where strength is weak and alignment is disagree
-        count(*) filter (where strong_int = 0 and agree_int = 0) as num_agreements_different
+        num_agreements_different: count(*) filter (where strong_int = 0 and agree_int = 0)
     from
         policy_collective_relevant
     join
@@ -142,23 +142,23 @@ class policy_alignment:
     SELECT
         period_id,
         policy_id,
-        pw_vote.person_id as person_id,
-        case pw_vote.person_id when {{ _person_id }} then 1 else 0 end as is_target,
+        person_id: pw_vote.person_id,
+        is_target: case pw_vote.person_id when {{ _person_id }} then 1 else 0 end,
         strong_int,
-        policy_divisions.id as division_id,
-        policy_divisions.date as division_date,
-        policy_divisions.division_number as division_number,
-        policy_divisions.division_year as division_year,
-        pw_vote.effective_vote as mp_vote,
+        division_id: policy_divisions.id,
+        division_date: policy_divisions.date,
+        division_number: policy_divisions.division_number,
+        division_year: policy_divisions.division_year,
+        mp_vote: pw_vote.effective_vote,
         -- ok, effective_vote_int should be 1 for agree, -1 for disagree
         -- agree_int is 1 for 'policy agrees with vote', 0 for 'policy disagrees with vote'
         -- so aligned with policy is (1,1) or (-1,0) and not aligned is (1,0) or (-1,1)
-        (case when pw_vote.effective_vote_int = 1 and agree_int = 1 
-                or pw_vote.effective_vote_int = -1 and agree_int = 0 then 1 else 0 end) as answer_agreed,
-        (case when pw_vote.effective_vote_int = 1 and agree_int = 0 
-                or pw_vote.effective_vote_int = -1 and agree_int = 1 then 1 else 0 end) as answer_disagreed,
-        pw_vote.abstain_int as abstained,
-        pw_vote.absent_int as absent,
+        answer_agreed: (case when pw_vote.effective_vote_int = 1 and agree_int = 1 
+                or pw_vote.effective_vote_int = -1 and agree_int = 0 then 1 else 0 end),
+        answer_disagreed: (case when pw_vote.effective_vote_int = 1 and agree_int = 0 
+                or pw_vote.effective_vote_int = -1 and agree_int = 1 then 1 else 0 end),
+        abstained: pw_vote.abstain_int,
+        absent: pw_vote.absent_int,
     FROM
         -- this is the divisions table merged with the division_links table and the period table
         policy_divisions_relevant as policy_divisions
@@ -195,14 +195,14 @@ class comparisons_by_policy_vote:
         is_target,
         policy_id,
         division_id,
-        ANY_VALUE(strong_int) as strong_int,
-        count(*) as total,
-        any_value(division_year) as division_year,
-        sum(answer_agreed) / total as num_divisions_agreed,
-        sum(answer_disagreed) / total as num_divisions_disagreed,
-        sum(abstained) / total as num_divisions_abstain,
-        sum(absent) / total as num_divisions_absent,
-        sum(answer_agreed) + sum(answer_disagreed) + sum(abstained) + sum(absent) as num_comparators,
+        strong_int: ANY_VALUE(strong_int),
+        total: count(*),
+        division_year: any_value(division_year),
+        num_divisions_agreed: sum(answer_agreed) / total,
+        num_divisions_disagreed: sum(answer_disagreed) / total,
+        num_divisions_abstain: sum(abstained) / total,
+        num_divisions_absent: sum(absent) / total,
+        num_comparators: sum(answer_agreed) + sum(answer_disagreed) + sum(abstained) + sum(absent),
     from
         policy_alignment({{ _person_id }},
                          {{ _chamber_id }},
@@ -220,19 +220,19 @@ class comparisons_by_policy_vote_pivot:
         period_id,
         is_target,
         policy_id,
-        sum(num_divisions_agreed) filter (where strong_int = 0) as num_votes_same,
-        sum(num_divisions_agreed) filter (where strong_int = 1) as num_strong_votes_same,
-        sum(num_divisions_disagreed) filter (where strong_int = 0) as num_votes_different,
-        sum(num_divisions_disagreed) filter (where strong_int = 1) as num_strong_votes_different,
-        sum(num_divisions_absent) filter (where strong_int = 0) as num_votes_absent,
-        sum(num_divisions_absent) filter (where strong_int = 1) as num_strong_votes_absent,
-        sum(num_divisions_abstain) filter (where strong_int = 0) as num_votes_abstain,
-        sum(num_divisions_abstain) filter (where strong_int = 1) as num_strong_votes_abstain,
-        list(num_comparators) as num_comparators,
+        num_votes_same: sum(num_divisions_agreed) filter (where strong_int = 0),
+        num_strong_votes_same: sum(num_divisions_agreed) filter (where strong_int = 1),
+        num_votes_different: sum(num_divisions_disagreed) filter (where strong_int = 0),
+        num_strong_votes_different: sum(num_divisions_disagreed) filter (where strong_int = 1),
+        num_votes_absent: sum(num_divisions_absent) filter (where strong_int = 0),
+        num_strong_votes_absent: sum(num_divisions_absent) filter (where strong_int = 1),
+        num_votes_abstain: sum(num_divisions_abstain) filter (where strong_int = 0),
+        num_strong_votes_abstain: sum(num_divisions_abstain) filter (where strong_int = 1),
+        num_comparators: list(num_comparators),
         -- for debugging - remove for speed
-        list(division_id) as division_ids,
-        min(division_year) as start_year,
-        max(division_year) as end_year
+        division_ids: list(division_id),
+        start_year: min(division_year),
+        end_year: max(division_year)
     from comparisons_by_policy_vote({{ _person_id }},
                                     {{ _chamber_id }},
                                     {{ _party_slug }}
@@ -252,12 +252,12 @@ class joined_division_agreement_comparison:
     args = ["_person_id", "_chamber_id", "_party_slug"]
     macro = """
     select
-        coalesce(division_comparison.period_id, agreement_comparison.period_id) as period_id,
-        coalesce(division_comparison.policy_id, agreement_comparison.policy_id) as policy_id,
-        coalesce(division_comparison.is_target, 0) as is_target,
-        {{ _person_id }} as person_id,
-        {{ _chamber_id }} as chamber_id,
-        {{ _party_slug }} as party_id,
+        period_id: coalesce(division_comparison.period_id, agreement_comparison.period_id),
+        policy_id: coalesce(division_comparison.policy_id, agreement_comparison.policy_id),
+        is_target: coalesce(division_comparison.is_target, 0),
+        person_id: {{ _person_id }},
+        chamber_id: {{ _chamber_id }},
+        party_id: {{ _party_slug }},
         division_comparison.* exclude (period_id, policy_id, is_target),
         agreement_comparison.* exclude (period_id, policy_id)
     from
@@ -293,11 +293,11 @@ else:
     class compiled_policies:
         query = """
         select
-            null as person_id,
-            null as period_id,
-            null as policy_id,
-            null as party_id,
-            null as policy_hash
+            person_id: null,
+            period_id: null,
+            policy_id: null,
+            party_id: null,
+            policy_hash: null 
         where 1 = 0
         """
 
@@ -315,7 +315,7 @@ class policy_hash:
 
     query = """
     select
-        id as policy_id,
+        policy_id: id,
         policy_hash
     from
         policies
@@ -331,7 +331,7 @@ class relevant_person_policy_period_with_hash:
     query = """
     select
         relevant_person_policy_period.* exclude (party_id),
-        coalesce(party_id, 0) as party_id,
+        party_id: coalesce(party_id, 0),
         policy_hash.policy_hash
     from
         relevant_person_policy_period
@@ -349,14 +349,14 @@ class compare_hash:
 
     query = """
     select
-        rp.person_id as person_id,
-        rp.chamber_id as chamber_id,
-        rp.period_id as period_id,
-        rp.policy_id as policy_id,
-        rp.party_id as party_id,
-        rp.policy_hash as current_hash,
-        compiled_policies.policy_hash as compiled_hash,
-        current_hash != compiled_hash as hash_differs
+        person_id: rp.person_id,
+        chamber_id: rp.chamber_id,
+        period_id: rp.period_id,
+        policy_id: rp.policy_id,
+        party_id: rp.party_id,
+        current_hash: rp.policy_hash,
+        compiled_hash: compiled_policies.policy_hash,
+        hash_differs: current_hash != compiled_hash
     from 
         relevant_person_policy_period_with_hash as rp
     left join
