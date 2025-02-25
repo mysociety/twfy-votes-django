@@ -43,8 +43,8 @@ class party_diff_over_time:
     SELECT
         votes_with_diff.person_id,
         diff_from_party_average,
-        date_part('year', pw_division.date) as year,
-        cast(ceiling(( current_date - pw_division.date) / 365) as int) as in_last_x_year
+        year: date_part('year', pw_division.date),
+        in_last_x_year: cast(ceiling(( current_date - pw_division.date) / 365) as int)
     from
         votes_with_diff
     join
@@ -59,8 +59,8 @@ class per_person_party_diff_all_time:
     query = """
     SELECT
         person_id,
-        avg(diff_from_party_average) as avg_diff_from_party,
-        count(*) as total_votes
+        avg_diff_from_party: avg(diff_from_party_average),
+        total_votes: count(*)
     from
         party_diff_over_time
     group by
@@ -74,8 +74,8 @@ class per_person_party_diff_year:
     SELECT
         person_id,
         year,
-        avg(diff_from_party_average) as avg_diff_from_party,
-        count(*) as total_votes
+        avg_diff_from_party: avg(diff_from_party_average),
+        total_votes: count(*)
     from
         party_diff_over_time
     group by
@@ -89,8 +89,8 @@ class per_person_party_diff_period:
     SELECT
         person_id,
         in_last_x_year,
-        avg(diff_from_party_average) as avg_diff_from_party,
-        count(*) as total_votes
+        avg_diff_from_party: avg(diff_from_party_average),
+        total_votes: count(*)
     from
         party_diff_over_time
     group by

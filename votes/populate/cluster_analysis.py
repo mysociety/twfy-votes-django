@@ -45,13 +45,13 @@ class reformat_for_cluster_base:
 
     query = """
     select
-        pw_divisions_gov_with_counts.division_id as division_id,
-        sum(case when grouping = 0 then for_motion else 0 end) as opp_aye,
-        sum(case when grouping = 0 then against_motion else 0 end) as opp_no,
-        sum(case when grouping = 0 then absent_motion + neutral_motion else 0 end) as opp_other,
-        sum(case when grouping = 1 then for_motion else 0 end) as gov_aye,
-        sum(case when grouping = 1 then against_motion else 0 end) as gov_no,
-        sum(case when grouping = 1 then absent_motion + neutral_motion else 0 end) as gov_other,
+        division_id: pw_divisions_gov_with_counts.division_id,
+        opp_aye: sum(case when grouping = 0 then for_motion else 0 end),
+        opp_no: sum(case when grouping = 0 then against_motion else 0 end),
+        opp_other: sum(case when grouping = 0 then absent_motion + neutral_motion else 0 end),
+        gov_aye: sum(case when grouping = 1 then for_motion else 0 end),
+        gov_no: sum(case when grouping = 1 then against_motion else 0 end),
+        gov_other: sum(case when grouping = 1 then absent_motion + neutral_motion else 0 end),
     from pw_divisions_gov_with_counts
     join pw_division on (pw_division.key = pw_divisions_gov_with_counts.division_id)
     group by pw_divisions_gov_with_counts.division_id, 
@@ -70,11 +70,11 @@ class reformat_for_cluster:
 
     query = """
     select
-        reformat_for_cluster_base.division_id as division_id,
-        opp_aye / (opp_aye + opp_other + opp_no) as opp_aye_p,
-        opp_no / (opp_aye + opp_other + opp_no) as opp_no_p,
-        gov_aye / (gov_aye + gov_other + gov_no) as gov_aye_p,
-        gov_no / (gov_aye + gov_other + gov_no) as gov_no_p,
+        division_id: reformat_for_cluster_base.division_id,
+        opp_aye_p: opp_aye / (opp_aye + opp_other + opp_no),
+        opp_no_p: opp_no / (opp_aye + opp_other + opp_no),
+        gov_aye_p: gov_aye / (gov_aye + gov_other + gov_no),
+        gov_no_p: gov_no / (gov_aye + gov_other + gov_no),
     from reformat_for_cluster_base
     """
 

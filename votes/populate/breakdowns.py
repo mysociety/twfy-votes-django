@@ -43,20 +43,20 @@ class pw_divisions_with_counts:
     query = """
     select
         division_id,
-        count(*) as vote_participant_count,
-        any_value(total_possible_members) as total_possible_members,
-        sum(case when effective_vote = 'aye' then 1 else 0 end) as for_motion,
-        sum(case when effective_vote = 'no' then 1 else 0 end) as against_motion,
-        sum(case when effective_vote = 'abstain' then 1 else 0 end) as neutral_motion,
-        sum(case when effective_vote = 'absent' then 1 else 0 end) as absent_motion,
-        for_motion + against_motion as signed_votes,
-        for_motion - against_motion as motion_majority,
-        for_motion / signed_votes as for_motion_percentage,
-        case 
+        vote_participant_count: count(*),
+        total_possible_members: any_value(total_possible_members),
+        for_motion: sum(case when effective_vote = 'aye' then 1 else 0 end),
+        against_motion: sum(case when effective_vote = 'no' then 1 else 0 end),
+        neutral_motion: sum(case when effective_vote = 'abstain' then 1 else 0 end),
+        absent_motion: sum(case when effective_vote = 'absent' then 1 else 0 end),
+        signed_votes: for_motion + against_motion,
+        motion_majority: for_motion - against_motion,
+        for_motion_percentage: for_motion / signed_votes,
+        motion_result_int: case 
             when motion_majority = 0 then 0
             when motion_majority > 0 then 1
             when motion_majority < 0 then -1
-        end as motion_result_int
+        end
 
         from
         cm_votes_with_people
@@ -74,21 +74,21 @@ class pw_divisions_party_with_counts:
     query = """
     SELECT
         division_id,
-        effective_party_slug as grouping,
-        count(*) as vote_participant_count,
-        any_value(total_possible_members) as total_possible_members,
-        sum(case when effective_vote = 'aye' then 1 else 0 end) as for_motion,
-        sum(case when effective_vote = 'no' then 1 else 0 end) as against_motion,
-        sum(case when effective_vote = 'abstain' then 1 else 0 end) as neutral_motion,
-        sum(case when effective_vote = 'absent' then 1 else 0 end) as absent_motion,
-        for_motion + against_motion as signed_votes,
-        for_motion - against_motion as motion_majority,
-        for_motion / signed_votes as for_motion_percentage,
-        case 
+        grouping: effective_party_slug ,
+        vote_participant_count: count(*),
+        total_possible_members: any_value(total_possible_members),
+        for_motion: sum(case when effective_vote = 'aye' then 1 else 0 end),
+        against_motion: sum(case when effective_vote = 'no' then 1 else 0 end),
+        neutral_motion: sum(case when effective_vote = 'abstain' then 1 else 0 end),
+        absent_motion: sum(case when effective_vote = 'absent' then 1 else 0 end),
+        signed_votes: for_motion + against_motion,
+        motion_majority: for_motion - against_motion,
+        for_motion_percentage: for_motion / signed_votes,
+        motion_result_int: case 
             when motion_majority = 0 then 0
             when motion_majority > 0 then 1
             when motion_majority < 0 then -1
-        end as motion_result_int
+        end
     FROM
         cm_votes_with_people
     GROUP BY 
@@ -105,21 +105,21 @@ class pw_divisions_gov_with_counts:
     query = """
     SELECT
         division_id,
-        is_gov as grouping,
-        count(*) as vote_participant_count,
-        any_value(total_possible_members) as total_possible_members,
-        sum(case when effective_vote = 'aye' then 1 else 0 end) as for_motion,
-        sum(case when effective_vote = 'no' then 1 else 0 end) as against_motion,
-        sum(case when effective_vote = 'abstain' then 1 else 0 end) as neutral_motion,
-        sum(case when effective_vote = 'absent' then 1 else 0 end) as absent_motion,
-        for_motion + against_motion as signed_votes,
-        for_motion - against_motion as motion_majority,
-        for_motion / signed_votes as for_motion_percentage,
-        case 
+        grouping: is_gov,
+        vote_participant_count: count(*),
+        total_possible_members: any_value(total_possible_members),
+        for_motion: sum(case when effective_vote = 'aye' then 1 else 0 end),
+        against_motion: sum(case when effective_vote = 'no' then 1 else 0 end),
+        neutral_motion: sum(case when effective_vote = 'abstain' then 1 else 0 end),
+        absent_motion: sum(case when effective_vote = 'absent' then 1 else 0 end),
+        signed_votes: for_motion + against_motion,
+        motion_majority: for_motion - against_motion,
+        for_motion_percentage: for_motion / signed_votes,
+        motion_result_int: case 
             when motion_majority = 0 then 0
             when motion_majority > 0 then 1
             when motion_majority < 0 then -1
-        end as motion_result_int
+        end
     FROM
         cm_votes_with_people
     GROUP BY

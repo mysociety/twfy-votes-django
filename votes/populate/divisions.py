@@ -49,7 +49,7 @@ class division_links_with_id:
     query = """
     SELECT
         division_links.*,
-        motions.id as motion_id
+        motion_id: motions.id
     from division_links
     join motions on
         (division_links.motion_gid = motions.gid)
@@ -61,9 +61,9 @@ class divisions_with_total_membership:
     query = """
         SELECT
             pw_divisions.*,
-            org_membership_count.count as total_possible_members,
-            division_links_with_id.motion_id as motion_id,
-            'twfy' as division_info_source
+            total_possible_members: org_membership_count.count,
+            motion_id: division_links_with_id.motion_id,
+            division_info_source: 'twfy'
         FROM
             pw_divisions
         LEFT JOIN org_membership_count on
@@ -83,8 +83,8 @@ class api_divisions_with_total_membership:
     query = """
         SELECT
             api_divisions.*,
-            org_membership_count.count as total_possible_members,
-            'commons_api' as division_info_source
+            total_possible_members: org_membership_count.count,
+            division_info_source: 'commons_api'
         FROM
             api_divisions
         LEFT JOIN org_membership_count on

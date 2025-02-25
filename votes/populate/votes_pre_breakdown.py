@@ -53,8 +53,8 @@ class pw_vote_deduped:
     SELECT
         division_id,
         person_id,
-        reduce_votes(vote) as vote,
-        last(membership_id) as membership_id
+        vote: reduce_votes(vote),
+        membership_id: last(membership_id)
     FROM
         (select *
             from pw_vote
@@ -139,7 +139,7 @@ class government_parties:
     query = """
         select
             *,
-            True as is_gov
+            is_gov: True
         from
         government_parties_basic
     """
@@ -153,10 +153,10 @@ class pw_vote_with_absences:
 
     query = """
     select
-        pw_division.key as division_id,
-        pdm.id as membership_id,
-        pdm.person_id as person_id,
-        case when vote is null then 'absent' else vote end as vote
+        division_id: pw_division.key,
+        membership_id: pdm.id,
+        person_id: pdm.person_id,
+        vote: case when vote is null then 'absent' else vote end 
     from
         pw_division
     join
@@ -226,10 +226,10 @@ class calculate_votes:
     query = """
     SELECT
         pw_vote.* EXCLUDE (person_id),
-        get_effective_vote(vote) as effective_vote,
-        pw_vote.person_id as person_id,
-        pd_membership.effective_party_slug as effective_party_slug,
-        CASE WHEN government_parties.is_gov is NULL THEN 0 ELSE 1 END AS is_gov,
+        effective_vote: get_effective_vote(vote),
+        person_id: pw_vote.person_id,
+        effective_party_slug: pd_membership.effective_party_slug,
+        is_gov: CASE WHEN government_parties.is_gov is NULL THEN 0 ELSE 1 END,
         total_possible_members
     FROM
         joined_votes as pw_vote

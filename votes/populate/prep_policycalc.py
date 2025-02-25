@@ -68,13 +68,13 @@ class policy_divisions_relevant:
     query = """
     select 
         pw_division.*,
-        date_part('year',date) as division_year,
-        case when policy_votes.strength = 'strong' then 1 else 0 end as strong_int,
-        case when policy_votes.alignment = 'agree' then 1 else 0 end as agree_int,
-        strong_int * 2 + agree_int as combo_int,
+        division_year: date_part('year',date),
+        strong_int: case when policy_votes.strength = 'strong' then 1 else 0 end,
+        agree_int: case when policy_votes.alignment = 'agree' then 1 else 0 end,
+        combo_int: strong_int * 2 + agree_int,
         policy_votes.* exclude (decision_id, id),
-        policy_comparison_period.slug as period_slug,
-        policy_comparison_period.id as period_id
+        period_slug: policy_comparison_period.slug,
+        period_id: policy_comparison_period.id
     from 
         policy_votes
     left join
@@ -96,14 +96,14 @@ class votes_relevant:
     query = """
     select 
         pw_vote.* exclude (division_id),
-        pd_org.id as effective_party_id,
+        effective_party_id: pd_org.id,
         -- if effective_vote is aye then 1, no then -1, otherwise 0
-        case when effective_vote = 'aye' then 1 when effective_vote = 'no' then -1 else 0 end as effective_vote_int,
+        effective_vote_int: case when effective_vote = 'aye' then 1 when effective_vote = 'no' then -1 else 0 end,
         -- when effective_vote is absent, then absent is 1
-        case when effective_vote = 'absent' then 1 else 0 end as absent_int, 
-        case when effective_vote = 'abstain' then 1 else 0 end as abstain_int,
-        pw_division.id as division_id,
-        pw_division.key as division_key
+        absent_int: case when effective_vote = 'absent' then 1 else 0 end, 
+        abstain_int: case when effective_vote = 'abstain' then 1 else 0 end,
+        division_id: pw_division.id,
+        division_key: pw_division.key
     from 
         pw_vote
     join
@@ -128,12 +128,12 @@ class policy_agreements_relevant:
     query = """
     select 
         pw_agreement.*,
-        case when policy_agreements.strength = 'strong' then 1 else 0 end as strong_int,
-        case when policy_agreements.alignment = 'agree' then 1 else 0 end as agree_int,
-        strong_int * 2 + agree_int as combo_int,
+        strong_int: case when policy_agreements.strength = 'strong' then 1 else 0 end,
+        agree_int: case when policy_agreements.alignment = 'agree' then 1 else 0 end,
+        combo_int: strong_int * 2 + agree_int,
         policy_agreements.* exclude (decision_id, id),
-        policy_comparison_period.slug as period_slug,
-        policy_comparison_period.id as period_id
+        period_slug: policy_comparison_period.slug,
+        period_id: policy_comparison_period.id
     from 
         policy_agreements
     left join
@@ -156,11 +156,11 @@ class collective_relevant:
 
     query = """
     select
-        pd_memberships.id as membership_id,
-        pd_memberships.person_id as person_id,
+        membership_id: pd_memberships.id,
+        person_id: pd_memberships.person_id,
         pw_agreement.*,
-        policy_agreements.decision_id as decision_id,
-        'collective' as effective_vote
+        decision_id: policy_agreements.decision_id,
+        effective_vote: 'collective'
     from
         pw_agreement
     join
@@ -184,7 +184,7 @@ class relevant_parties_for_people:
         select
             person_id,
             effective_party_slug,
-            effective_party_id as party_id,
+            party_id: effective_party_id,
             chamber_id
         from
             pd_memberships
@@ -206,9 +206,9 @@ class relevant_people_divisions:
 
     query = """
     select
-        policy_divisions_relevant.chamber_id as chamber_id,
-        policy_divisions_relevant.policy_id as policy_id,
-        votes_relevant.person_id as person_id,
+        chamber_id: policy_divisions_relevant.chamber_id,
+        policy_id: policy_divisions_relevant.policy_id,
+        person_id: votes_relevant.person_id ,
         policy_divisions_relevant.period_id
     from votes_relevant
     join
@@ -225,9 +225,9 @@ class relevant_people_agreements:
 
     query = """
     select
-        policy_agreements_relevant.chamber_id as chamber_id,
-        policy_agreements_relevant.policy_id as policy_id,
-        collective_relevant.person_id as person_id,
+        chamber_id: policy_agreements_relevant.chamber_id,
+        policy_id: policy_agreements_relevant.policy_id,
+        person_id: collective_relevant.person_id,
         policy_agreements_relevant.period_id
     from collective_relevant
     join
