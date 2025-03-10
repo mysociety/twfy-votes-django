@@ -665,7 +665,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
         for link in division_links:
             vote = division_vote_lookup.get(link.decision_id)
             if not vote:
-                raise ValueError(f"Vote for division {link.decision_id} not found")
+                raise ValueError(f"Vote for division {link.decision.key} not found")
             division_items.append(
                 {
                     "motion": UrlColumn(
@@ -798,14 +798,18 @@ class PersonPolicyView(TitleMixin, TemplateView):
             Membership.objects.filter(chamber=chamber, person=person)
         )
 
-        def is_in_range_agreement(agreement: Agreement) -> bool:
+        def is_in_range_date(date: datetime.date) -> bool:
             for membership in relevant_memberships:
-                if membership.start_date <= agreement.date <= membership.end_date:
+                if membership.start_date <= date <= membership.end_date:
                     return True
             return False
 
         agreements = [
-            x.decision for x in agreement_links if is_in_range_agreement(x.decision)
+            x.decision for x in agreement_links if is_in_range_date(x.decision.date)
+        ]
+
+        division_links = [
+            x for x in division_links if is_in_range_date(x.decision.date)
         ]
 
         decision_links_and_votes = self.dfs_from_division_links(
