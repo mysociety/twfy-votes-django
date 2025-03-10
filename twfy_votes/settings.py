@@ -26,7 +26,9 @@ env = environ.Env(
     GOOGLE_ANALYTICS=(str, ""),
     REFRESH_TOKEN=(str, ""),
     TWFY_API_KEY=(str, ""),
+    BUGS_EMAIL=(str, ""),
 )
+
 
 environ.Env.read_env(BASE_DIR / ".env")
 
@@ -41,6 +43,12 @@ CACHE_FILE = env("CACHE_FILE")
 HIDE_DEBUG_TOOLBAR = env("HIDE_DEBUG_TOOLBAR")
 GOOGLE_ANALYTICS = env("GOOGLE_ANALYTICS")
 TWFY_API_KEY = env("TWFY_API_KEY")
+
+
+if env("BUGS_EMAIL"):
+    SERVER_EMAIL = env("BUGS_EMAIL")
+    ADMINS = ("mySociety bugs", env("BUGS_EMAIL"))
+
 
 # Application definition
 
