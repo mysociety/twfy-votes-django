@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 from pathlib import Path
 
@@ -92,20 +94,60 @@ def get_commons_clusters(df: pd.DataFrame, quiet: bool = True) -> "pd.Series[str
 
     center_df = pd.read_csv(cluster_centers, index_col="labels")
 
-    clusters: list[str] = []
+    cluster_distance: list[float] = []
+    cluster_name: list[str] = []
 
-    required_columns = list(center_df.columns)
     required_columns = list(center_df.columns)
     if len([x for x in df.columns if x in required_columns]) < 4:
         raise ValueError("Dataframe missing all required columns")
     tdf = list(df[required_columns].transpose().items())
     for _, series in tqdm(tdf, total=len(tdf), disable=quiet):
-        value: str = (
-            (center_df - series).pow(2).sum(axis=1).pow(1.0 / 2).sort_values().index[0]  # type: ignore
+        # for each row calculate the distance to all the centroids and get the closest
+        distance_series = (
+            (center_df - series).pow(2).sum(axis=1).pow(1.0 / 2).sort_values()
         )
-        clusters.append(value)
+        closest_name = distance_series.index[0]
+        closest_distance = distance_series.iloc[0]
 
-    return pd.Series(clusters, index=df.index)
+        cluster_distance.append(closest_distance)
+        cluster_name.append(closest_name)  # type: ignore
+
+    # get these into a single dataframe
+    cluster_name_s = pd.Series(cluster_name, index=df.index)
+    cluster_distance_s = pd.Series(cluster_distance, index=df.index)
+
+    jdf = pd.DataFrame(
+        {
+            "cluster": cluster_name_s,
+            "distance": cluster_distance_s,
+        }
+    )
+
+    # now what we want is a column that *within* each cluster puts them in a percentile of distance
+    # with the smallest distance being 0 and the maximum distance being 1
+    # do this because if it's tightly clustered we don't want an artifical line
+
+    rescaled_distance_cols: list[pd.Series] = []
+
+    for _, cluster_df in jdf.groupby("cluster"):
+        max_distance = cluster_df["distance"].max()
+        rescaled_distance = (cluster_df["distance"]) / max_distance
+        rescaled_distance_cols.append(rescaled_distance)
+
+    jdf["cluster_percentile"] = pd.concat(rescaled_distance_cols)
+
+    # if cluster_percentile > 0.70 then we should consider this a weak cluster
+    # and add a _outlier suffix to the cluster name
+    jdf["cluster"] = jdf.apply(
+        lambda x: (
+            f"{x['cluster']}_outlier"
+            if x["cluster_percentile"] > 0.70
+            else x["cluster"]
+        ),
+        axis=1,
+    )
+
+    return jdf["cluster"]
 
 
 @import_register.register("cluster_analysis", group=ImportOrder.DIVISION_ANALYSIS)

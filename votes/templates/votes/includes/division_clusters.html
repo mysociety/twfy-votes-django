@@ -6,6 +6,11 @@
                 {{ dc.bespoke }}
             {% endmarkdown %}
         {% else %}
+            {% if dc.is_outlier %}
+                {% markdown %}
+                    This vote is an outlier compared to other votes in this cluster. The discription below is the closest match, but it may be signficantly different to other votes in this cluster.
+                {% endmarkdown %}
+            {% endif %}
             {% with dc.tag as vc_tag %}
                 {% if vc_tag == "opp_strong_aye_gov_strong_no" %}
                     {% markdown %}
