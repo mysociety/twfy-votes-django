@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Literal
 
+from django.conf import settings
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect
 from django.template import Context, Template
@@ -175,7 +176,9 @@ class MarkdownView(TemplateView):
             raise Http404
         # sanitise the slug to prevent directory traversal
         markdown_slug = re.sub(r"[^a-zA-Z0-9_-]", "", markdown_slug)
-        template_path = Path("votes", "markdown/{}.md".format(markdown_slug))
+        template_path = Path(
+            settings.BASE_DIR, "votes", "markdown/{}.md".format(markdown_slug)
+        )
         markdown_body = template_path.read_text()
 
         # Extract the markdown H1 header to use as the page title, and remove it from the markdown_body
