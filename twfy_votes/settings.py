@@ -49,7 +49,7 @@ TWFY_API_KEY = env("TWFY_API_KEY")
 
 if env("BUGS_EMAIL"):
     SERVER_EMAIL = env("BUGS_EMAIL")
-    ADMINS = ("mySociety bugs", env("BUGS_EMAIL"))
+    ADMINS = [("mySociety bugs", env("BUGS_EMAIL"))]
     EMAIL_HOST = env("EMAIL_HOST")
     EMAIL_PORT = env("EMAIL_PORT")
     DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
