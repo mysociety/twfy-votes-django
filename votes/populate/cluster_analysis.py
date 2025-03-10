@@ -151,7 +151,8 @@ def import_cluster_analysis(
         DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
     else:
         DivisionTag.objects.all().delete()
-        DivisionTag.objects.bulk_create(to_create)
+
+    DivisionTag.objects.bulk_create(to_create)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] division clusters")
