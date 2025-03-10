@@ -114,7 +114,7 @@ gracious_speech = PhraseDetector(
     criteria=["gracious speech"],
 )
 
-lords_amendment = PhraseDetector(criteria=["lords", "amendment"])
+lords_amendment = PhraseDetector(criteria=["lords", "amendment"], operator="and")
 
 
 any_amendment = PhraseDetector(criteria=["amendment", "clause be added to the bill"])
