@@ -4,6 +4,7 @@ import datetime
 from dataclasses import dataclass
 from typing import (
     TYPE_CHECKING,
+    Any,
     NotRequired,
     Optional,
     Protocol,
@@ -734,7 +735,7 @@ class Division(DjangoVoteModel):
             return ob
         raise ValueError("No overall breakdown found")
 
-    def voting_cluster(self) -> dict[str, str]:
+    def voting_cluster(self) -> dict[str, Any]:
         lookup = {
             "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
             "gov_aye_opp_lean_no": "Divided opposition: Government Aye, Opposition divided",
@@ -748,19 +749,33 @@ class Division(DjangoVoteModel):
         }
 
         tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
-        data = tag.analysis_data if tag else "Unknown"
+        cluster_name = tag.analysis_data if tag else "Unknown"
+
+        if cluster_name.endswith("_outlier"):
+            is_outlier = True
+            cluster_name = cluster_name.replace("_outlier", "")
+        else:
+            is_outlier = False
+
         bespoke = ""
 
         analysis_override = self.analysis_override()
         if analysis_override:
             if analysis_override.parl_dynamics_group:
-                data = analysis_override.parl_dynamics_group
+                cluster_name = analysis_override.parl_dynamics_group
             if analysis_override.manual_parl_dynamics_desc:
                 bespoke = analysis_override.manual_parl_dynamics_desc
 
-        desc = lookup.get(data, "Unknown")
+        desc = lookup.get(cluster_name, "Unknown")
+        if is_outlier:
+            desc = f"{desc} (Outlier)"
 
-        return {"tag": data, "desc": desc, "bespoke": bespoke}
+        return {
+            "tag": cluster_name,
+            "desc": desc,
+            "bespoke": bespoke,
+            "is_outlier": is_outlier,
+        }
 
     def twfy_link(self) -> str:
         gid = self.source_gid.split("/")[-1]

@@ -153,7 +153,7 @@ class DivisionWithInfoSchema(ModelSchema):
     party_breakdowns: list[DivisionPartyBreakdownSchema]
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
     motion: MotionSchema | None
-    voting_cluster: dict[str, str]
+    voting_cluster: dict[str, Any]
     division_annotations: list[DivisionAnnotationSchema]
     vote_annotations: list[VoteAnnotationSchema]
     whip_reports: list[dict[str, Any]]
