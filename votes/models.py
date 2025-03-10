@@ -1106,7 +1106,7 @@ class Agreement(DjangoVoteModel):
     def votes_df(self) -> pd.DataFrame:
         relevant_memberships = Membership.objects.filter(
             chamber=self.chamber, start_date__lte=self.date, end_date__gte=self.date
-        )
+        ).prefetch_related("person", "party")
         data = [
             {
                 "Person": UrlColumn(url=m.person.votes_url(), text=m.person.name),
