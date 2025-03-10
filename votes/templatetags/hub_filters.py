@@ -125,9 +125,7 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
 
     df = df.rename(columns=nice_headers)
 
-    for p in percentage_columns:
-        if p not in df.columns:
-            raise ValueError(f"Column {p} not found in DataFrame")
+    percentage_columns = tuple([x for x in percentage_columns if x in df.columns])
 
     styled_df = df.style.hide(axis="index").format(
         {x: format_percentage for x in percentage_columns},  # type: ignore
