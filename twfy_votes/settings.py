@@ -27,6 +27,9 @@ env = environ.Env(
     REFRESH_TOKEN=(str, ""),
     TWFY_API_KEY=(str, ""),
     BUGS_EMAIL=(str, ""),
+    EMAIL_HOST=(str, "localhost"),
+    EMAIL_PORT=(int, 1025),
+    DEFAULT_FROM_EMAIL=(str, "webmaster@localhost"),
 )
 
 
@@ -44,11 +47,12 @@ HIDE_DEBUG_TOOLBAR = env("HIDE_DEBUG_TOOLBAR")
 GOOGLE_ANALYTICS = env("GOOGLE_ANALYTICS")
 TWFY_API_KEY = env("TWFY_API_KEY")
 
-
 if env("BUGS_EMAIL"):
     SERVER_EMAIL = env("BUGS_EMAIL")
     ADMINS = ("mySociety bugs", env("BUGS_EMAIL"))
-
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env("EMAIL_PORT")
+    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 
 # Application definition
 
