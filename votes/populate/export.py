@@ -41,7 +41,7 @@ def move_as_is():
     for file in files:
         source = COMPILED_DIR / file
         destination = DATA_DIR / file
-        shutil.move(source, destination)
+        shutil.copyfile(source, destination)
 
 
 def dump_models():
