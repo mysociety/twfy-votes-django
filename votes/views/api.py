@@ -409,7 +409,13 @@ def get_divisions_by_month(
 
 @api.get("/policies.json", response=list[PolicySchema])
 def get_policies(request: HttpRequest):
-    return Policy.objects.all().prefetch_related("groups")
+    return Policy.objects.all().prefetch_related(
+        "groups",
+        "division_links",
+        "division_links__decision",
+        "agreement_links",
+        "agreement_links__decision",
+    )
 
 
 @api.get("/policy/{chamber_slug}/{status}/{group_slug}.json", response=PolicySchema)
