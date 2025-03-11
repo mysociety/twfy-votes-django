@@ -9,7 +9,7 @@ import pandas as pd
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import VotePosition
-from ..models import Division, Organization, PolicyComparisonPeriod
+from ..models import Chamber, Division, Organization, PolicyComparisonPeriod
 from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
@@ -45,6 +45,9 @@ def move_as_is():
 
 
 def dump_models():
+    all_orgs = pd.DataFrame(list(Chamber.objects.all().values()))
+    all_orgs.to_parquet(DATA_DIR / "chambers.parquet")
+
     all_orgs = pd.DataFrame(list(Organization.objects.all().values()))
     all_orgs.to_parquet(DATA_DIR / "organization.parquet")
 

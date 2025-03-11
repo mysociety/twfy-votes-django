@@ -246,6 +246,7 @@ class DataView(TitleMixin, TemplateView):
             "division_with_counts": "Division information with basic counts",
             "divisions_gov_with_counts": "Division breakdowns split by government/opposition",
             "divisions_party_with_counts": "Division breakdowns split by party",
+            "chambers": "Chamber ids and names",
             "organization": "Party ids and names",
             "per_person_party_diff_all_time": "Voting alignment scores all time",
             "per_person_party_diff_period": "Voting alignment scores by rolling period",
