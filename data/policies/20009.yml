@@ -1,6 +1,6 @@
 id: 20009
 name: Increase capital gains tax
-context_description: increase <b>capital gains tax</b>
+context_description: increasing <b>capital gains tax</b>
 policy_description: Votes on increasing capital gains tax
 notes: Reverse of old 6754 policy - for consistency that tax votes are up
 status: active
