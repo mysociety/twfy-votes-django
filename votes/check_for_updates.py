@@ -25,6 +25,6 @@ def new_divisions_on_commons_votes():
 def check_for_external_update_markers():
     if new_divisions_on_commons_votes():
         Update.create_task(
-            {"shortcut": " refresh_commons_api"}, created_via="Commons API trigger"
+            {"shortcut": "refresh_commons_api"}, created_via="Commons API trigger"
         )
     return False
