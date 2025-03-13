@@ -87,6 +87,10 @@ second_stage = PhraseDetector(
     criteria=["second reading", "read a second time"],
 )
 
+ten_minute_rule = AndPhraseDetector(
+    criteria=["standing order", "23"],
+)
+
 ten_minute_rule = PhraseDetector(
     criteria=["standing order", "23"],
 )
@@ -116,12 +120,13 @@ gracious_speech = PhraseDetector(
 
 lords_amendment = PhraseDetector(criteria=["lords", "amendment"], operator="and")
 
-
 any_amendment = PhraseDetector(criteria=["amendment", "clause be added to the bill"])
 
 humble_address = PhraseDetector(criteria=["humble address be presented"])
 
-private_sitting = PhraseDetector(criteria=["that the house sit in private"])
+private_sitting = PhraseDetector(
+    criteria=["that the house sit in private", "Standing Order No. 163"]
+)
 
 confidence = PhraseDetector(criteria=["confidence in the government"])
 
