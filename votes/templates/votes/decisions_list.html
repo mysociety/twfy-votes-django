@@ -50,7 +50,7 @@
                             ✅
                         {% endif %}
                     {% elif division.decision_type == "Division" %}
-                        {% if division.overall_breakdowns.first.motion_result_int == 1 %}
+                        {% if division.overall_breakdowns.0.motion_result_int == 1 %}
                             ✅
                         {% else %}
                             ❌
