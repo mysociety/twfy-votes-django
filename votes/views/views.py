@@ -397,6 +397,7 @@ class DivisionPageView(TitleMixin, TemplateView):
         context["can_report_self_whip"] = super_users_or_group(
             self.request.user, PermissionGroupSlug.CAN_REPORT_SELF_WHIP
         )
+        context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
 
         return context
 
@@ -418,7 +419,6 @@ class AgreementPageView(TitleMixin, TemplateView):
         ).apply_analysis_override()
 
         context["decision"] = decision
-        context["decision"] = decision
         context["relevant_policies"] = [
             x.policy
             for x in PolicyAgreementLink.objects.filter(
@@ -428,6 +428,7 @@ class AgreementPageView(TitleMixin, TemplateView):
         context["can_add_annotations"] = super_users_or_group(
             self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
         )
+        context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
         return context
 
 
@@ -461,6 +462,7 @@ class DecisionsListPageView(TitleMixin, TemplateView):
 
         search = self.decision_search(chamber, year_start, year_end)
         context["search"] = search
+        context["page_title"] = f"{year} {chamber.name} Decisions"
 
         return context
 
@@ -477,6 +479,9 @@ class DecisionsListMonthPageView(DecisionsListPageView):
         chamber = Chamber.objects.get(slug=chamber_slug)
         search = self.decision_search(chamber, month_start, month_end)
         context["search"] = search
+        context["page_title"] = (
+            f"{month_start.strftime('%B %Y')} {chamber.name} Decisions"
+        )
 
         return context
 
@@ -494,6 +499,7 @@ class PoliciesPageView(TitleMixin, TemplateView):
         if not can_view_draft_content(self.request.user):
             do_not_display.append(PolicyStatus.DRAFT)
         context["statuses"] = [x for x in PolicyStatus if x not in do_not_display]
+
         return context
 
 
@@ -526,6 +532,7 @@ class PolicyPageView(TitleMixin, TemplateView):
     def get_context_data(self, policy_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
         context["policy"] = Policy.objects.get(id=policy_id)
+        context["page_title"] = context["policy"].name + " | TheyWorkForYou Votes"
         return context
 
 
@@ -537,6 +544,8 @@ class PolicyReportPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["policy"] = Policy.objects.get(id=policy_id)
         context["policy_report"] = PolicyReport.from_policy(context["policy"])
+        context["page_title"] = f"{context['policy'].name} Report"
+
         return context
 
 
@@ -550,6 +559,10 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["chamber"] = Chamber.objects.get(slug=chamber_slug)
         context["status"] = PolicyStatus(status_slug)
+        context["page_title"] = (
+            f"{context['chamber'].name} {context['status'].name} Policies"
+        )
+
         if group_slug == "all":
             policies = Policy.objects.filter(
                 chamber__slug=chamber_slug, status=status_slug
@@ -613,7 +626,7 @@ class PersonPoliciesView(TitleMixin, TemplateView):
                 period=period,
                 party=party,
                 policy__status__in=valid_status,
-            ).prefetch_related("policy")
+            ).prefetch_related("policy", "policy__groups")
         )
 
         collection = PolicyCollection.from_distributions(
@@ -625,6 +638,9 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         context["period"] = period
         context["party"] = party
         context["collection"] = collection
+        context["page_title"] = (
+            f"{person.name} {chamber.name} {party.name} {period.description} Policies"
+        )
 
         return context
 
@@ -828,5 +844,6 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["own_distribution"] = own_distribution
         context["other_distribution"] = other_distribution
         context["decision_links_and_votes"] = decision_links_and_votes
+        context["page_title"] = f"{policy.name} votes for {person.name}"
 
         return context
