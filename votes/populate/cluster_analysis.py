@@ -168,14 +168,14 @@ def import_cluster_analysis(
 
     df["division_database_id"] = df["division_id"].map(division_id_lookup)
 
-    if update_since:
-        df = df[df["division_database_id"].isin(affected_divisions)]
-
     clusters = get_commons_clusters(df, quiet=quiet)
 
     df["cluster"] = clusters
 
     df.to_parquet(clusters_labelled)
+
+    if update_since:
+        df = df[df["division_database_id"].isin(affected_divisions)]
 
     to_create = []
 
