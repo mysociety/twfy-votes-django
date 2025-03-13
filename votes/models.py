@@ -698,7 +698,11 @@ class Division(DjangoVoteModel):
     def get_annotations(self) -> list[DivisionAnnotation]:
         return list(self.division_annotations.all())
 
-    def analysis_override(self) -> Optional[AnalysisOverride]:
+    def analysis_override(
+        self, override_lookup: dict[str, AnalysisOverride] | None = None
+    ) -> Optional[AnalysisOverride]:
+        if override_lookup is not None:
+            return override_lookup.get(self.key)
         existing = getattr(self, "_override", None)
         if existing:
             return existing
@@ -730,12 +734,18 @@ class Division(DjangoVoteModel):
         return ""
 
     def single_breakdown(self):
-        ob = self.overall_breakdowns.first()
+        ob_list = list(self.overall_breakdowns.all())
+        if len(ob_list) == 1:
+            ob = ob_list[0]
+        else:
+            ob = None
         if ob:
             return ob
         raise ValueError("No overall breakdown found")
 
-    def voting_cluster(self) -> dict[str, Any]:
+    def voting_cluster(
+        self, override_lookup: dict[str, AnalysisOverride] | None = None
+    ) -> dict[str, Any]:
         lookup = {
             "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
             "gov_aye_opp_lean_no": "Divided opposition: Government Aye, Opposition divided",
@@ -747,8 +757,12 @@ class Division(DjangoVoteModel):
             "cross_party_aye": "Cross party aye",
             "free_vote": "Free vote",
         }
-
-        tag = self.tags.filter(tag_type=TagType.GOV_CLUSTERS).first()
+        # use this rather than a filter that lets us use prefetch related
+        tag = list([x for x in self.tags.all() if x.tag_type == TagType.GOV_CLUSTERS])
+        if tag:
+            tag = tag[0]
+        else:
+            tag = None
         cluster_name = tag.analysis_data if tag else "Unknown"
 
         if cluster_name.endswith("_outlier"):
@@ -759,7 +773,7 @@ class Division(DjangoVoteModel):
 
         bespoke = ""
 
-        analysis_override = self.analysis_override()
+        analysis_override = self.analysis_override(override_lookup)
         if analysis_override:
             if analysis_override.parl_dynamics_group:
                 cluster_name = analysis_override.parl_dynamics_group
@@ -1168,6 +1182,8 @@ class Policy(DjangoVoteModel):
 
     def decision_df(self) -> pd.DataFrame:
         """ """
+
+        ao_override = AnalysisOverride.bulk_lookup()
         division_data = [
             {
                 "month": x.decision.date.strftime("%Y-%m"),
@@ -1178,10 +1194,17 @@ class Policy(DjangoVoteModel):
                 "strength": x.strength,
                 "decision type": "Division",
                 "uses powers": x.decision.motion_uses_powers,
-                "voting cluster": x.decision.voting_cluster()["desc"],
+                "voting cluster": x.decision.voting_cluster(
+                    override_lookup=ao_override
+                )["desc"],
                 "participant count": x.decision.single_breakdown().signed_votes,
             }
-            for x in self.division_links.all()
+            for x in self.division_links.all().prefetch_related(
+                "decision",
+                "decision__tags",
+                "decision__overall_breakdowns",
+                "decision__motion",
+            )
         ]
 
         agreement_data = [
@@ -1197,7 +1220,7 @@ class Policy(DjangoVoteModel):
                 "voting cluster": x.decision.voting_cluster()["desc"],
                 "participant count": 0,
             }
-            for x in self.agreement_links.all()
+            for x in self.agreement_links.all().prefetch_related("decision")
         ]
 
         df = pd.DataFrame(data=division_data + agreement_data)
@@ -1393,3 +1416,7 @@ class AnalysisOverride(DjangoVoteModel):
     banned_motion_ids: TextField = field(blank=True, default="")
     parl_dynamics_group: str = field(blank=True, default="")
     manual_parl_dynamics_desc: TextField = field(blank=True, default="")
+
+    @classmethod
+    def bulk_lookup(cls) -> dict[str, AnalysisOverride]:
+        return {x.decision_key: x for x in cls.objects.all()}
