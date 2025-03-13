@@ -47,7 +47,7 @@
                     <ul>
                         {% for division in commons_votes %}
                             <li>
-                                <a href="{{ division.url }}">{{ division.safe_decision_name }}</a>
+                                <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
                             </li>
                         {% endfor %}
                     </ul>
