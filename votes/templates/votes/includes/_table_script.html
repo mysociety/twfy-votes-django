@@ -1,0 +1,53 @@
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+<script>
+    $(document).ready(function() {
+
+        const na_percentage_headers = ['party alignment', 'Party alignment', 'For motion percentage'];
+
+        $('th').each(function() {
+            // Trim text to avoid whitespace issues
+            const headerText = $(this).text().trim();
+            // Check if the header text is in our array
+            if (na_percentage_headers.includes(headerText)) {
+                $(this).addClass('na-percentage');
+            }
+        });
+
+
+        fix_percentage = function(data) {
+            if (data.toLowerCase() === "na" || data.toLowerCase() === "n/a") {
+                return Number.POSITIVE_INFINITY;
+            }
+            var stripped = data.replace(/[^0-9.\-]/g, "");
+            return parseFloat(stripped) || 0;
+        };
+
+        bi_directional_sort = function(a, b, asc) {
+            a = fix_percentage(a);
+            b = fix_percentage(b);
+            if (a === Number.POSITIVE_INFINITY) return 1;
+            if (b === Number.POSITIVE_INFINITY) return -1;
+            if (asc) {
+                return a - b;
+            } else {
+                return b - a;
+            }
+        };
+
+        jQuery.fn.dataTableExt.oSort["na-percentage-asc"] = function(a, b) {
+            return bi_directional_sort(a, b, true);
+        };
+
+        jQuery.fn.dataTableExt.oSort["na-percentage-desc"] = function(a, b) {
+            return bi_directional_sort(a, b, false);
+        };
+
+        $('table').DataTable({
+            paging: false,
+            columnDefs: [{
+                targets: "na-percentage",
+                type: 'na-percentage'
+            }]
+        });
+    });
+</script>
