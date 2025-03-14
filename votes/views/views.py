@@ -37,6 +37,7 @@ from ..models import (
     Agreement,
     Chamber,
     Division,
+    DivisionPartyBreakdown,
     Membership,
     Organization,
     Person,
@@ -652,6 +653,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
     def dfs_from_division_links(
         self,
         votes: list[Vote],
+        division_vote_breakdowns: list[DivisionPartyBreakdown],
         agreements: list[Agreement],
         division_links: list[PolicyDivisionLink],
         agreement_links: list[PolicyAgreementLink],
@@ -661,6 +663,11 @@ class PersonPolicyView(TitleMixin, TemplateView):
         """
 
         division_vote_lookup = {v.division_id: v for v in votes}
+
+        division_vote_breakdown_lookup = {
+            v.division_id: v for v in division_vote_breakdowns
+        }
+
         df_lookup: dict[str, pd.DataFrame] = {}
         division_items = []
 
@@ -679,6 +686,21 @@ class PersonPolicyView(TitleMixin, TemplateView):
                 return "na"
             return "not aligned"
 
+        def get_party_alignment(vote: Vote):
+            party_breakdown = division_vote_breakdown_lookup.get(vote.division_id)
+            if party_breakdown is None or vote.effective_vote_float is None:
+                return "na"
+
+            diff_from_party = abs(
+                vote.effective_vote_float - party_breakdown.for_motion_percentage
+            )
+            print(
+                f"diff_from_party: {diff_from_party}, effective_vote: {vote.effective_vote_float}, party: {party_breakdown.for_motion_percentage}"
+            )
+            value = 1 - diff_from_party
+            # return formatted no dp percentage
+            return f"{value:.0%}"
+
         for link in division_links:
             vote = division_vote_lookup.get(link.decision_id)
             if not vote:
@@ -690,6 +712,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
                     ),
                     "date": link.decision.date,
                     "person_vote": vote.vote_desc().lower(),
+                    "party_alignment": get_party_alignment(vote),
                     "policy_direction": link.alignment,
                     "policy_aligned": is_aligned(vote, link),
                     "policy_strength": f"{link.strength.lower()}_votes",
@@ -811,6 +834,13 @@ class PersonPolicyView(TitleMixin, TemplateView):
             ).prefetch_related("decision")
         )
 
+        party_breakdowns = list(
+            DivisionPartyBreakdown.objects.filter(
+                division__division_links__policy=policy,
+                party=party,
+            ).prefetch_related("division")
+        )
+
         relevant_memberships = list(
             Membership.objects.filter(chamber=chamber, person=person)
         )
@@ -831,6 +861,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
 
         decision_links_and_votes = self.dfs_from_division_links(
             votes=votes,
+            division_vote_breakdowns=party_breakdowns,
             agreements=agreements,
             division_links=division_links,
             agreement_links=agreement_links,
