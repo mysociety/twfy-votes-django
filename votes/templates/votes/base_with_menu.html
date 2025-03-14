@@ -45,6 +45,9 @@
         var sideTopHeader = document.getElementById("side-top-header");
 
         window.addEventListener("scroll", function() {
+            if (!topHeader) {
+                return;
+            }
             if (window.pageYOffset > (topHeader.offsetTop + 100) && window.innerWidth > 770) {
                 sideTopHeader.style.display = "block";
             } else {
@@ -79,7 +82,6 @@
                     const targetId = closestSection.id;
                     const activeNavItem = document.querySelector(`.nav-link[href="#${targetId}"]`);
                     if (activeNavItem) {
-                        console.log("yes");
                         activeNavItem.classList.add("active");
                     }
                 }

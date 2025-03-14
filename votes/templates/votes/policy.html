@@ -47,12 +47,6 @@
 {% endblock extracss %}
 
 {% block extrajs %}
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('table').DataTable({
-                paging: false
-            });
-        });
-    </script>
+
+    {% include 'votes/includes/_table_script.html' %}
 {% endblock extrajs %}
