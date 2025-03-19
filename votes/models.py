@@ -11,6 +11,7 @@ from typing import (
     Type,
     TypedDict,
     TypeVar,
+    cast,
 )
 
 from django.contrib.auth.models import User
@@ -834,6 +835,7 @@ class Division(DjangoVoteModel):
                 "Against motion": x.against_motion,
                 "Neutral motion": x.neutral_motion,
                 "Absent motion": x.absent_motion,
+                "Tellers": x.teller_for_motion + x.teller_against_motion,
                 "Party turnout": x.signed_votes / x.vote_participant_count,
                 "For motion percentage": (
                     x.for_motion_percentage
@@ -844,12 +846,22 @@ class Division(DjangoVoteModel):
             for x in self.party_breakdowns.all().prefetch_related("party")
         ]
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        remove_if_zero = ["Tellers"]
+
+        for col in remove_if_zero:
+            if df[col].sum() == 0:
+                df = df.drop(columns=[col])
+
+        return df
 
     def gov_breakdown_df(self) -> pd.DataFrame:
         overall_breakdown = self.overall_breakdowns.first()
         if overall_breakdown is None:
             raise ValueError("No overall breakdown found")
+
+        overall_breakdown = cast(DivisionBreakdown, overall_breakdown)
 
         overall_breakdown_dict = {
             "Grouping": f"All {self.chamber.member_plural}",
@@ -859,6 +871,8 @@ class Division(DjangoVoteModel):
             "Against motion": overall_breakdown.against_motion,
             "Neutral motion": overall_breakdown.neutral_motion,
             "Absent motion": overall_breakdown.absent_motion,
+            "Tellers": overall_breakdown.teller_for_motion
+            + overall_breakdown.teller_against_motion,
             "Turnout": overall_breakdown.signed_votes
             / overall_breakdown.vote_participant_count,
             "For motion percentage": overall_breakdown.for_motion_percentage,
@@ -873,6 +887,7 @@ class Division(DjangoVoteModel):
                 "Against motion": x.against_motion,
                 "Neutral motion": x.neutral_motion,
                 "Absent motion": x.absent_motion,
+                "Tellers": x.teller_for_motion + x.teller_against_motion,
                 "Turnout": x.signed_votes / x.vote_participant_count,
                 "For motion percentage": x.for_motion_percentage,
             }
@@ -883,6 +898,12 @@ class Division(DjangoVoteModel):
 
         all_breakdowns = [dict(x) for x in all_breakdowns]
         df = pd.DataFrame(data=all_breakdowns)
+
+        remove_if_all_zero = ["Tellers"]
+
+        for col in remove_if_all_zero:
+            if df[col].sum() == 0:
+                df = df.drop(columns=[col])
 
         return df
 
@@ -975,6 +996,8 @@ class DivisionBreakdown(DjangoVoteModel):
     for_motion: int
     against_motion: int
     neutral_motion: int
+    teller_for_motion: int
+    teller_against_motion: int
     absent_motion: int
     signed_votes: int
     motion_majority: int
@@ -1002,6 +1025,8 @@ class DivisionsIsGovBreakdown(DjangoVoteModel):
     for_motion: int
     against_motion: int
     neutral_motion: int
+    teller_for_motion: int
+    teller_against_motion: int
     absent_motion: int
     signed_votes: int
     motion_majority: int
@@ -1020,6 +1045,8 @@ class DivisionPartyBreakdown(DjangoVoteModel):
     for_motion: int
     against_motion: int
     neutral_motion: int
+    teller_for_motion: int
+    teller_against_motion: int
     absent_motion: int
     signed_votes: int
     motion_majority: int
@@ -1045,7 +1072,7 @@ class Vote(DjangoVoteModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # not sure why this is needed, but coming back as strin
+        # not sure why this is needed, but coming back as string
         self.vote = VotePosition(int(self.vote))
         self.effective_vote = VotePosition(int(self.effective_vote))
 
