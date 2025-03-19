@@ -678,6 +678,13 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def first_breakdown(self):
+        """
+        This doesn't use the 'first' because it's been prefetched.
+        And that generates another query.
+        """
+        return self.overall_breakdowns.all()[0]
+
     def decision_number_or_ref(self) -> str:
         return str(self.division_number)
 
