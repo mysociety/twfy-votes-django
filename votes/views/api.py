@@ -124,9 +124,15 @@ class PersonWithVoteSchema(ModelSchema):
 
 
 class DivisionSchema(ModelSchema):
+    url: str
+
     class Meta:
         model = Division
         fields = "__all__"
+
+    @staticmethod
+    def resolve_url(obj: Division) -> str:
+        return obj.url()
 
 
 class AgreementAnnotationSchema(ModelSchema):
@@ -385,6 +391,11 @@ def get_agreement(
     return Agreement.objects.get(
         chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
     ).apply_analysis_override()
+
+
+@api.get("/decisions/commons_api_source.json", response=list[DivisionSchema])
+def commons_api_source(request: HttpRequest):
+    return Division.objects.filter(division_info_source="commons_api")
 
 
 @api.get("/decisions/{chamber_slug}/{year}.json", response=list[DivisionSchema])
