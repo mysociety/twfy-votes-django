@@ -40,3 +40,18 @@
     fill: currentColor;
     stroke-opacity: 1;
 }
+
+.table-wrapped {
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.col_heading {
+    max-width: 60px;
+    white-space: normal;
+}
+
+.party_voting_wrapper .col0 {
+    max-width: 80px;
+    white-space: normal;
+}
