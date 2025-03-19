@@ -243,8 +243,10 @@ class DataView(TitleMixin, TemplateView):
         # we want the last three votes for each chamber
 
         data = {
+            "divisions": "Division data and titles (twfy re-export)",
+            "votes": "Vote data (twfy re-export)",
             "clusters_labelled": "Parliamentary dynamics vote clusters, by division.",
-            "division_with_counts": "Division information with basic counts",
+            "division_with_counts": "Division ids with overall count information",
             "divisions_gov_with_counts": "Division breakdowns split by government/opposition",
             "divisions_party_with_counts": "Division breakdowns split by party",
             "chambers": "Chamber ids and names",

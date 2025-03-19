@@ -20,14 +20,19 @@ BASE_DIR = Path(settings.BASE_DIR)
 STATIC_DIR = Path(settings.STATIC_ROOT)
 
 DATA_DIR = STATIC_DIR / "data"
-
+SOURCE_DIR = BASE_DIR / "data" / "source"
 COMPILED_DIR = BASE_DIR / "data" / "compiled"
 
 votes_with_diff = COMPILED_DIR / "votes_with_diff.parquet"
 
 
 def move_as_is():
-    files = [
+    source_files = [
+        "divisions.parquet",
+        "votes.parquet",
+    ]
+
+    compiled_files = [
         "division_with_counts.parquet",
         "divisions_gov_with_counts.parquet",
         "divisions_party_with_counts.parquet",
@@ -38,7 +43,12 @@ def move_as_is():
         "clusters_labelled.parquet",
     ]
 
-    for file in files:
+    for file in source_files:
+        source = SOURCE_DIR / file
+        destination = DATA_DIR / file
+        shutil.copyfile(source, destination)
+
+    for file in compiled_files:
         source = COMPILED_DIR / file
         destination = DATA_DIR / file
         shutil.copyfile(source, destination)
