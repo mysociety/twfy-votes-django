@@ -4,13 +4,13 @@ We group motions into common categories - this page describes the role they play
 
 ## First stage
 
-This is the first stage or reading of a draft law.
+This is the first stage/reading of a draft law.
 
 It will introduce the topic area, but not the full details of the bill. 
 
 ## Second stage
 
-This is the second reading or stage of a draft law. 
+This is the second stage/reading of a draft law. 
 
 It introduces a complete bill that may be subject to future amendment. 
 
@@ -18,9 +18,15 @@ If this passes, in the House of Commons it will proceed to a committee stage.
 
 ## Third stage
 
-This is the third reading or stage of a draft law.
+This is the third stage/reading of a draft law.
 
-The chamber confirms the final text of the bill, and it will proceed to the Lords if it is a Commons bill.
+The chamber confirms the final text of the bill, and it will proceed to the Lords if it is a Commons bill (or to the Commons if it starts as a Lords bill).
+
+## Ten minute rule
+
+A Ten Minute Rule motion is a way for MPs to propose a law by making a brief speech of up to ten minutes in support of it. 
+
+In practice, even when these pass they are unlikely to be given time in the schedule to become legislation. 
 
 ## Programme
 
@@ -86,13 +92,14 @@ This is a vote to change the rules of the chamber.
 
 This is a vote to sit in private.
 
-Generally this isn't a real vote about sitting in private, but because it's a vote that can be called by any MP, it's a way of ending debate but leading to a count of MPs for division. If there are less than 40 MPs present, the debate ends.
+Generally this is not a real vote about sitting in private, but because it is a vote that can be called by any MP, it can be used to end a low participation debate. 
+Calling for the vote leads to a check if there are more than 40 MPs present, and if not, proceedings end. 
 
-However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. 
+However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. This prevents it being used to close debate later on. 
 
 ## EU document scrutiny
 
-Now historical, but a vote noting a document was a requirement before a minister could support in council.
+Now historical, but a vote recognising an EU document in Parliament was a requirement before a minister could support in council.
 
 ## Other
 
