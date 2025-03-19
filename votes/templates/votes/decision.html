@@ -40,10 +40,13 @@
     {% endif %}
     {% if decision.decision_type == "Division" %}
         <li class="nav-item">
-            <a class="nav-link h36 pl-0 mb-0" href="#voting-breakdown">Voting breakdown</a>
+            <a class="nav-link h36 pl-0 mb-0" href="#overall-counts">Overall counts</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link h6 pl-0 mb-0" href="#party-breakdown">Party voting breakdown</a>
+            <a class="nav-link h36 pl-0 mb-0" href="#gov-counts">Government counts</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#party-breakdown">Party voting counts</a>
         </li>
         <li class="nav-item">
             <a class="nav-link h6 pl-0 mb-0" href="#voting-list">Voting list</a>
@@ -181,9 +184,11 @@
         </ul>
     {% endif %}
     {% if decision.decision_type == "Division" %}
-        <h2 class="section-header" id="voting-breakdown">Voting breakdown</h2>
+        <h2 class="section-header" id="overall-counts">Overall counts</h2>
+        {% style_df decision.overall_breakdown_df "For motion percentage" "Turnout" %}
+        <h2 class="section-header" id="gov-counts">Government counts</h2>
         {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
-        <h2 class="section-header" id="party-breakdown">Party voting breakdown</h2>
+        <h2 class="section-header" id="party-breakdown">Party voting counts</h2>
         {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
         <h2 class="section-header" id ="voting-list">Voting list</h2>
         {% if can_add_annotations %}

@@ -856,7 +856,7 @@ class Division(DjangoVoteModel):
 
         return df
 
-    def gov_breakdown_df(self) -> pd.DataFrame:
+    def overall_breakdown_df(self) -> pd.DataFrame:
         overall_breakdown = self.overall_breakdowns.first()
         if overall_breakdown is None:
             raise ValueError("No overall breakdown found")
@@ -878,6 +878,19 @@ class Division(DjangoVoteModel):
             "For motion percentage": overall_breakdown.for_motion_percentage,
         }
 
+        all_breakdowns = [overall_breakdown_dict]
+        all_breakdowns = [dict(x) for x in all_breakdowns]
+        df = pd.DataFrame(data=all_breakdowns)
+
+        remove_if_all_zero = ["Tellers"]
+
+        for col in remove_if_all_zero:
+            if df[col].sum() == 0:
+                df = df.drop(columns=[col])
+
+        return df
+
+    def gov_breakdown_df(self) -> pd.DataFrame:
         gov_breakdowns = [
             {
                 "Grouping": "Government" if x.is_gov else "Opposition",
@@ -894,9 +907,7 @@ class Division(DjangoVoteModel):
             for x in self.is_gov_breakdowns.all()
         ]
 
-        all_breakdowns = [overall_breakdown_dict] + gov_breakdowns
-
-        all_breakdowns = [dict(x) for x in all_breakdowns]
+        all_breakdowns = [dict(x) for x in gov_breakdowns]
         df = pd.DataFrame(data=all_breakdowns)
 
         remove_if_all_zero = ["Tellers"]
