@@ -56,9 +56,11 @@
         {% endfeatureflag %}
     {% endif %}
     <hr />
-    <li class="nav-item">
-        <a class="nav-link h6 pl-0 mb-0" href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
-    </li>
+    {% if decision.twfy_link %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="{{ decision.twfy_link }}">View decision in TheyWorkForYou</a>
+        </li>
+    {% endif %}
     {% if decision.motion %}
         <li class="nav-item">
             <a class="nav-link h6 pl-0 mb-0" href="{{ decision.motion_speech_url }}">View motion in TheyWorkForYou</a>
