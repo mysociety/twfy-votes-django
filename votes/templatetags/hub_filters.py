@@ -132,7 +132,10 @@ def style_df(df: pd.DataFrame, *percentage_columns: str) -> str:
         precision=2,
     )
 
-    return mark_safe(styled_df.to_html())  # type: ignore
+    content = styled_df.to_html()
+    wrapped = '<div class="table-wrapped">' + content + "</div>"
+
+    return mark_safe(wrapped)
 
 
 @register.tag(name="markdown")

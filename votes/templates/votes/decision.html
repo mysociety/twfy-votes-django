@@ -189,7 +189,9 @@
         <h2 class="section-header" id="gov-counts">Government counts</h2>
         {% style_df decision.gov_breakdown_df "For motion percentage" "Turnout" %}
         <h2 class="section-header" id="party-breakdown">Party voting counts</h2>
-        {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
+        <div class="party_voting_wrapper">
+            {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
+        </div>
         <h2 class="section-header" id ="voting-list">Voting list</h2>
         {% if can_add_annotations %}
             <p>
