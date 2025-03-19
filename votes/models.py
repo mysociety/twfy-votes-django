@@ -853,12 +853,12 @@ class Division(DjangoVoteModel):
         remove_if_all_zero = ["Tellers", "Neutral motion"]
 
         for col in remove_if_all_zero:
-            if df[col].sum() == 0:
+            if col in df.columns and df[col].sum() == 0:
                 df = df.drop(columns=[col])
 
         # drop tellers for now
-
-        df = df.drop(columns=["Tellers"])
+        if "Tellers" in df.columns:
+            df = df.drop(columns=["Tellers"])
 
         return df
 
@@ -891,11 +891,12 @@ class Division(DjangoVoteModel):
         remove_if_all_zero = ["Tellers", "Neutral motion"]
 
         for col in remove_if_all_zero:
-            if df[col].sum() == 0:
+            if col in df.columns and df[col].sum() == 0:
                 df = df.drop(columns=[col])
 
-        # for the moment,  we'll drop tellers to reduce table size
-        df = df.drop(columns=["Tellers"])
+        # drop tellers for now
+        if "Tellers" in df.columns:
+            df = df.drop(columns=["Tellers"])
 
         return df
 
@@ -922,11 +923,12 @@ class Division(DjangoVoteModel):
         remove_if_all_zero = ["Tellers", "Neutral motion"]
 
         for col in remove_if_all_zero:
-            if df[col].sum() == 0:
+            if col in df.columns and df[col].sum() == 0:
                 df = df.drop(columns=[col])
 
-        # for the moment,  we'll drop tellers to reduce table size
-        df = df.drop(columns=["Tellers"])
+        # drop tellers for now
+        if "Tellers" in df.columns:
+            df = df.drop(columns=["Tellers"])
 
         return df
 
