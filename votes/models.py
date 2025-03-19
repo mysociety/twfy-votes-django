@@ -801,6 +801,8 @@ class Division(DjangoVoteModel):
 
     def twfy_link(self) -> str:
         gid = self.source_gid.split("/")[-1]
+        if not gid:
+            return ""
 
         return self.chamber.twfy_debate_link(gid)
 
