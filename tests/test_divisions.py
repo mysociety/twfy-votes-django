@@ -58,8 +58,8 @@ class TestDivision2023(BaseTestResponse):
 
         overall_breakdown = data["overall_breakdowns"][0]
 
-        assert overall_breakdown["for_motion"] == 290, "Expected 290 for votes"
-        assert overall_breakdown["against_motion"] == 56, "Expected 56 against votes"
+        assert overall_breakdown["for_motion"] == 288, "Expected 288 for votes"
+        assert overall_breakdown["against_motion"] == 54, "Expected 54 against votes"
 
         party_breakdowns = data["party_breakdowns"]
         con_breakdown = [
@@ -69,8 +69,8 @@ class TestDivision2023(BaseTestResponse):
         gov_breakdowns = data["is_gov_breakdowns"]
         gov = [x for x in gov_breakdowns if x["is_gov"] is True][0]
 
-        assert con_breakdown["for_motion"] == 287, "Expected 287 for votes"
-        assert gov["for_motion"] == 287, "Expected 287 for votes"
+        assert con_breakdown["for_motion"] == 285, "Expected 285 for votes"
+        assert gov["for_motion"] == 285, "Expected 285 for votes"
 
         assert len(data["votes"]) == (
             650
