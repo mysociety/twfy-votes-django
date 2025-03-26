@@ -15,8 +15,21 @@ from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
 
-
 BASE_DIR = Path(settings.BASE_DIR)
+
+
+@duck.python_function
+def versionless_gid(x: str) -> str:
+    """
+    to reconnect correctly to motions, sometimes
+    one version had been upgraded to the new c,d,e version.
+    so we want to remove that to connect to the correct motion.
+    """
+    parts = x.split("/")
+    # remove any letters from final_part
+    final_part = "".join([i for i in parts[-1] if not i.isalpha()])
+    # put it back together
+    return "/".join(parts[:-1] + [final_part])
 
 
 @duck.as_source
@@ -71,7 +84,7 @@ class divisions_with_total_membership:
             and org_membership_count.end_date
             and pw_divisions.chamber = org_membership_count.chamber_slug)
         LEFT JOIN division_links_with_id on
-            (pw_divisions.source_gid = division_links_with_id.division_gid)
+            (versionless_gid(pw_divisions.source_gid) = versionless_gid(division_links_with_id.division_gid))
         WHERE
             pw_divisions.chamber != 'pbc'
             and division_id not like '%cy-senedd'
