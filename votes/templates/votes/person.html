@@ -24,7 +24,7 @@
                     {% for record in person.policy_distribution_groups %}
                         <li class="nav-item" class="nav-item">
                             <a class="nav-link  h6 pl-0 mb-0"
-                               href="{% url 'person_policy' person.id record.chamber.slug record.party.slug record.period.slug.lower %}">Voting summary - {{ record.party.name }} (Period: {{ record.period.description }})</a>
+                               href="{% url 'person_policy' person.id record.chamber.slug record.party_slug record.period.slug.lower %}">Voting summary - {{ record.party_name }} (Period: {{ record.period.description }})</a>
                         </li>
                     {% endfor %}
                 </ul>

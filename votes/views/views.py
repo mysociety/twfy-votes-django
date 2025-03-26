@@ -48,6 +48,7 @@ from ..models import (
     UrlColumn,
     UserPersonLink,
     Vote,
+    VoteDistribution,
 )
 from .auth import can_view_draft_content, super_users_or_group
 from .helper_models import (
@@ -623,11 +624,16 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         else:
             valid_status = [PolicyStatus.ACTIVE]
 
+        if party_slug == "independent":
+            comparison_party = None
+        else:
+            comparison_party = party
+
         distributions = list(
             person.vote_distributions.filter(
                 chamber=chamber,
                 period=period,
-                party=party,
+                party=comparison_party,
                 policy__status__in=valid_status,
             ).prefetch_related("policy", "policy__groups")
         )
@@ -809,9 +815,12 @@ class PersonPolicyView(TitleMixin, TemplateView):
         own_distribution = person.vote_distributions.get(
             chamber=chamber, period=period, party=party, policy=policy, is_target=1
         )
-        other_distribution = person.vote_distributions.get(
-            chamber=chamber, period=period, party=party, policy=policy, is_target=0
-        )
+        try:
+            other_distribution = person.vote_distributions.get(
+                chamber=chamber, period=period, party=party, policy=policy, is_target=0
+            )
+        except VoteDistribution.DoesNotExist:
+            other_distribution = None
 
         votes = list(
             Vote.objects.filter(
