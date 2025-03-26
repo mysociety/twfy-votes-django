@@ -162,12 +162,23 @@ def is_valid_decision_model(
 
 @dataclass
 class DistributionGroup:
-    party: Organization
+    party: Organization | None
     chamber: Chamber
     period: PolicyComparisonPeriod
 
     def key(self):
-        return f"{self.party.id}-{self.chamber.id}-{self.period.id}"
+        party_id = self.party.id if self.party else "independent"
+        return f"{party_id}-{self.chamber.id}-{self.period.id}"
+
+    def party_slug(self):
+        if self.party:
+            return self.party.slug
+        return "independent"
+
+    def party_name(self):
+        if self.party:
+            return self.party.name
+        return "Independent"
 
 
 class Update(DjangoVoteModel):
