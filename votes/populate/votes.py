@@ -92,12 +92,17 @@ class pw_votes_with_party_difference:
         str_to_int_vote_position(cm_votes_with_people.vote) as vote,
         str_to_int_vote_position(cm_votes_with_people.effective_vote) as effective_vote,
         ps_divisions.id as division_id,
-        case cm_votes_with_people.effective_vote
-            when 'aye' then 1
-            when 'no' then 0
-            when 'abstain' then 0.5
-        end as effective_vote_float,
-        abs(effective_vote_float - for_motion_percentage) as diff_from_party_average
+        effective_vote_float:
+            case cm_votes_with_people.effective_vote
+                when 'aye' then 1
+                when 'no' then 0
+                when 'abstain' then 0.5
+            end,
+        diff_from_party_average:
+            case 
+                when cm_votes_with_people.effective_party_slug = 'independent' then null
+                else abs(effective_vote_float - for_motion_percentage)
+            end
     FROM
         cm_votes_with_people
     JOIN
