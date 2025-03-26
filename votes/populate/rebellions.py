@@ -49,8 +49,6 @@ class party_diff_over_time:
         votes_with_diff
     join
         pw_division on votes_with_diff.division_id = pw_division.id
-    where
-        diff_from_party_average is not null
     """
 
 
