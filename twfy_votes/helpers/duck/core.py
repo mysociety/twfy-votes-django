@@ -51,6 +51,8 @@ from .url import DuckUrl
 
 T = TypeVar("T")
 
+PythonCallable = Callable[..., Any]
+
 
 class DuckQuery:
     def __init__(
@@ -61,6 +63,7 @@ class DuckQuery:
         self.queries: list[str] = []
         self.source_lookup: list[str] = []
         self.data_sources: list[DataSourceValue] = []
+        self.python_functions: list[PythonCallable] = []
         self.queries_to_cache: list[QueryToCache] = []
 
         if postgres_database_settings:
@@ -151,6 +154,10 @@ class DuckQuery:
 
         self.queries.append(table_query)
 
+        return item
+
+    def python_function(self, item: PythonCallable) -> PythonCallable:
+        self.python_functions.append(item)
         return item
 
     def as_source(
@@ -255,7 +262,6 @@ class DuckQuery:
             raise ValueError("Class must have a query method")
 
         self.queries.append(query)
-
         return item
 
     def as_table(self, item: Type[DuckorSourceViewType]) -> Type[DuckorSourceViewType]:
@@ -308,6 +314,9 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
             _query = query.construct_query(variables)
             self.data_sources += query.data_sources
             self.queries_to_cache += query.queries_to_cache
+            self.python_functions += query.python_functions
+            for function in self.python_functions:
+                self.connection.create_function(function.__name__, function)  # type: ignore
         elif isinstance(query, str):
             _query = query
             if variables:
@@ -319,6 +328,7 @@ class ConnectedDuckQuery(DuckQuery, Generic[ResponseType]):
 
         if len(self.queries) > 0:
             raise ValueError("Can only use 'compile' on a fresh or empty query.")
+
         return self.response_type(self.connection, _query, self.data_sources)  # type: ignore
 
     query = compile
