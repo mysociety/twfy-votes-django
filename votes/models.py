@@ -998,7 +998,7 @@ class Division(DjangoVoteModel):
 
         df = pd.DataFrame(data=data)
 
-        if len(vote_annotation_map) == 0:
+        if len(vote_annotation_map) == 0 and "Annotation" in df.columns:
             df = df.drop(columns=["Annotation"])
 
         setattr(self, "_votes_df", df)
