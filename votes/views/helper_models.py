@@ -20,6 +20,7 @@ from ..consts import (
 )
 from ..models import (
     Agreement,
+    AnalysisOverride,
     Chamber,
     Division,
     Person,
@@ -41,14 +42,24 @@ class DivisionSearch(BaseModel):
     decisions: list[Division | Agreement]
 
     def decisions_df(self) -> pd.DataFrame:
+        ao_override = AnalysisOverride.bulk_lookup()
+
+        def get_voting_cluster(item: Division | Agreement) -> dict[str, str]:
+            if isinstance(item, Agreement):
+                return item.voting_cluster()
+            elif isinstance(item, Division) and item.id:
+                return item.voting_cluster(override_lookup=ao_override)
+            else:
+                return {"cluster_name": "Unknown", "desc": ""}
+
         data = [
             {
                 "Date": d.date,
-                "Division": UrlColumn(url=d.url(), text=d.safe_decision_name()),
+                "Decision": UrlColumn(url=d.url(), text=d.safe_decision_name()),
                 "Vote Type": d.decision_type,
                 "Motion Type": MotionType(d.motion_type()).display_name(),
                 "Uses Parl. Powers": d.motion_uses_powers.simple_str(),
-                "Voting Cluster": d.voting_cluster()["desc"],
+                "Voting Cluster": get_voting_cluster(d)["cluster_name"],
             }
             for d in self.decisions
         ]

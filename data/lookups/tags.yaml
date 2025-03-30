@@ -1,0 +1,102 @@
+-   slug: gov_aye_opp_lean_no
+    name: "Divided opposition: Government Aye, Opposition divided"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the government is proposing a motion, but there is division among opposition MPs/parties in opposing it (but generally, leaning against).
+-   slug: opp_strong_aye_gov_strong_no
+    name: "Strong conflict: Opposition proposes"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
+        This usually suggests an important point of principle, or that it would have substantive effects if passed.
+-   slug: opp_aye_weak_gov_no
+    name: "Medium conflict: Opposition Aye, Government No"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the motion is proposed by the opposition, the result is quite polarized, but there is a medium level of participation (most MPs, but not all).
+        This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
+-   slug: gov_aye_opp_weak_no
+    name: "Nominal opposition: Government Aye Opposition Weak No"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the government is proposing a motion, but opposition is less strongly opposing it (higher numbers of absences).
+        This can reflect different views between opposition parties - where at least one party neither wants to be on the record as voting for or against.
+-   slug: gov_no_opp_lean_no
+    name: "Multi-party against: Government No, Opposition divided"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the government is voting against a motion, and opposition MPs/parties are divided in their support.
+        This can reflect an amendment or motion bought by one opposition party, which other opposition parties are not supportive of.
+-   slug: low_participation
+    name: "Low participation vote"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where there is low participation from both sides.
+        This might be non-contentious or procedural motions in the early stages of member proposed bills.
+-   slug: gov_strong_aye_opp_strong_no
+    name: "Strong conflict: Gov proposes"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
+        This usually suggests an important point of principle, that even if the government is likely to win, is a significant public signal of opposition.
+-   slug: cross_party_aye
+    name: "Cross party aye"
+    tag_type: gov_clusters
+    description: |
+        This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
+        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/opposition lines.
+-   slug: gov_aye_opp_lean_no_outlier
+    name: "Divided opposition: Government Aye, Opposition divided - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the government is proposing a motion, but there is division among opposition MPs/parties in opposing it (but generally, leaning against).
+-   slug: opp_strong_aye_gov_strong_no_outlier
+    name: "Strong conflict: Opposition proposes - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the opposition has proposed a motion and the government is strongly opposing it (few defections, high turnout).
+        This usually suggests an important point of principle, or that it would have substantive effects if passed.
+-   slug: opp_aye_weak_gov_no_outlier
+    name: "Medium conflict: Opposition Aye, Government No - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the motion is proposed by the opposition, the result is quite polarized, but there is a medium level of participation (most MPs, but not all).
+        This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
+-   slug: gov_aye_opp_weak_no_outlier
+    name: "Nominal opposition: Government Aye Opposition Weak No - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the government is proposing a motion, but opposition is less strongly opposing it (higher numbers of absences).
+        This can reflect different views between opposition parties - where at least one party neither wants to be on the record as voting for or against.
+-   slug: gov_no_opp_lean_no_outlier
+    name: "Multi-party against: Government No, Opposition divided - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the government is voting against a motion, and opposition MPs/parties are divided in their support.
+        This can reflect an amendment or motion bought by one opposition party, which other opposition parties are not supportive of.
+-   slug: low_participation_outlier
+    name: "Low participation vote - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where there is low participation from both sides.
+        This might be non-contentious or procedural motions in the early stages of member proposed bills.
+-   slug: gov_strong_aye_opp_strong_no_outlier
+    name: "Strong conflict: Gov proposes - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where the government is proposing a motion and the opposition is strongly opposing it (few defections, high turnout).
+        This usually suggests an important point of principle, that even if the government is likely to win, is a significant public signal of opposition.
+-   slug: cross_party_aye_outlier
+    name: "Cross party aye - Outlier"
+    tag_type: gov_clusters
+    description: |
+        This vote is an outlier compared to other votes in this cluster. The description below is the closest match, but it may be significantly different to other votes in this cluster.
+        This vote is most similar to a group of votes where there is a cross party consensus in favour of a motion.
+        There may be scattered opposition (which is why a vote is being held at all), but it does not break down clearly along government/opposition lines.

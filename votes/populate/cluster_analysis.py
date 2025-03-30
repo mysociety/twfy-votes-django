@@ -12,7 +12,7 @@ from tqdm import tqdm
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import TagType
-from ..models import Division, DivisionTag
+from ..models import DecisionTag, Division, DivisionTagLink
 from .register import ImportOrder, import_register
 
 BASE_DIR = Path(settings.BASE_DIR)
@@ -164,37 +164,45 @@ def import_cluster_analysis(
         else []
     )
 
+    tag_slug_to_tag = {
+        x.slug: x for x in DecisionTag.objects.filter(tag_type=TagType.GOV_CLUSTERS)
+    }
+
     df = pd.read_parquet(division_cluster_path)
 
     df["division_database_id"] = df["division_id"].map(division_id_lookup)
 
-    clusters = get_commons_clusters(df, quiet=quiet)
+    if affected_divisions:
+        df = df[df["division_database_id"].isin(affected_divisions)]
 
-    df["cluster"] = clusters
+    df["cluster"] = get_commons_clusters(df, quiet=quiet)
+
+    if affected_divisions and clusters_labelled.exists():
+        original_df = pd.read_parquet(clusters_labelled)
+        # concat the new data
+        df = pd.concat([original_df, df], ignore_index=True)
+        # drop duplicates on division_database_id - keep last
+        df = df.drop_duplicates(subset=["division_database_id"], keep="last")
 
     df.to_parquet(clusters_labelled)
 
     if update_since:
         df = df[df["division_database_id"].isin(affected_divisions)]
 
-    to_create = []
+    to_create: list[DivisionTagLink] = []
 
     for _, row in tqdm(df.iterrows(), total=len(df), disable=quiet):
         if update_since and row["division_database_id"] not in affected_divisions:
             continue
-        item = DivisionTag(
+        item = DivisionTagLink(
             division_id=row["division_database_id"],
-            tag_type=TagType.GOV_CLUSTERS,
-            analysis_data=row["cluster"],
+            tag=tag_slug_to_tag[row["cluster"]],
+            extra_data={},
         )
         to_create.append(item)
 
-    if update_since:
-        DivisionTag.objects.filter(division_id__in=affected_divisions).delete()
-    else:
-        DivisionTag.objects.all().delete()
-
-    DivisionTag.objects.bulk_create(to_create)
+    # bulk create the tags
+    DivisionTagLink.sync_tags(to_create, quiet=quiet)
 
     if not quiet:
         rich.print(f"Imported [green]{len(to_create)}[/green] division clusters")
