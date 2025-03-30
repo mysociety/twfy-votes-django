@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import datetime
 from dataclasses import dataclass
+from itertools import groupby
 from typing import (
     TYPE_CHECKING,
     Any,
     NotRequired,
     Optional,
     Protocol,
+    Self,
     Type,
     TypedDict,
     TypeVar,
@@ -29,6 +31,7 @@ from twfy_votes.helpers.typed_django.models import (
     Dummy,
     DummyManyToMany,
     DummyOneToMany,
+    JSONField,
     ManyToMany,
     PrimaryKey,
     TextField,
@@ -124,6 +127,163 @@ class UrlColumn:
         if not isinstance(other, UrlColumn):
             return NotImplemented
         return self.text >= other.text
+
+
+class DecisionTag(DjangoVoteModel):
+    """
+    A tag that can be applied to a decision
+    """
+
+    tag_type: TagType
+    slug: str
+    name: str
+    desc: TextField = ""
+    agreements: DummyManyToMany[Agreement] = related_name("tags")
+    divisions: DummyManyToMany[Division] = related_name("tags")
+
+    def desc_markdown(self):
+        """
+        Convert the description to HTML
+        """
+        lines = self.desc.split("\n")
+        text = "\n\n\n".join([x.strip() for x in lines]).strip()
+
+        return markdown.markdown(text, extensions=["tables"])
+
+    def url(self):
+        return reverse("tag", args=[self.tag_type, self.slug])
+
+    def get_decisions(self):
+        return list(self.agreements.all()) + list(self.divisions.all())
+
+    def decisions_df(self) -> pd.DataFrame:
+        ao_override = AnalysisOverride.bulk_lookup()
+
+        def get_voting_cluster(item: Division | Agreement) -> dict[str, str]:
+            if isinstance(item, Agreement):
+                return item.voting_cluster()
+            elif isinstance(item, Division) and item.id:
+                return item.voting_cluster(override_lookup=ao_override)
+            else:
+                return {"cluster_name": "Unknown", "desc": ""}
+
+        data = [
+            {
+                "Chamber": d.chamber.name,
+                "Date": d.date,
+                "Decision": UrlColumn(url=d.url(), text=d.safe_decision_name()),
+                "Vote Type": d.decision_type,
+                "Motion Type": MotionType(d.motion_type()).display_name(),
+                "Voting Cluster": get_voting_cluster(d)["cluster_name"],
+            }
+            for d in self.get_decisions()
+        ]
+
+        return pd.DataFrame(data=data)
+
+
+class BaseTagLink(DjangoVoteModel, abstract=True):
+    tag: DoNothingForeignKey[DecisionTag] = related_name("decision_tag_links")
+    tag_id: Dummy[int] = 0
+    extra_data: JSONField = field(default=dict)
+
+    @property
+    def decision_id(self) -> int:
+        raise NotImplementedError
+
+    @classmethod
+    def sync_tags(
+        cls,
+        links: list[Self],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        """
+        Sync the tags for a set of links.
+        This will remove any existing links and add the new ones
+        """
+
+        links.sort(key=lambda x: x.tag_id)
+
+        for tag_id, tag_links in groupby(links, key=lambda x: x.tag_id):
+            tag_links = list(tag_links)
+            tag = tag_links[0].tag
+            cls.sync_tag(tag, tag_links, quiet=quiet, clear_absent=clear_absent)
+
+    @classmethod
+    def sync_tag(
+        cls,
+        tag: DecisionTag,
+        links: list[Self],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        tag_ids = [x.tag_id for x in links]
+        if not all(x == tag.id for x in tag_ids):
+            raise ValueError("All links must be for the same tag")
+
+        # remove any existing links
+        existing_id_lookup = dict(
+            cls.objects.filter(tag=tag).values_list("division_id", "id")
+        )
+        decision_ids = [link.decision_id for link in links]
+
+        existing_ids = existing_id_lookup.keys()
+        to_remove = set(existing_ids) - set(decision_ids)
+        to_add = set(decision_ids) - set(existing_ids)
+        to_edit = set(decision_ids) & set(existing_ids)
+
+        if to_remove and clear_absent:
+            if not quiet:
+                print(f"Removing {len(to_remove)} links for tag {tag.slug}")
+            cls.objects.filter(tag=tag, division_id__in=to_remove).delete()
+
+        if to_add:
+            if not quiet:
+                print(f"Adding {len(to_add)} links for tag {tag.slug}")
+            to_create = [x for x in links if x.decision_id in to_add]
+            cls.objects.bulk_create(to_create)
+
+        if to_edit:
+            if not quiet:
+                print(f"Editing {len(to_edit)} links for tag {tag.slug}")
+            edit_objects = [x for x in links if x.decision_id in to_edit]
+            for e in edit_objects:
+                e.id = existing_id_lookup[e.decision_id]
+            cls.objects.bulk_update(
+                edit_objects,
+                ["extra_data"],
+            )
+
+
+class DivisionTagLink(BaseTagLink):
+    """
+    A link between a division and a tag
+    """
+
+    tag: DoNothingForeignKey[DecisionTag] = related_name("division_tag_links")
+    division: DoNothingForeignKey[Division] = related_name("tag_links")
+    division_id: Dummy[int] = 0
+
+    @property
+    def decision_id(self) -> int:
+        return self.division_id
+
+
+class AgreementTagLink(BaseTagLink):
+    """
+    A link between an agreement and a tag
+    """
+
+    tag: DoNothingForeignKey[DecisionTag] = related_name("agreement_tag_links")
+    agreement: DoNothingForeignKey[Agreement] = related_name("tag_links")
+    agreement_id: Dummy[int] = 0
+
+    @property
+    def decision_id(self) -> int:
+        return self.agreement_id
 
 
 class DecisionProtocol(Protocol):
@@ -678,7 +838,13 @@ class Division(DjangoVoteModel):
     whip_reports: DummyOneToMany[WhipReport] = related_name("division")
     division_annotations: DummyOneToMany[DivisionAnnotation] = related_name("division")
     vote_annotations: DummyOneToMany[VoteAnnotation] = related_name("division")
-    tags: DummyManyToMany[DivisionTag] = related_name("division")
+    tags: DummyManyToMany[DecisionTag] = field(
+        models.ManyToManyField,
+        to=DecisionTag,
+        related_name="divisions",
+        through=DivisionTagLink,
+        through_fields=("division", "tag"),
+    )
     motion_id: Dummy[Optional[int]] = None
     motion: Optional[Motion] = field(
         models.ForeignKey,
@@ -763,48 +929,37 @@ class Division(DjangoVoteModel):
         raise ValueError("No overall breakdown found")
 
     def voting_cluster(
-        self, override_lookup: dict[str, AnalysisOverride] | None = None
+        self,
+        override_lookup: dict[str, AnalysisOverride] | None = None,
     ) -> dict[str, Any]:
-        lookup = {
-            "opp_strong_aye_gov_strong_no": "Strong conflict: Opposition proposes",
-            "gov_aye_opp_lean_no": "Divided opposition: Government Aye, Opposition divided",
-            "opp_aye_weak_gov_no": "Medium conflict: Opposition Aye, Government No",
-            "gov_aye_opp_weak_no": "Nominal opposition: Government Aye Opposition Weak No",
-            "gov_no_opp_lean_no": "Multi-party against: Government No, Opposition divided",
-            "low_participation": "Low participation vote",
-            "gov_strong_aye_opp_strong_no": "Strong conflict: Gov proposes",
-            "cross_party_aye": "Cross party aye",
-            "free_vote": "Free vote",
-        }
-        # use this rather than a filter that lets us use prefetch related
         tag = list([x for x in self.tags.all() if x.tag_type == TagType.GOV_CLUSTERS])
         if tag:
             tag = tag[0]
         else:
             tag = None
-        cluster_name = tag.analysis_data if tag else "Unknown"
+
+        cluster_name = tag.name if tag else "Unknown"
 
         if cluster_name.endswith("_outlier"):
             is_outlier = True
-            cluster_name = cluster_name.replace("_outlier", "")
         else:
             is_outlier = False
 
         bespoke = ""
 
         analysis_override = self.analysis_override(override_lookup)
+        print(analysis_override)
         if analysis_override:
             if analysis_override.parl_dynamics_group:
                 cluster_name = analysis_override.parl_dynamics_group
             if analysis_override.manual_parl_dynamics_desc:
                 bespoke = analysis_override.manual_parl_dynamics_desc
 
-        desc = lookup.get(cluster_name, "Unknown")
-        if is_outlier:
-            desc = f"{desc} (Outlier)"
+        desc = tag.desc_markdown() if tag else ""
 
         return {
             "tag": cluster_name,
+            "cluster_name": cluster_name,
             "desc": desc,
             "bespoke": bespoke,
             "is_outlier": is_outlier,
@@ -1017,13 +1172,6 @@ class Division(DjangoVoteModel):
         return df
 
 
-class DivisionTag(DjangoVoteModel):
-    division_id: Dummy[int]
-    division: DoNothingForeignKey[Division] = related_name("tags")
-    tag_type: TagType
-    analysis_data: str
-
-
 class DivisionBreakdown(DjangoVoteModel):
     division_id: Dummy[int]
     division: DoNothingForeignKey[Division] = related_name("overall_breakdowns")
@@ -1136,6 +1284,13 @@ class Agreement(DjangoVoteModel):
     agreement_annotations: DummyOneToMany[AgreementAnnotation] = related_name(
         "agreement"
     )
+    tags: DummyManyToMany[DecisionTag] = field(
+        models.ManyToManyField,
+        to=DecisionTag,
+        related_name="agreements",
+        through=AgreementTagLink,
+        through_fields=("agreement", "tag"),
+    )
 
     def decision_number_or_ref(self) -> str:
         return str(self.decision_ref)
@@ -1175,7 +1330,7 @@ class Agreement(DjangoVoteModel):
         return ""
 
     def voting_cluster(self) -> dict[str, str]:
-        return {"tag": "Agreement", "desc": "Agreement"}
+        return {"tag": "Agreement", "cluster_name": "Agreement"}
 
     def safe_decision_name(self) -> str:
         return self.decision_name or "[missing title]"
@@ -1254,6 +1409,7 @@ class Policy(DjangoVoteModel):
         """ """
 
         ao_override = AnalysisOverride.bulk_lookup()
+
         division_data = [
             {
                 "month": x.decision.date.strftime("%Y-%m"),
@@ -1265,8 +1421,8 @@ class Policy(DjangoVoteModel):
                 "decision type": "Division",
                 "uses powers": x.decision.motion_uses_powers,
                 "voting cluster": x.decision.voting_cluster(
-                    override_lookup=ao_override
-                )["desc"],
+                    override_lookup=ao_override,
+                )["cluster_name"],
                 "participant count": x.decision.single_breakdown().signed_votes,
             }
             for x in self.division_links.all().prefetch_related(
@@ -1287,7 +1443,7 @@ class Policy(DjangoVoteModel):
                 "strength": x.strength,
                 "decision type": "Agreement",
                 "uses powers": x.decision.motion_uses_powers,
-                "voting cluster": x.decision.voting_cluster()["desc"],
+                "voting cluster": x.decision.voting_cluster()["cluster_name"],
                 "participant count": 0,
             }
             for x in self.agreement_links.all().prefetch_related("decision")

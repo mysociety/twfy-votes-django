@@ -13,12 +13,12 @@ from ..models import (
     Agreement,
     AgreementAnnotation,
     Chamber,
+    DecisionTag,
     Division,
     DivisionAnnotation,
     DivisionBreakdown,
     DivisionPartyBreakdown,
     DivisionsIsGovBreakdown,
-    DivisionTag,
     Motion,
     Organization,
     Person,
@@ -64,9 +64,9 @@ class PolicyComparisonPeriodSchema(ModelSchema):
         fields = "__all__"
 
 
-class DivisionTagSchema(ModelSchema):
+class DecisionTagSchema(ModelSchema):
     class Meta:
-        model = DivisionTag
+        model = DecisionTag
         fields = "__all__"
 
 
