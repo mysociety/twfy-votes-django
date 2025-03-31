@@ -12,7 +12,7 @@ def override():
     ao = AnalysisOverride(
         decision_key="pw-2024-12-03-52-commons",
         banned_motion_ids="uk.org.publicwhip/debate/2024-12-03b.193.2.1",
-        parl_dynamics_group="free_vote",
+        parl_dynamics_group="Free vote",
         manual_parl_dynamics_desc="Manual text",
     )
     ao.save()

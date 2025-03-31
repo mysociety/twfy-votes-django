@@ -20,6 +20,7 @@
                 {% include 'votes/includes/nav-item.html' with name='decisions' label='Decisions' %}
                 {% include 'votes/includes/nav-item.html' with name='people' label='People' url_param='all' %}
                 {% include 'votes/includes/nav-item.html' with name='policies' label='Policies' %}
+                {% include 'votes/includes/nav-item.html' with name='tag_home' label='Tags' %}
                 {% if user.is_authenticated %}
 
                     {% include 'votes/includes/nav-item.html' with name='logout' label='Sign out' %}

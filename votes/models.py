@@ -154,7 +154,23 @@ class DecisionTag(DjangoVoteModel):
         return reverse("tag", args=[self.tag_type, self.slug])
 
     def get_decisions(self):
-        return list(self.agreements.all()) + list(self.divisions.all())
+        return list(
+            self.agreements.all().prefetch_related("tags", "chamber", "motion")
+        ) + list(self.divisions.all().prefetch_related("tags", "chamber", "motion"))
+
+    def decisions_df_by_chamber(self) -> dict[Chamber, pd.DataFrame]:
+        """
+        Get a dataframe of decisions by chamber
+        """
+
+        data = self.decisions_df()
+
+        # group by chamber
+        chambers = {}
+        for chamber, df in data.groupby("Chamber"):
+            chambers[chamber] = df
+
+        return chambers
 
     def decisions_df(self) -> pd.DataFrame:
         ao_override = AnalysisOverride.bulk_lookup()
@@ -169,7 +185,7 @@ class DecisionTag(DjangoVoteModel):
 
         data = [
             {
-                "Chamber": d.chamber.name,
+                "Chamber": d.chamber,
                 "Date": d.date,
                 "Decision": UrlColumn(url=d.url(), text=d.safe_decision_name()),
                 "Vote Type": d.decision_type,
@@ -179,7 +195,9 @@ class DecisionTag(DjangoVoteModel):
             for d in self.get_decisions()
         ]
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+        df = df.sort_values("Date", ascending=False)
+        return df
 
 
 class BaseTagLink(DjangoVoteModel, abstract=True):
@@ -597,6 +615,37 @@ class Chamber(DjangoVoteModel):
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
 
+    def __str__(self) -> str:
+        return self.name
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Chamber):
+            return NotImplemented
+        return self.slug == other.slug
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, Chamber):
+            return NotImplemented
+        return self.slug < other.slug
+
+    def __le__(self, other: object) -> bool:
+        if not isinstance(other, Chamber):
+            return NotImplemented
+        return self.slug <= other.slug
+
+    def __gt__(self, other: object) -> bool:
+        if not isinstance(other, Chamber):
+            return NotImplemented
+        return self.slug > other.slug
+
+    def __ge__(self, other: object) -> bool:
+        if not isinstance(other, Chamber):
+            return NotImplemented
+        return self.slug >= other.slug
+
+    def __hash__(self) -> int:
+        return hash(self.slug)
+
     def member_singular(self) -> str:
         return self.member_plural[:-1]
 
@@ -948,7 +997,6 @@ class Division(DjangoVoteModel):
         bespoke = ""
 
         analysis_override = self.analysis_override(override_lookup)
-        print(analysis_override)
         if analysis_override:
             if analysis_override.parl_dynamics_group:
                 cluster_name = analysis_override.parl_dynamics_group

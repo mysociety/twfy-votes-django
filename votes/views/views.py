@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Literal
 
 from django.conf import settings
+from django.db.models import Count
 from django.http import Http404, HttpRequest
 from django.shortcuts import redirect
 from django.template import Context, Template
@@ -36,6 +37,7 @@ from ..forms import (
 from ..models import (
     Agreement,
     Chamber,
+    DecisionTag,
     Division,
     DivisionPartyBreakdown,
     Membership,
@@ -252,6 +254,9 @@ class DataView(TitleMixin, TemplateView):
             "divisions_party_with_counts": "Division breakdowns split by party",
             "chambers": "Chamber ids and names",
             "organization": "Party ids and names",
+            "tags": "Decision tags",
+            "division_tag_link": "Decision tag links",
+            "agreement_tag_link": "Agreement tag links",
             "per_person_party_diff_all_time": "Voting alignment scores all time",
             "per_person_party_diff_period": "Voting alignment scores by rolling period",
             "per_person_party_diff_year": "Voting alignment scores by year",
@@ -433,6 +438,43 @@ class AgreementPageView(TitleMixin, TemplateView):
             self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
+        return context
+
+
+class TagsHomeView(TitleMixin, TemplateView):
+    page_title = "Tags"
+    template_name = "votes/tags_home.html"
+
+    def get_context_data(self, tag_type: str | None = None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if tag_type:
+            query = DecisionTag.objects.filter(tag_type=tag_type)
+        else:
+            query = DecisionTag.objects.all()
+        tags = query.annotate(
+            decision_count=Count("divisions", distinct=True)
+            + Count("agreements", distinct=True)
+        ).order_by("tag_type", "slug")
+
+        context["tags"] = tags
+        return context
+
+
+class TagListView(TitleMixin, TemplateView):
+    page_title = "Tag List"
+    template_name = "votes/tag_list.html"
+
+    def get_context_data(self, tag_type: str, tag_slug: str, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tag_type"] = tag_type
+        context["tag_slug"] = tag_slug
+        tag = DecisionTag.objects.get(tag_type=tag_type, slug=tag_slug)
+        context["page_title"] = f"Tag: {tag.name}"
+        context["tag"] = tag
+        context["decisions_by_chamber"] = tag.decisions_df_by_chamber()
+        context["total_len"] = sum(
+            [len(x) for x in context["decisions_by_chamber"].values()]
+        )
         return context
 
 

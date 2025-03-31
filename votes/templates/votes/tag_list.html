@@ -1,0 +1,47 @@
+{% extends "votes/base_with_menu.html" %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+
+    {% include 'votes/includes/_table_script.html' %}
+{% endblock extrajs %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">{{ tag.name }}</a>
+    </p>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#about">{{ tag.name }}</a>
+    </li>
+    <hr />
+    {% regroup search.decisions by date.month as decisions_by_date %}
+    {% for chamber, df in decisions_by_chamber.items %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#{{ chamber.slug }}">{{ chamber.name }}</a>
+        </li>
+    {% endfor %}
+{% endblock content.menu %}
+
+{% block content.inner %}
+    <h1 id="about">Decisions tagged ‘{{ tag.name }}’</h1>
+    {{ tag.desc_markdown|safe }}
+    <p>There are {{ total_len }} decisions tagged across {{ decisions_by_chamber|length }} chambers.</p>
+    <ul>
+        {% for chamber, df in decisions_by_chamber.items %}
+            <li>
+                <a href="#{{ chamber.slug }}">{{ chamber.name }}</a>: {{ df.shape.0 }}
+            </li>
+        {% endfor %}
+    </ul>
+    {% for chamber, df in decisions_by_chamber.items %}
+        <h2 id="{{ chamber.slug }}" class="section-header">{{ chamber.name }}</h2>
+        {% style_df df %}
+    {% endfor %}
+{% endblock content.inner %}
