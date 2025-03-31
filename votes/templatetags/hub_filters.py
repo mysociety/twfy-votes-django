@@ -17,6 +17,14 @@ register = Library()
 User = get_user_model()
 
 
+@register.filter(name="unslugify")
+def unslugify(value):
+    if not value:
+        return value
+    parts = value.split("_")
+    return " ".join(part.capitalize() for part in parts)
+
+
 @register.filter(name="replace_underscore_with_hyphen")
 def replace_underscore_with_hyphen(value: str) -> str:
     """Replaces underscores with hyphens in a string."""

@@ -109,6 +109,21 @@ class TestPersonPolicy(BaseTestResponse):
     has_json = True
 
 
+class TestTagHome(BaseTestResponse):
+    url = "/tags"
+    has_json = True
+
+
+class TestSingleTagTypeHome(BaseTestResponse):
+    url = "/tags/gov_clusters"
+    has_json = True
+
+
+class TestTag(BaseTestResponse):
+    url = "/tags/gov_clusters/cross_party_aye"
+    has_json = True
+
+
 def test_vote_popolo(client: Client):
     response = client.get("/twfy-compatible/popolo/6679.json")
     assert response.status_code == 200

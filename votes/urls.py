@@ -70,6 +70,9 @@ urlpatterns = [
         name="person_votes",
     ),
     fast_path("decisions", views.DecisionsPageView, name="decisions"),
+    fast_path("tags", views.TagsHomeView, name="tag_home"),
+    fast_path("tags/{tag_type:slug}", views.TagsHomeView, name="tag_home"),
+    fast_path("tags/{tag_type:slug}/{tag_slug:slug}", views.TagListView, name="tag"),
     fast_path(
         "decisions/division/{chamber_slug:str}/{decision_date:date}/{decision_num:int}",
         views.DivisionPageView,

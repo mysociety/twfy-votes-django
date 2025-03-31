@@ -1,0 +1,43 @@
+{% extends "votes/base_with_menu.html" %}
+
+{% block content.title %}
+    <h1 id="top-header">Tags</h1>
+{% endblock content.title %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">Tags</a>
+    </p>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#about">About</a>
+    </li>
+    <hr />
+    {% regroup tags by tag_type as tags_by_type %}
+    {% for tag_name, tags in tags_by_type %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#{{ tag_name }}">{{ tag_name|unslugify }}</a>
+        </li>
+    {% endfor %}
+{% endblock content.menu %}
+
+{% block content.inner %}
+    <h2 id="about" class="section-header">About</h2>
+    <p>Tags are used to group related decisions.</p>
+    <ul>
+        <li>Gov clusters cover the a set of different parliamentary dynamics for different votes.</li>
+    </ul>
+    {% regroup tags by tag_type as tags_by_type %}
+    {% for tag_name, tags in tags_by_type %}
+        <h2 id="{{ tag_name }}" class="section-header">{{ tag_name|unslugify }}</h2>
+        <ul>
+            {% for tag in tags %}
+                <li class="tag">
+                    <a href="{{ tag.url }}">{{ tag.name }}</a> ({{ tag.decision_count }})
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% endblock content.inner %}

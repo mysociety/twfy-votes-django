@@ -1,4 +1,5 @@
 import datetime
+import json
 import shutil
 from pathlib import Path
 
@@ -9,7 +10,15 @@ import pandas as pd
 from twfy_votes.helpers.duck import DuckQuery
 
 from ..consts import VotePosition
-from ..models import Chamber, Division, Organization, PolicyComparisonPeriod
+from ..models import (
+    AgreementTagLink,
+    Chamber,
+    DecisionTag,
+    Division,
+    DivisionTagLink,
+    Organization,
+    PolicyComparisonPeriod,
+)
 from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
@@ -60,6 +69,25 @@ def dump_models():
 
     all_orgs = pd.DataFrame(list(Organization.objects.all().values()))
     all_orgs.to_parquet(DATA_DIR / "organization.parquet")
+
+    all_tags = pd.DataFrame(list(DecisionTag.objects.all().values()))
+    all_tags.to_parquet(DATA_DIR / "tags.parquet")
+
+    all_division_tag_links = pd.DataFrame(list(DivisionTagLink.objects.all().values()))
+    all_division_tag_links["extra_data"] = all_division_tag_links["extra_data"].apply(
+        json.dumps
+    )
+    all_division_tag_links.to_parquet(DATA_DIR / "division_tag_link.parquet")
+
+    all_agreement_tag_links = pd.DataFrame(
+        list(AgreementTagLink.objects.all().values())
+    )
+
+    if len(all_agreement_tag_links) > 0:
+        all_agreement_tag_links["extra_data"] = all_agreement_tag_links[
+            "extra_data"
+        ].apply(json.dumps)
+        all_agreement_tag_links.to_parquet(DATA_DIR / "agreement_tag_link.parquet")
 
     all_periods = pd.DataFrame(list(PolicyComparisonPeriod.objects.all().values()))
     all_periods.to_parquet(DATA_DIR / "policy_comparison_period.parquet")

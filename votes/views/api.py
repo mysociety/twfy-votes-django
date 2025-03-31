@@ -46,6 +46,12 @@ class AuthBearer(HttpBearer):
 api = NinjaAPI(docs_url="/api", title="TheyWorkForYou Votes API")
 
 
+class DecisionTagSchema(ModelSchema):
+    class Meta:
+        model = DecisionTag
+        fields = "__all__"
+
+
 class OrganizationSchema(ModelSchema):
     class Meta:
         model = Organization
@@ -61,12 +67,6 @@ class ChamberSchema(ModelSchema):
 class PolicyComparisonPeriodSchema(ModelSchema):
     class Meta:
         model = PolicyComparisonPeriod
-        fields = "__all__"
-
-
-class DecisionTagSchema(ModelSchema):
-    class Meta:
-        model = DecisionTag
         fields = "__all__"
 
 
@@ -228,6 +228,15 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
+class TagWithDecisionsSchema(ModelSchema):
+    divisions: list[DivisionSchema]
+    agreements: list[AgreementSchema]
+
+    class Meta:
+        model = DecisionTag
+        fields = "__all__"
+
+
 class RebellionRateSchema(ModelSchema):
     class Meta:
         model = RebellionRate
@@ -284,6 +293,27 @@ class PersonPolicySchema(BaseModel):
     own_distribution: VoteDistributionSchema
     other_distribution: VoteDistributionSchema
     decision_links_and_votes: dict[str, list[dict[str, Any]]]
+
+
+@api.get("/tags.json", response=list[DecisionTagSchema])
+def tags_api(request: HttpRequest):
+    return DecisionTag.objects.all()
+
+
+@api.get("/tags/{tag_type}.json", response=list[DecisionTagSchema])
+def single_type_tag_api(request: HttpRequest, tag_type: str):
+    return DecisionTag.objects.filter(tag_type=tag_type)
+
+
+@api.get("/tags/{tag_type}/{tag}.json", response=TagWithDecisionsSchema)
+def tag_to_api(request: HttpRequest, tag_type: str, tag: str):
+    return (
+        DecisionTag.objects.filter(tag_type=tag_type, slug=tag)
+        .prefetch_related(
+            "divisions", "agreements", "divisions__tags", "agreements__tags"
+        )
+        .first()
+    )
 
 
 @api.post("/webhooks/refresh", include_in_schema=False, auth=AuthBearer())
