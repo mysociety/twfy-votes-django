@@ -289,6 +289,27 @@ class DivisionTagLink(BaseTagLink):
     def decision_id(self) -> int:
         return self.division_id
 
+    @classmethod
+    def sync_tag_from_division_id_list(
+        cls,
+        tag: DecisionTag,
+        division_ids: list[int],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        """
+        Sync the tags for a set of links.
+        This will remove any existing links and add the new ones
+        """
+
+        links = [
+            cls(tag=tag, division_id=x, extra_data={})
+            for x in division_ids
+            if x is not None
+        ]
+        cls.sync_tags(links, quiet=quiet, clear_absent=clear_absent)
+
 
 class AgreementTagLink(BaseTagLink):
     """
