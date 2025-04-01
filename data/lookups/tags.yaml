@@ -1,3 +1,15 @@
+-   slug: false_aye_tellers
+    name: False Aye Tellers
+    tag_type: misc
+    description: Where tellers have been put up to allow a vote, but no one is actually in support of aye.
+-   slug: false_no_tellers
+    name: False No Tellers
+    tag_type: misc
+    description: Where tellers have been put up to allow a vote, but no one is actually in support of no.
+-   slug: tie
+    name: Tied vote
+    tag_type: misc
+    description: Where this actually happens, this is a win for the status quo. In some cases this differs from the teller read result (which is the one that matters).
 -   slug: gov_aye_opp_lean_no
     name: "Divided opposition: Government Aye, Opposition divided"
     tag_type: gov_clusters
