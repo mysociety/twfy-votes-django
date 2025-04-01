@@ -40,7 +40,7 @@ def import_tags(quiet: bool = False, update_since: datetime.date | None = None):
     if not quiet:
         rich.print("[blue]Importing tags[/blue]")
 
-    yaml = YAML(typ="safe")  # default, if not specfied, is 'rt' (round-trip)
+    yaml = YAML(typ="safe")  # default, if not specified, is 'rt' (round-trip)
 
     data = yaml.load(tags_path)
     tags = PartialTagList.validate_python(data)
