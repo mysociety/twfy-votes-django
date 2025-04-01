@@ -91,10 +91,6 @@ ten_minute_rule = AndPhraseDetector(
     criteria=["standing order", "23"],
 )
 
-ten_minute_rule = PhraseDetector(
-    criteria=["standing order", "23"],
-)
-
 adjournment = PhraseDetector(
     criteria=["do adjourn until", "do now adjourn"],
 )
