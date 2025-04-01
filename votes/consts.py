@@ -171,6 +171,7 @@ class MotionType(StrEnum):
     BILL_INTRODUCTION = "bill_introduction"
     UNKNOWN = "unknown"
     REASONED_AMENDMENT = "reasoned_amendment"
+    REASONS_COMMITTEE = "reasons_committee"
 
     def url_slug(self):
         return self.value.replace("_", "-")

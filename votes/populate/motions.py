@@ -136,6 +136,10 @@ new_clause = PhraseDetector(criteria=["new clause"])
 
 bill_introduction = PhraseDetector(criteria=["that leave be given to bring in a bill"])
 
+reasons_committee = AndPhraseDetector(
+    criteria=["draw up Reasons", "Committee be appointed"]
+)
+
 # this is in priority order, the first matched will be used
 criteria_map: dict[Callable[[str], bool], MotionType] = {
     approve_si: MotionType.APPROVE_STATUTORY_INSTRUMENT,
@@ -151,6 +155,7 @@ criteria_map: dict[Callable[[str], bool], MotionType] = {
     third_stage: MotionType.THIRD_STAGE,
     second_stage: MotionType.SECOND_STAGE,
     ten_minute_rule: MotionType.TEN_MINUTE_RULE,
+    reasons_committee: MotionType.REASONS_COMMITTEE,
     adjournment: MotionType.ADJOURNMENT,
     european_document: MotionType.EU_DOCUMENT_SCRUTINY,
     gracious_speech: MotionType.GOVERNMENT_AGENDA,
