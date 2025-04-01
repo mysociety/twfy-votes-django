@@ -97,6 +97,10 @@ Calling for the vote leads to a check if there are more than 40 MPs present, and
 
 However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. This prevents it being used to close debate later on. 
 
+## Reasons committee
+
+Where a Lords amendment has been rejected without an alternative, a committee is assigned to draw up a reason for each disagreement to return to the Lords.
+
 ## EU document scrutiny
 
 Now historical, but a vote recognising an EU document in Parliament was a requirement before a minister could support in council.
