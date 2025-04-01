@@ -31,7 +31,7 @@ def load_policies() -> list[PartialPolicy]:
 
     policies: list[PartialPolicy] = []
 
-    yaml = YAML(typ="safe")  # default, if not specfied, is 'rt' (round-trip)
+    yaml = YAML(typ="safe")  # default, if not specified, is 'rt' (round-trip)
 
     for path in policies_folder.glob("*.yml"):
         data: dict[str, Any] = yaml.load(path)
