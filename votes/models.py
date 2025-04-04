@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import html
 from dataclasses import dataclass
 from itertools import groupby
 from typing import (
@@ -848,6 +849,8 @@ class Motion(DjangoVoteModel):
 
     def nice_text(self) -> str:
         text = self.text
+
+        text = html.unescape(text)
 
         lines = text.split("\n")
 
