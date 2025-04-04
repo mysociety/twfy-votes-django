@@ -914,6 +914,7 @@ class Division(DjangoVoteModel):
         related_name="divisions",
         through=DivisionTagLink,
         through_fields=("division", "tag"),
+        default=None,
     )
     motion_id: Dummy[Optional[int]] = None
     motion: Optional[Motion] = field(
@@ -1359,6 +1360,7 @@ class Agreement(DjangoVoteModel):
         related_name="agreements",
         through=AgreementTagLink,
         through_fields=("agreement", "tag"),
+        default=None,
     )
 
     def decision_number_or_ref(self) -> str:
