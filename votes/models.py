@@ -553,13 +553,13 @@ class Person(DjangoVoteModel):
         else:
             votes_query = self.votes.all()
 
-        votes_query = votes_query.prefetch_related("division")
+        votes_query = votes_query.prefetch_related("division", "division__motion")
 
         data = [
             {
                 "Date": v.division.date,
                 "Division": UrlColumn(
-                    url=v.division.url(), text=v.division.division_name
+                    url=v.division.url(), text=v.division.safe_decision_name()
                 ),
                 "Vote": v.vote_desc(),
                 "Party alignment": (
