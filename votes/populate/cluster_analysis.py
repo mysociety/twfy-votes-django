@@ -154,6 +154,11 @@ def get_commons_clusters(df: pd.DataFrame, quiet: bool = True) -> "pd.Series[str
 def import_cluster_analysis(
     quiet: bool = False, update_since: datetime.date | None = None
 ):
+    # this is hard to speed up, although I've left the halfway attempt in below
+    # there's a problem with the 'outlier' detection that needs it all to be present.
+    # In principle this can be stored and reused if we really want to speed it up
+    update_since = None
+
     with DuckQuery.connect() as query:
         df = query.compile(duck).run()
 
