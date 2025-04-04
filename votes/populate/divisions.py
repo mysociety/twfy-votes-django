@@ -88,6 +88,8 @@ class divisions_with_total_membership:
         WHERE
             pw_divisions.chamber != 'pbc'
             and division_id not like '%cy-senedd'
+            -- and not scottish divisions before 2015
+            and not (pw_divisions.chamber = 'scotland' and pw_divisions.division_date < '2015-01-01')
         """
 
 
