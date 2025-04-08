@@ -66,6 +66,10 @@ def import_agreements(quiet: bool = False):
         chamber_id = chamber_ids[chamber_slug]
         safe_pid = row["gid"].split("/")[-1][10:]
 
+        # non ukparl pids don't start with a letter
+        if safe_pid[0] == ".":
+            safe_pid = safe_pid[1:]
+
         item = Agreement(
             key=f"a-{chamber_slug}-{row['date']}-{safe_pid}",
             chamber_slug=chamber_slug,
