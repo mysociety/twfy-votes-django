@@ -3,12 +3,18 @@ from __future__ import annotations
 import calendar
 import datetime
 import re
+import string
 from pathlib import Path
 from typing import Literal
 
 from django.conf import settings
 from django.db.models import Count
-from django.http import Http404, HttpRequest
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponsePermanentRedirect,
+    HttpResponseRedirect,
+)
 from django.shortcuts import redirect
 from django.template import Context, Template
 from django.utils.safestring import mark_safe
@@ -415,6 +421,13 @@ class AgreementPageView(TitleMixin, TemplateView):
     page_title = "Agreement"
     template_name = "votes/decision.html"
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        if isinstance(context, HttpResponseRedirect | HttpResponsePermanentRedirect):
+            return context
+        else:
+            return self.render_to_response(context)
+
     def get_context_data(
         self,
         chamber_slug: str,
@@ -423,9 +436,29 @@ class AgreementPageView(TitleMixin, TemplateView):
         **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        decision = Agreement.objects.get(
-            chamber__slug=chamber_slug, date=decision_date, decision_ref=decision_ref
-        ).apply_analysis_override()
+        try:
+            decision = Agreement.objects.get(
+                chamber__slug=chamber_slug,
+                date=decision_date,
+                decision_ref=decision_ref,
+            )
+        except Agreement.DoesNotExist as e:
+            # this is a very basic mapping that almost always holds true
+            # if 'a' is missing, see if we've loaded a newer one (there will only be one).
+            # if not we could also export the gid_redirect tables from twfy
+            if decision_ref[0] in string.ascii_lowercase:
+                tail_decision_ref = decision_ref[1:]
+                alts = Agreement.objects.filter(
+                    chamber__slug=chamber_slug,
+                    date=decision_date,
+                    decision_ref__endswith=tail_decision_ref,
+                ).first()
+                # redirect to the new decision
+                if alts:
+                    return redirect(alts.url())
+            raise e
+
+        decision = decision.apply_analysis_override()
 
         context["decision"] = decision
         context["relevant_policies"] = [
