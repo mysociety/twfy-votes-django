@@ -454,8 +454,10 @@ def get_policies(request: HttpRequest):
         "groups",
         "division_links",
         "division_links__decision",
+        "division_links__decision__tags",
         "agreement_links",
         "agreement_links__decision",
+        "agreement_links__decision__tags",
     )
 
 
@@ -485,11 +487,20 @@ def get_chamber_status_policies(
     request: HttpRequest, chamber_slug: str, status_slug: str, group_slug: str
 ):
     if group_slug == "all":
-        return Policy.objects.filter(chamber__slug=chamber_slug, status=status_slug)
+        query = Policy.objects.filter(chamber__slug=chamber_slug, status=status_slug)
     else:
-        return Policy.objects.filter(
+        query = Policy.objects.filter(
             chamber__slug=chamber_slug, status=status_slug, group__slug=group_slug
         )
+    return query.prefetch_related(
+        "groups",
+        "division_links",
+        "division_links__decision",
+        "division_links__decision__tags",
+        "agreement_links",
+        "agreement_links__decision",
+        "agreement_links__decision__tags",
+    )
 
 
 @api.get("/policies/reports.json")
