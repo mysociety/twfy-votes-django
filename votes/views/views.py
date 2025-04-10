@@ -12,17 +12,20 @@ from django.db.models import Count
 from django.http import (
     Http404,
     HttpRequest,
+    HttpResponse,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
 from django.shortcuts import redirect
 from django.template import Context, Template
+from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 
 import markdown
 import pandas as pd
 from bs4 import BeautifulSoup
+from PIL import Image
 
 from ..consts import (
     ChamberSlug,
@@ -66,6 +69,7 @@ from .helper_models import (
     PolicyReport,
 )
 from .mixins import TitleMixin
+from .opengraph import draw_custom_image, draw_vote_image
 
 
 class FormsView(TemplateView):
@@ -414,6 +418,8 @@ class DivisionPageView(TitleMixin, TemplateView):
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
 
+        context["og_image"] = reverse("division_opengraph_image", args=[decision.id])
+
         return context
 
 
@@ -471,6 +477,7 @@ class AgreementPageView(TitleMixin, TemplateView):
             self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
+        context["og_image"] = reverse("agreement_opengraph_image", args=[decision.id])
         return context
 
 
@@ -964,3 +971,48 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["page_title"] = f"{policy.name} votes for {person.name}"
 
         return context
+
+
+class BaseOpenGraphView(View):
+    def get_image(self, request, *args, **kwargs) -> Image.Image:
+        raise NotImplementedError
+
+    def get(self, request, *args, **kwargs):
+        image = self.get_image(request, *args, **kwargs)
+        response = HttpResponse(content_type="image/png")
+        image.save(response, "PNG")  # type: ignore
+        return response
+
+
+class DivisionOpenGraphImageView(BaseOpenGraphView):
+    """
+    View for serving the OpenGraph image for a division.
+    Returns a PNG image with the correct MIME type.
+    """
+
+    def get_image(self, request, division_id: int, **kwargs) -> Image.Image:
+        try:
+            division = Division.objects.get(id=division_id)
+            return draw_vote_image(division)
+
+        except Division.DoesNotExist:
+            raise Http404("Division not found")
+
+
+class AgreementOpenGraphImageView(BaseOpenGraphView):
+    """
+    View for serving the OpenGraph image for a Agreement.
+    Returns a PNG image with the correct MIME type.
+    """
+
+    def get_image(self, request, agreement_id: int, **kwargs) -> Image.Image:
+        try:
+            agreement = Agreement.objects.get(id=agreement_id)
+            header = agreement.safe_decision_name()
+            chamber = agreement.chamber.name
+            date = agreement.date.strftime("%Y-%m-%d")
+            subheader = f"{chamber} - {date}"
+            return draw_custom_image(header, subheader)
+
+        except Agreement.DoesNotExist:
+            raise Http404("Agreement not found")
