@@ -245,9 +245,8 @@ class BaseTagLink(DjangoVoteModel, abstract=True):
             raise ValueError("All links must be for the same tag")
 
         # remove any existing links
-        existing_id_lookup = dict(
-            cls.objects.filter(tag=tag).values_list("division_id", "id")
-        )
+        existing_id_lookup = {x.decision_id: x.id for x in cls.objects.filter(tag=tag)}
+
         decision_ids = [link.decision_id for link in links]
 
         existing_ids = existing_id_lookup.keys()
@@ -326,6 +325,27 @@ class AgreementTagLink(BaseTagLink):
     def decision_id(self) -> int:
         return self.agreement_id
 
+    @classmethod
+    def sync_tag_from_agreement_id_list(
+        cls,
+        tag: DecisionTag,
+        division_ids: list[int],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        """
+        Sync the tags for a set of links.
+        This will remove any existing links and add the new ones
+        """
+
+        links = [
+            cls(tag=tag, agreement_id=x, extra_data={})
+            for x in division_ids
+            if x is not None
+        ]
+        cls.sync_tags(links, quiet=quiet, clear_absent=clear_absent)
+
 
 class DecisionProtocol(Protocol):
     """
@@ -350,6 +370,8 @@ class DecisionProtocol(Protocol):
     def motion_speech_url(self) -> str: ...
 
     def decision_number_or_ref(self) -> str: ...
+
+    def legislation_tag(self) -> DecisionTag | None: ...
 
 
 DecisionProtocolType = TypeVar("DecisionProtocolType", bound=DecisionProtocol)
@@ -1003,6 +1025,14 @@ class Division(DjangoVoteModel):
             return ob
         raise ValueError("No overall breakdown found")
 
+    def legislation_tag(self) -> DecisionTag | None:
+        tag = list([x for x in self.tags.all() if x.tag_type == TagType.LEGISLATION])
+        if tag:
+            tag = tag[0]
+        else:
+            tag = None
+        return tag
+
     def voting_cluster(
         self,
         override_lookup: dict[str, AnalysisOverride] | None = None,
@@ -1366,6 +1396,14 @@ class Agreement(DjangoVoteModel):
         through_fields=("agreement", "tag"),
         default=None,
     )
+
+    def legislation_tag(self) -> DecisionTag | None:
+        tag = list([x for x in self.tags.all() if x.tag_type == TagType.LEGISLATION])
+        if tag:
+            tag = tag[0]
+        else:
+            tag = None
+        return tag
 
     def decision_number_or_ref(self) -> str:
         return str(self.decision_ref)
