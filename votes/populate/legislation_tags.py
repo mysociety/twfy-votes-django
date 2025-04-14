@@ -248,17 +248,17 @@ def get_division_df(verbose: bool = False) -> pd.DataFrame:
             leg_id = legislation["id"]
             leg_chamber = legislation["chamber"]
 
-        items.append(
-            {
-                "dtype": d.decision_type,
-                "leg_id": leg_id,
-                "leg_chamber": leg_chamber,
-                "id": d.id,
-                "name": dn,
-                "legislation": ldn.strip(),
-                "url": url,
-            }
-        )
+            items.append(
+                {
+                    "dtype": d.decision_type,
+                    "leg_id": leg_id,
+                    "leg_chamber": leg_chamber,
+                    "id": d.id,
+                    "name": dn,
+                    "legislation": ldn.strip(),
+                    "url": url,
+                }
+            )
 
     df = pd.DataFrame(items)
 
