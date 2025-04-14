@@ -139,6 +139,7 @@ class DecisionTag(DjangoVoteModel):
     slug: str
     name: str
     desc: TextField = ""
+    extra_data: JSONField = field(default=dict)
     agreements: DummyManyToMany[Agreement] = related_name("tags")
     divisions: DummyManyToMany[Division] = related_name("tags")
 
