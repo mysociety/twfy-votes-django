@@ -224,7 +224,7 @@ class OrganisationType(StrEnum):
 class TagType(StrEnum):
     GOV_CLUSTERS = "gov_clusters"
     MISC = "misc"
-    PARL_BILLS = "parl_bills"
+    LEGISLATION = "legislation"
 
 
 class WhipPriority(StrEnum):

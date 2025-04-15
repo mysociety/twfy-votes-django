@@ -15,11 +15,9 @@
     <li class="nav-item">
         <a class="nav-link h6 pl-0 mb-0" href="#result">Result</a>
     </li>
-    {% if decision.decision_type == "Division" %}
-        <li class="nav-item">
-            <a class="nav-link h6 pl-0 mb-0" href="#parliamentary-analysis">Parliamentary analysis</a>
-        </li>
-    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#parliamentary-analysis">Parliamentary analysis</a>
+    </li>
     {% if decision.motion %}
         <li class="nav-item">
             <a class="nav-link h6 pl-0 mb-0" href="#motion">Motion</a>
@@ -99,7 +97,14 @@
         {% endwith %}
 
         {% include 'votes/includes/division_dots.html' %}
-        <h2 class="section-header" id="parliamentary-analysis">Parliamentary analysis</h2>
+    {% endif %}
+    <h2 class="section-header" id="parliamentary-analysis">Parliamentary analysis</h2>
+    {% with decision.legislation_tag as lt %}
+        <p>
+            Part of tag: <a href="{{ lt.url }}">{{ lt.name }}</a>
+        </p>
+    {% endwith %}
+    {% if decision.decision_type == "Division" %}
 
         {% include 'votes/includes/division_clusters.html' %}
     {% endif %}

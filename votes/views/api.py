@@ -108,10 +108,25 @@ class DivisionsIsGovBreakdownSchema(ModelSchema):
 
 class VoteSchema(ModelSchema):
     person: PersonSchema
+    vote: str
+    effective_vote: str
+    party: str
+
+    @staticmethod
+    def resolve_vote(obj: Vote):
+        return obj.vote.name.title()
+
+    @staticmethod
+    def resolve_effective_vote(obj: Vote):
+        return obj.effective_vote.name.title()
+
+    @staticmethod
+    def resolve_party(obj: Vote):
+        return obj.membership.party.slug
 
     class Meta:
         model = Vote
-        exclude = ["id"]
+        exclude = ["id", "vote", "effective_vote"]
         fields = "__all__"
 
 
@@ -160,6 +175,7 @@ class DivisionWithInfoSchema(ModelSchema):
     is_gov_breakdowns: list[DivisionsIsGovBreakdownSchema]
     motion: MotionSchema | None
     voting_cluster: dict[str, Any]
+    legislation: DecisionTagSchema | None
     division_annotations: list[DivisionAnnotationSchema]
     vote_annotations: list[VoteAnnotationSchema]
     whip_reports: list[dict[str, Any]]
@@ -172,6 +188,13 @@ class DivisionWithInfoSchema(ModelSchema):
         # for columns, drop to lower case and change spaces to underscores
         df.columns = [x.lower().replace(" ", "_") for x in df.columns]
         return df.to_dict(orient="records")
+
+    @staticmethod
+    def resolve_legislation(obj: Division):
+        legislation = obj.legislation_tag()
+        if legislation is None:
+            return None
+        return legislation
 
     @staticmethod
     def resolve_voting_cluster(obj: Division):
@@ -338,17 +361,31 @@ def refresh_webhook(request: HttpRequest, item: TriggerSchema):
 def get_division(
     request: HttpRequest, chamber_slug: str, date: datetime.date, division_number: int
 ):
-    return Division.objects.get(
-        chamber_slug=chamber_slug, date=date, division_number=division_number
-    ).apply_analysis_override()
+    division = (
+        Division.objects.filter(
+            chamber_slug=chamber_slug, date=date, division_number=division_number
+        )
+        .prefetch_related(
+            "votes", "votes__person", "votes__membership", "votes__membership__party"
+        )
+        .first()
+    )
+
+    if division is None:
+        raise ValueError(
+            f"Division not found for {chamber_slug} {date} {division_number}"
+        )
+    return division.apply_analysis_override()
 
 
 @api.get("/people/{people_option}.json", response=list[PersonSchema])
 def get_people(request: HttpRequest, people_option: Literal["current", "all"]):
     if people_option == "current":
-        return Person.current()
+        query = Person.current()
     else:
-        return Person.objects.all()
+        query = Person.objects.all()
+
+    return query
 
 
 @api.get("/person/{person_id}.json", response=PersonSchema)

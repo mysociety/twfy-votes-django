@@ -74,6 +74,10 @@ Additionally - for items that are outliers in their cluster - we highlight that 
 
 We can override these descriptions when the automated description is not helpful - please report any issues using the link on the decision in question.
 
+## Legislation tags
+
+We group votes related to the same legislation, and link back to the tracking page for that legislation. We try to reconcile different variants used of the same bill, but the same legislation may end up split over multiple tags, or miss a vote if there isn't a clear link in the title of the vote or debate. 
+
 ## Voting breakdowns and party alignment
 
 This is the bread and butter of a voting analysis site. We list how people vote, and create breakdowns of how parties collectively voted. 
