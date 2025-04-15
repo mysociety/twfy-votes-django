@@ -130,7 +130,7 @@ class ScotBill(BaseModel):
 
     @property
     def slug(self):
-        # this is fullname, removing puntation other than space,
+        # this is fullname, removing punctuation other than space,
         # replacing space with -
         # and lowercasing
 
@@ -180,7 +180,7 @@ class ScotBill(BaseModel):
         adaptor = TypeAdapter(list[cls])
         scot_data = adaptor.validate_python(scot_data)
 
-        # fetch stages - which we need to get the first dat
+        # fetch stages - which we need to get the first date
         # to get the url
         scot_stages = ScotBillStage.fetch_data()
         scot_lookup = {x.BillID: x for x in scot_stages}
