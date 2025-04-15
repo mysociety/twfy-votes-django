@@ -100,9 +100,14 @@
     {% endif %}
     <h2 class="section-header" id="parliamentary-analysis">Parliamentary analysis</h2>
     {% with decision.legislation_tag as lt %}
-        <p>
-            Part of tag: <a href="{{ lt.url }}">{{ lt.name }}</a>
-        </p>
+        {% if lt %}
+            <p>
+                Part of tag: <a href="{{ lt.url }}">{{ lt.name }}</a>
+            </p>
+        {% elif decision.decision_type == "Agreement" %}
+            <p>No parliamentary analysis for the agreement</p>
+            .
+        {% endif %}
     {% endwith %}
     {% if decision.decision_type == "Division" %}
 
