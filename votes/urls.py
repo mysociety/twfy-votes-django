@@ -127,5 +127,15 @@ urlpatterns = [
     ),
     fast_path("help/{markdown_slug:slug}", views.MarkdownView, name="help"),
     fast_path("data", views.DataView, name="data"),
+    fast_path(
+        "opengraph/division/{division_id:int}",
+        views.DivisionOpenGraphImageView,
+        name="division_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/agreement/{agreement_id:int}",
+        views.AgreementOpenGraphImageView,
+        name="agreement_opengraph_image",
+    ),
     path("", api.urls),
 ]
