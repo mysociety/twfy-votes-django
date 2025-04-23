@@ -1,5 +1,14 @@
 <nav class="navbar navbar-expand-sm bg-green-100">
     <div class="container">
+        <a href="https://www.mysociety.org/"
+           id="mysociety-badge"
+           aria-label="A service from mySociety">
+            <img class="badge-desktop"
+                 src="/static/img/badge-mysociety-desktop@2x.png"
+                 width="60"
+                 height="80"
+                 alt="A service from mySociety">
+        </a>
         {% if not request.resolver_match.url_name == 'home' %}
             <a class="navbar-brand"
                href="{% url 'home' %}"
@@ -34,7 +43,10 @@
 </nav>
 {% if not request.resolver_match.url_name == 'home' %}
     <div class="bg-green-50">
-        <div class ="container ">
+        <div class="container"
+             style="padding-top:10px;
+                    padding-bottom:10px;
+                    text-align:center">
             This site is in experimental release. Please report <a href="https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting">any issues on this form</a>.
         </div>
     </div>

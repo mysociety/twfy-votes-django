@@ -66,6 +66,8 @@
   font-family: "Merriweather", serif;
   font-weight: 400;
   font-style: normal;
+  margin-left: 0px;
+  padding-left: 0px;
   padding-top: var(--#{$prefix}navbar-brand-padding-y);
   padding-bottom: var(--#{$prefix}navbar-brand-padding-y);
   margin-right: var(--#{$prefix}navbar-brand-margin-end);
@@ -78,6 +80,12 @@
   &:focus {
     color: var(--#{$prefix}navbar-brand-hover-color);
     text-decoration: if($link-hover-decoration ==underline, none, null);
+  }
+}
+
+@media (min-width: 768px) {
+  .navbar-brand {
+    padding-left: 120px;
   }
 }
 
