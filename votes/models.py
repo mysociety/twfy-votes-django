@@ -257,13 +257,17 @@ class BaseTagLink(DjangoVoteModel, abstract=True):
         if to_remove and clear_absent:
             if not quiet:
                 print(f"Removing {len(to_remove)} links for tag {tag.slug}")
-            cls.objects.filter(tag=tag, division_id__in=to_remove).delete()
+            # if cls is AgreementTagLink, then we need to remove the links
+            if issubclass(cls, AgreementTagLink):
+                cls.objects.filter(tag=tag, agreement_id__in=to_remove).delete()
+            elif issubclass(cls, DivisionTagLink):
+                cls.objects.filter(tag=tag, division_id__in=to_remove).delete()
 
         if to_add:
             if not quiet:
                 print(f"Adding {len(to_add)} links for tag {tag.slug}")
             to_create = [x for x in links if x.decision_id in to_add]
-            cls.objects.bulk_create(to_create)
+            cls.objects.bulk_create(to_create)  # type: ignore
 
         if to_edit:
             if not quiet:
@@ -272,7 +276,7 @@ class BaseTagLink(DjangoVoteModel, abstract=True):
             for e in edit_objects:
                 e.id = existing_id_lookup[e.decision_id]
             cls.objects.bulk_update(
-                edit_objects,
+                edit_objects,  # type: ignore
                 ["extra_data"],
             )
 
