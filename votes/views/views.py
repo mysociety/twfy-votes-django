@@ -532,7 +532,7 @@ class DecisionsListPageView(TitleMixin, TemplateView):
             chamber=chamber, date__range=(start_date, end_date)
         ).prefetch_related("motion", "tags")
         decisions = list(relevent_divisions) + list(relevant_agreements)
-        decisions.sort(key=lambda x: x.date, reverse=True)
+        decisions.sort(key=lambda x: x.gid(), reverse=True)
         return DivisionSearch(
             start_date=start_date,
             end_date=end_date,

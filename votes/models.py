@@ -1073,12 +1073,14 @@ class Division(DjangoVoteModel):
             "is_outlier": is_outlier,
         }
 
-    def twfy_link(self) -> str:
+    def gid(self) -> str:
         gid = self.source_gid.split("/")[-1]
         if not gid:
             return ""
+        return gid
 
-        return self.chamber.twfy_debate_link(gid)
+    def twfy_link(self) -> str:
+        return self.chamber.twfy_debate_link(self.gid())
 
     @property
     def decision_type(self) -> str:
@@ -1452,7 +1454,7 @@ class Agreement(DjangoVoteModel):
     def safe_decision_name(self) -> str:
         return self.decision_name or "[missing title]"
 
-    def twfy_link(self) -> str:
+    def gid(self) -> str:
         gid = self.decision_ref.split("/")[-1]
         # remove the final .number
         gid = ".".join(gid.split(".")[:-1])
@@ -1460,7 +1462,10 @@ class Agreement(DjangoVoteModel):
         if gid[0].isdigit():
             gid = f".{gid}"
         gid = f"{self.date.isoformat()}{gid}"
-        return self.chamber.twfy_debate_link(gid)
+        return gid
+
+    def twfy_link(self) -> str:
+        return self.chamber.twfy_debate_link(self.gid())
 
     def votes_df(self) -> pd.DataFrame:
         relevant_memberships = Membership.objects.filter(
