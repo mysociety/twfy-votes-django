@@ -393,9 +393,22 @@ class DivisionPageView(TitleMixin, TemplateView):
         **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        decision = Division.objects.get(
-            chamber__slug=chamber_slug, date=decision_date, division_number=decision_num
-        ).apply_analysis_override()
+
+        # Special case for Scottish divisions before 2015, which are excluded from the database
+        if chamber_slug == ChamberSlug.SCOTLAND and decision_date < datetime.date(
+            2015, 1, 1
+        ):
+            raise Http404("Scottish divisions before 2015 are not available")
+
+        try:
+            decision = Division.objects.get(
+                chamber__slug=chamber_slug,
+                date=decision_date,
+                division_number=decision_num,
+            ).apply_analysis_override()
+        except Division.DoesNotExist:
+            # Return a proper 404 response instead of failing
+            raise Http404("Division not found")
 
         context["decision"] = decision
         context["relevant_policies"] = [
