@@ -154,6 +154,11 @@ Dummy = Annotated[T, AllowJustAnnotated]
 PrimaryKey = Annotated[
     Optional[int], models.BigAutoField(primary_key=True), PydanticField(default=None)
 ]
+OptionalDateTimeField = Annotated[
+    Optional[datetime.datetime],
+    models.DateTimeField(null=True),
+    PydanticField(default=None),
+]
 CharField = Annotated[
     str, models.CharField(max_length=255), PydanticField(max_length=255)
 ]

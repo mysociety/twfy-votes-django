@@ -20,6 +20,7 @@ from typing import (
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 import markdown
 import numpy as np
@@ -34,6 +35,7 @@ from twfy_votes.helpers.typed_django.models import (
     DummyOneToMany,
     JSONField,
     ManyToMany,
+    OptionalDateTimeField,
     PrimaryKey,
     TextField,
     field,
@@ -414,13 +416,9 @@ class Update(DjangoVoteModel):
     """
 
     id: PrimaryKey = None
-    date_created: Optional[datetime.datetime] = field(models.DateTimeField, null=True)
-    date_started: Optional[datetime.datetime] = field(
-        models.DateTimeField, null=True, blank=True
-    )
-    date_completed: Optional[datetime.datetime] = field(
-        models.DateTimeField, null=True, blank=True
-    )
+    date_created: OptionalDateTimeField
+    date_started: OptionalDateTimeField
+    date_completed: OptionalDateTimeField
     failed: bool = False
     error_message: TextField = ""
     instructions: dict
@@ -440,20 +438,20 @@ class Update(DjangoVoteModel):
         return cls.objects.create(
             instructions=instructions,
             created_via=created_via,
-            date_created=datetime.datetime.now(),
+            date_created=timezone.now(),
         )
 
     def start(self):
-        self.date_started = datetime.datetime.now()
+        self.date_started = timezone.now()
         self.save()
 
     def complete(self):
-        self.date_completed = datetime.datetime.now()
+        self.date_completed = timezone.now()
         self.error_message = ""
         self.save()
 
     def fail(self, error_message: str):
-        self.date_completed = datetime.datetime.now()
+        self.date_completed = timezone.now()
         self.failed = True
         self.error_message = error_message
         self.save()
