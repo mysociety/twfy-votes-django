@@ -421,6 +421,8 @@ class Update(DjangoVoteModel):
     date_completed: Optional[datetime.datetime] = field(
         models.DateTimeField, null=True, blank=True
     )
+    failed: bool = False
+    error_message: TextField = ""
     instructions: dict
     created_via: str
 
@@ -447,6 +449,13 @@ class Update(DjangoVoteModel):
 
     def complete(self):
         self.date_completed = datetime.datetime.now()
+        self.error_message = ""
+        self.save()
+
+    def fail(self, error_message: str):
+        self.date_completed = datetime.datetime.now()
+        self.failed = True
+        self.error_message = error_message
         self.save()
 
     def check_similar_in_progress(self):
