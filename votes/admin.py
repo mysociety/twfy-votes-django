@@ -13,7 +13,18 @@ from .models import (
     WhipReport,
 )
 
-admin.site.register(Update)
+
+@admin.register(Update)
+class UpdateAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "date_created",
+        "date_started",
+        "date_completed",
+        "failed",
+        "instructions",
+    )
+    list_filter = ("failed",)
 
 
 @admin.register(Division)
