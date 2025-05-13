@@ -430,7 +430,7 @@ class Update(DjangoVoteModel):
     ):
         if check_for_running:
             # basic check that we don't have the same instructions running or queued to be started
-            currently_running = cls.created_not_finished()
+            currently_running = cls.created_not_finished(last_hour=True)
             for update in currently_running:
                 if update.instructions == instructions:
                     return update
@@ -482,7 +482,13 @@ class Update(DjangoVoteModel):
         return final_items
 
     @classmethod
-    def created_not_finished(cls):
+    def created_not_finished(cls, last_hour: bool = False):
+        if last_hour:
+            # get all items created in the last hour
+            return cls.objects.filter(
+                date_created__gte=timezone.now() - datetime.timedelta(hours=1),
+                date_completed=None,
+            )
         return cls.objects.filter(date_completed=None)
 
 
