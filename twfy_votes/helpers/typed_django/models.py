@@ -156,7 +156,7 @@ PrimaryKey = Annotated[
 ]
 OptionalDateTimeField = Annotated[
     Optional[datetime.datetime],
-    models.DateTimeField(null=True),
+    models.DateTimeField(null=True, blank=True),
     PydanticField(default=None),
 ]
 CharField = Annotated[
