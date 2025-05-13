@@ -11,6 +11,13 @@
                     {% include 'votes/includes/nav-item.html' with name='help' url_param="about" label='About' %}
                     {% include 'votes/includes/nav-item.html' with name='api-1.0.0:openapi-view' label='API' %}
                     {% include 'votes/includes/nav-item.html' with name='data' label='Bulk data' %}
+                    {% if user.is_authenticated %}
+
+                        {% include 'votes/includes/nav-item.html' with name='logout' label='Sign out' %}
+                    {% else %}
+
+                        {% include 'votes/includes/nav-item.html' with name='login' label='Sign in' %}
+                    {% endif %}
                 </ul>
             </div>
         </div>
