@@ -458,7 +458,11 @@ class Update(DjangoVoteModel):
 
     def check_similar_in_progress(self):
         return (
-            Update.objects.filter(date_completed=None, instructions=self.instructions)
+            Update.objects.filter(
+                date_completed=None,
+                instructions=self.instructions,
+                date_created__gte=timezone.now() - datetime.timedelta(hours=1),
+            )
             .exclude(id=self.id)
             .exists()
         )
