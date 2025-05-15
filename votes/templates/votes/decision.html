@@ -78,6 +78,11 @@
     {% featureflag pg.ADVANCED_INFO %}
         <p>Decision Key: {{ decision.key }}</p>
     {% endfeatureflag %}
+    {% if decision.division_info_source == "commons_api" %}
+        <div class="alert alert-warning" role="alert">
+            This vote has been sourced from <a href="https://votes.parliament.uk/">the Commons API</a>. Motion information will be available after it loads from Hansard in the morning. Some absent votes may also be updated from Hansard.
+        </div>
+    {% endif %}
     <h2 class="section-header" id="result">Result</h2>
     {% if decision.decision_type == "Agreement" %}
         {% if decision.negative %}
