@@ -93,6 +93,7 @@ This is a vote to change the rules of the chamber.
 This is a vote to sit in private.
 
 Generally this is not a real vote about sitting in private, but because it is a vote that can be called by any MP, it can be used to end a low participation debate. 
+
 Calling for the vote leads to a check if there are more than 40 MPs present, and if not, proceedings end. 
 
 However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. This prevents it being used to close debate later on. 
