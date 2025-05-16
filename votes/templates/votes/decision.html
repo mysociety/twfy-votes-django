@@ -67,26 +67,29 @@
             <a class="nav-link h6 pl-0 mb-0" href="{{ decision.motion_speech_url }}">View motion in TheyWorkForYou</a>
         </li>
     {% endif %}
-    {% with navigation=decision.same_day_navigation %}
-        {% if navigation.next_decision or navigation.previous_decision %}
-            <hr />
-            <li class="nav-item">
-                <span class="nav-link h6 pl-0 mb-0 text-muted">Same day decisions:</span>
-            </li>
-            {% if navigation.previous_decision %}
-                <li class="nav-item">
-                    <a class="nav-link h6 pl-0 mb-0"
-                       href="{{ navigation.previous_decision.url }}">Previous decision</a>
-                </li>
+    <div class="month-navigation">
+        <hr />
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0"
+               href="{% url 'decisions_list_month' decision.chamber.slug decision.date.year decision.date.month %}">All {{ decision.chamber.name }} decisions in {{ decision.date|date:"F Y" }}</a>
+        </li>
+        {% with navigation=decision.same_day_navigation %}
+            {% if navigation.next_decision or navigation.previous_decision %}
+                {% if navigation.previous_decision %}
+                    <li class="nav-item">
+                        <a class="nav-link h6 pl-0 mb-0"
+                           href="{{ navigation.previous_decision.url }}">Previous decision this day</a>
+                    </li>
+                {% endif %}
+                {% if navigation.next_decision %}
+                    <li class="nav-item">
+                        <a class="nav-link h6 pl-0 mb-0"
+                           href="{{ navigation.next_decision.url }}">Next decision this day</a>
+                    </li>
+                {% endif %}
             {% endif %}
-            {% if navigation.next_decision %}
-                <li class="nav-item">
-                    <a class="nav-link h6 pl-0 mb-0"
-                       href="{{ navigation.next_decision.url }}">Next decision</a>
-                </li>
-            {% endif %}
-        {% endif %}
-    {% endwith %}
+        {% endwith %}
+    </div>
     <hr />
     <li class="nav-item active">
         <a class="nav-link h6 pl-0 mb-0"
