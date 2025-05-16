@@ -7,6 +7,7 @@ from itertools import groupby
 from typing import (
     TYPE_CHECKING,
     Any,
+    NamedTuple,
     NotRequired,
     Optional,
     Protocol,
@@ -72,6 +73,13 @@ if TYPE_CHECKING:
         Vote,
         VoteDistribution,
     )
+
+
+class NavigationResult(NamedTuple):
+    """A tuple containing next and previous decisions."""
+
+    next_decision: Division | Agreement | None
+    previous_decision: Division | Agreement | None
 
 
 class UserPersonLink(DjangoVoteModel):
@@ -1299,6 +1307,13 @@ class Division(DjangoVoteModel):
 
         return df
 
+    def same_day_navigation(self) -> NavigationResult:
+        """
+        Get both next and previous decisions on the same day in a single query.
+        Returns a NavigationResult with both decisions (or None if not available).
+        """
+        return get_same_day_decision_navigation(self)
+
 
 class DivisionBreakdown(DjangoVoteModel):
     division_id: Dummy[int]
@@ -1515,6 +1530,16 @@ class Agreement(DjangoVoteModel):
         return reverse(
             "agreement", args=[self.chamber_slug, self.date, self.decision_ref]
         )
+
+    def same_day_navigation(self) -> NavigationResult:
+        """
+        Get both next and previous decisions on the same day in a single query.
+        Returns a NavigationResult with both decisions (or None if not available).
+        """
+        return get_same_day_decision_navigation(self)
+
+
+DecisionType = Division | Agreement
 
 
 class PolicyGroup(DjangoVoteModel):
@@ -1789,3 +1814,47 @@ class AnalysisOverride(DjangoVoteModel):
     @classmethod
     def bulk_lookup(cls) -> dict[str, AnalysisOverride]:
         return {x.decision_key: x for x in cls.objects.all()}
+
+
+def get_same_day_decision_navigation(decision: DecisionType) -> NavigationResult:
+    """
+    Shared utility function to get next and previous decisions on the same day.
+
+    """
+    # Get all divisions from the same day and chamber
+    same_day_divisions = Division.objects.filter(
+        date=decision.date, chamber=decision.chamber
+    )
+
+    # Get all agreements from the same day and chamber
+    same_day_agreements = Agreement.objects.filter(
+        date=decision.date, chamber=decision.chamber
+    )
+
+    # Combine and sort using the same logic as in DecisionsListPageView.decision_search()
+    same_day_decisions = list(same_day_divisions) + list(same_day_agreements)
+    same_day_decisions.sort(
+        key=lambda x: (x.gid() or f"{x.date}-{getattr(x, 'division_number', 0)}"),
+        reverse=True,  # Descending order (newest first)
+    )
+
+    # Find the current decision in the list
+    current_index = None
+    for i, d in enumerate(same_day_decisions):
+        if d.decision_type == decision.decision_type and d.id == decision.id:
+            current_index = i
+            break
+
+    next_decision = None
+    previous_decision = None
+
+    if current_index is not None:
+        # Get the next decision (the one before in the list since it's reverse sorted)
+        if current_index > 0:
+            next_decision = same_day_decisions[current_index - 1]
+
+        # Get the previous decision (the one after in the list since it's reverse sorted)
+        if current_index < len(same_day_decisions) - 1:
+            previous_decision = same_day_decisions[current_index + 1]
+
+    return NavigationResult(next_decision, previous_decision)
