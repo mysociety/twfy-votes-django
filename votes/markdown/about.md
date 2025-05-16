@@ -1,27 +1,36 @@
-# About TheyWorkForYou Votes
+# TheyWorkForYou Votes – Help & Overview
 
-## Introduction
+## What is TheyWorkForYou Votes?
 
-TheyWorkForYou Votes is a parliamentary voting analysis.
+TheyWorkForYou Votes is the home of our upgraded parliamentary voting analysis. It brings together data from the UK’s legislatures, adds new context, and makes it easier for everyone—from interested citizens to researchers—to understand and analyse decisions made.
 
-Our goal is to create and support better analysis of decisions taken in the UK's Parliaments - both directly to citizens, or indirectly by providing new tools and data to specialists. 
+If you spot a problem or have a suggestion, please let us know via our [issue reporting form](https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting) or the [contact page](https://www.theyworkforyou.com/contact/).
 
-Please report any issues through [the reporting form](https://survey.alchemer.com/s3/8114572/TheyWorkForYou-Votes-issue-reporting) or [our contact page](https://www.theyworkforyou.com/contact/).
+You can read more about votes in general, and our voting summary information [in TheyWorkForYou](https://www.theyworkforyou.com/voting-information/).
 
-Read [more about votes, and how we handle them in TheyWorkForYou](https://www.theyworkforyou.com/voting-information/).
+---
 
-
-## Decisions
+## Decisions, Divisions & Agreements
 
 This site lists decisions made in the UK's Parliaments, and provides analysis of the results.
+On this site a decision can be a Division or an Agreement.
 
-By decisions, we mean by 'divisions' (when representatives have voted), and 'agreements' (when a decision is made without a vote).
+A division is when representatives vote "Aye/No" (or equivalents) and the names are recorded, as happens in the Commons, Lords, Scottish Parliament, and Senedd Cymru.
+
+Alternatively, a decision may be an Agreement. In this case, the chair asks whether anyone objects, and if no one does, the motion passes without a recorded vote. We create an entry for this agreement to better associate it with the text of the motion. 
+
+We do **not yet list divisions for the Northern Ireland Assembly**. Our current parser for the Assembly does not extract divisions.
+
+---
 
 ## Divisions
 
-We list divisions for the Westminster Parliament, the Scottish Parliament, and the Senedd/Welsh Parliament.
+For each division you’ll find:
 
-We do not currently list divisions for the Northern Ireland Assembly. This is because the underlying TheyWorkForYou parser does not currently support divisions, and there are additional analysis needs around correctly showing the results of votes with cross-community requirements. 
+* The motion text (where available)
+* Tallies of Ayes, Noes and absentees.
+* Party‑by‑party breakdowns.
+* An automated description of the parliamentary dynamic
 
 ## Agreements
 
@@ -31,91 +40,97 @@ We list agreements for the House of Commons, and the Scottish Parliament.
 
 Agreements do not necessarily mean that all MPs supported the result, just that there was no opposition, and so the decision was made collectively. 
 
-In practice, this can mean "everyone loved this", "we all agree you'd win so it's a waste of time voting", and "this is a small piece of house business". 
+In practice, this can mean "everyone loved this", "we all agree you'd win so it is a waste of time voting", or "this is a small piece of house business". 
 
 Our goal in listing agreements is to be able to better explain decisions made without a vote, by creating a page to attach motions that are passed this way. 
 
 We can add these into voting summaries, but do so infrequently - when we feel we can make a clear interpretation of the decision. 
 
+---
+
 ## Motions
 
-To improve public understanding of Parliament, we want to make it easier to understand and link back to what a vote or decision was about.
+Understanding *what* was being voted on is just as important as seeing the numbers. In debates, the matter is often talked about as “the Question”, with the full wording hidden earlier in the transcript—or missing entirely.
 
-The official record (Hansard) can be unhelpful for this, with the subject for debate being referred to as 'the question', and the motion itself may be significantly earlier, or sometimes absent altogether. 
+We have written new parsers to pull out the motion text and attach it to each decision. Because transcripts vary, mistakes can happen: please use the **“Report a problem”** link on any decision page if something looks wrong.
 
-We have written new parsers to extract motions from Parliamentary transcripts, and assign them to decisions/agreements.
+We’re also categorising these motions into common types and adding plain‑English explanations. This work is ongoing—feedback is welcome.
 
-This can be fiddly, as the wording of motions can be complex, and the way they are presented in the transcript can vary. Please report any errors using the link on the decision in question. 
+Sometimes knowning the motion is still unhelpful because it refers to an Lords amendment number. We need to automate a few more steps to be able to pull the content of this out of the PDFs Parliament publishes. 
 
-For each motion, we are then trying to categorise the kind of motion - and give additional detail about what that kind of motion means. This is a work in progress, and please report any problems. 
+---
 
-## Parliamentary dynamics clustering
+## Parliamentary Dynamics Clustering
 
-For divisions in all Parliaments we cover, we have added an automated description of the Parliamentary dynamics of the vote. 
+To give a quick sense of the politics behind each division, we run a clustering algorithm on a breakdown of each vote.
+We calculate the six percentages(Government/Opposition × For/Against/Absent) and can use this as a way to cluster that is independent of the relative numbers of the government and opposition. This helps give a sense of who is proposing the vote, and the strength of the conflict. 
 
-The goal of this is to make it easier when reviewing lots of votes to understand as a glance the shape of the politics of a vote - and then to expand that to a fuller description for public use. 
+The clusters currently in use are:
 
-The way this technically works is for each division we have divided the results into six percentages of government/opposition and for/against/absent.
+* **Strong conflict – Government proposes**
+* **Strong conflict – Opposition proposes**
+* **Divided opposition – Government Aye, Opposition split**
+* **Medium conflict – Opposition Aye, Government No**
+* **Nominal opposition – Government Aye, Opposition weak No**
+* **Multi‑party against – Government No, Opposition split**
+* **Low‑participation vote**
+* **Cross‑party Aye**
 
-From this, we ran a clustering approach to identify common groups of divisions based on basic government/opposition dynamics. 
+If a vote sits awkwardly in its cluster we flag it as an outlier, and editors can override the label where necessary.
 
-The clusters this current covers are:
+---
 
-* Strong conflict: Gov proposes
-* Strong conflict: Opposition proposes
-* Divided opposition: Government Aye, Opposition divided
-* Medium conflict: Opposition Aye, Government No
-* Nominal opposition: Government Aye Opposition Weak No
-* Multi-party against: Government No, Opposition divided
-* Low participation vote
-* Cross-party aye
+## Legislation Tags
 
-Additionally - for items that are outliers in their cluster - we highlight that this may be the best current description, but is stretching how we are describing it.
+Where a decision relates to a Bill, we link all the relevant votes together and back to the bill‑tracking page. Titles vary, so occasionally a bill will be split across two tags or a vote will be missed.
 
-We can override these descriptions when the automated description is not helpful - please report any issues using the link on the decision in question.
+All currently legislative tags can be seen on the tags page.
 
-## Legislation tags
+---
 
-We group votes related to the same legislation, and link back to the tracking page for that legislation. We try to reconcile different variants used of the same bill, but the same legislation may end up split over multiple tags, or miss a vote if there isn't a clear link in the title of the vote or debate. 
+## Voting Breakdowns & Party Alignment
 
-## Voting breakdowns and party alignment
+For every decision we list how each representative voted and summarise party voting behaviour.
 
-This is the bread and butter of a voting analysis site. We list how people vote, and create breakdowns of how parties collectively voted. 
+Because whip instructions are not always public, we calculate a **party‑alignment score** instead. Alignment is the distance between an MP’s vote for the motion(0 % or 100 %) and the share of their party voting for the motion (e.g. if 3/5s vote for the motion: 60%). If all members of a party vote the same way, there is 100% alignment. 
 
-As a substitute for knowing the party voting instructions, we calculate a party alignment score - where we calculate the percentage of party that voted for the motion, and then calculate the distance of individual representatives (who will be 0% or 100% for the motion) to this score. Absent votes do not count towards this score. 
+Absent votes don’t count towards the score. Lower scores indicate greater rebellion. Annual aggregates appear on each representative’s profile.
 
-Lower scores will be more rebellious. Aggregate summaries for a specific representative by year are available on their person page. 
+This is slightly different from 'rebelliousness' scores because even those who consistently vote with the majority of the party will not score 100% (as they will pick up small percentage from the average differences because of rebels).
 
-When a party is divided, even MPs who voted with the majority view will pick up a small lack of alignment - which is why in the long term stats unrebellious MPs have scores below 100%..
+The advantage of this statistic is being responsive the size of rebellions - e.g. in a free vote a sizable group of representatives voting against the majority of the party will be more aligned with the average party position in this vote, than a single MP going the other way in another vote. 
 
-## Annotations and whip reports
+Our long term goal is to calculate rebellion information based on actual whip information. 
 
-An impact of TheyWorkForYou has been [more public explanations by representatives](https://www.mysociety.org/2023/07/12/guest-post-does-watching-mps-make-them-behave-better/) of how they've voted. 
+---
 
-We want to start logging these into our database, to make the more accessible to people viewing their representatives' voting records.
+## Annotations
 
-Divisions, Agreements, and votes by individual representatives can be annotated with additional information or a link. 
+Partly as a result of [sites like TheyWorkForYou](https://www.mysociety.org/2023/07/12/guest-post-does-watching-mps-make-them-behave-better/)[,](https://www.mysociety.org/2023/07/12/guest-post-does-watching-mps-make-them-behave-better/) more MPs are now publicly explaining how they voted. We’re beginning to log these statements so they appear alongside the official record. Decisions, agreements and individual votes can all carry annotations with extra background or links.
 
-We're currently testing this out, but in the long run we want to make it possible for representatives to add their own annotations to their voting records. 
+In future we hope to let representatives add their own explanations directly.
 
-## Whip reports
+---
 
-A key part of how Parliament works is that MPs are instructed on how to vote by their party.
+## Whip Reports
 
-To better explain how Parliament works, [we want this information to be public](https://www.mysociety.org/2022/01/21/the-voting-instructions-parties-give-their-mps-should-be-public/) in all instances, but a starting point is better collection and display of this information where it is has become public.
+Party whips tell MPs how to vote. [Making these instructions public](https://www.mysociety.org/2022/01/21/the-voting-instructions-parties-give-their-mps-should-be-public/) would help everyone understand parliamentary decisions better.
 
-For some votes, we are adding Whip Reports about how parties instructed their members to vote when this information has become public. 
+For some votes, we are adding Whip Reports about how parties instructed their members to vote when this information has become public.
 
-As with annotations, we want to explore getting the information directly from representatives, to improve public understanding of how our Parliaments work. 
+As with annotations, we want to explore getting the information directly from representatives, to improve public understanding of how our Parliaments work.
 
-## Policies/Voting Records Comparisons
+---
 
-One of TheyWorkForYou's key features are the voting record summaries. TheyWorkForYou Votes is our tool for managing and calculating these summaries. 
+## Policies and Voting‑Record Comparisons
 
-We create "policies", that group a set of votes together and say if a vote agrees or is against the general direction of the policy. 
+TheyWorkForYou’s voting summary are caucluated on this site as **policies**: themed collections of votes marked as *supporting* or *opposing* a given outcome.
 
-From this, we calculate for each MP their own alignment score, and the alignment score of comparable MPs (MPs of the same party, over the same votes). This helps highlight policies where an MP differs from the majority of their party. 
+From these we calculate:
 
-We currently only have policies for the House of Commons, but part of the purpose of TheyWorkForYou is creating tools that help us update policies more efficiently, and reduce the resources needed to expand to other Parliaments.
+* **MP policy score** – how far an MP’s votes align with the policy direction.
+* **Party comparison** – how an MP’s score compares with colleagues in the same party over the same votes.
 
-Read [more about votes, and how we handle them in TheyWorkForYou](https://www.theyworkforyou.com/voting-information/).
+At present policies cover only the House of Commons, but the new tooling behind TheyWorkForYou Votes will make it easier to extend them to other legislatures, or to push summaries further back in time as a learning resources. We have no set timetable on doing this however. 
+
+Read [more about votes, and how we handle them in TheyWorkForYou](https://www.theyworkforyou.com/voting-information).
