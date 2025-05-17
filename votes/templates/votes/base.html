@@ -31,89 +31,89 @@
         <meta property="og:title" content="{{ page_title }}">
         <meta property="og:site_name" content="TheyWorkForYou Votes">
         <meta property="og:description"
-            content="{{ meta_description|default:"Analysis and data on voting in the UK's Parliaments" }}">
-            <meta property="og:type" content="website">
-            {% if og_image %}
-                <meta property="og:image"
-                      content="https://{{ request.get_host }}{{ og_image }}">
-            {% else %}
-                <meta property="og:image"
-                      content="https://{{ request.get_host }}{% static 'img/opengraph.png' %}">
-            {% endif %}
-            <meta property="og:image:type" content="image/png">
-            <meta property="og:image:width" content="1200">
-            <meta property="og:image:height" content="630">
-            {% if GOOGLE_SITE_VERIFICATION %}
-                <meta name="google-site-verification"
-                      content="{{ GOOGLE_SITE_VERIFICATION }}">
-            {% endif %}
-            {% if GOOGLE_ANALYTICS %}
-                <script defer>
-                    Object.defineProperty(document, "cookie", {
-                        get: function() {
-                            var t = Object.getOwnPropertyDescriptor(Document.prototype, "cookie").get.call(document);
-                            return t.trim().length > 0 && (t += "; "), t += "_ga=GA1.1." + Math.floor(1e9 * Math.random()) + "." + Math.floor(1e9 * Math.random())
-                        },
-                        set: function(t) {
-                            t.trim().startsWith("_ga") || Object.getOwnPropertyDescriptor(Document.prototype, "cookie").set.call(document, t)
-                        }
-                    });
-                </script>
-                <script defer
-                        src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS }}"></script>
-                <script>
-                    var client_id = Math.floor(Math.random() * 1000000000) + '.' + Math.floor(Math.random() * 1000000000);
-                    window.dataLayer = window.dataLayer || [];
-
-                    function gtag() {
-                        dataLayer.push(arguments);
+              content="{{ meta_description|default:"Analysis and data on voting in the UK’s Parliaments" }}">
+        <meta property="og:type" content="website">
+        {% if og_image %}
+            <meta property="og:image"
+                  content="https://{{ request.get_host }}{{ og_image }}">
+        {% else %}
+            <meta property="og:image"
+                  content="https://{{ request.get_host }}{% static 'img/opengraph.png' %}">
+        {% endif %}
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        {% if GOOGLE_SITE_VERIFICATION %}
+            <meta name="google-site-verification"
+                  content="{{ GOOGLE_SITE_VERIFICATION }}">
+        {% endif %}
+        {% if GOOGLE_ANALYTICS %}
+            <script defer>
+                Object.defineProperty(document, "cookie", {
+                    get: function() {
+                        var t = Object.getOwnPropertyDescriptor(Document.prototype, "cookie").get.call(document);
+                        return t.trim().length > 0 && (t += "; "), t += "_ga=GA1.1." + Math.floor(1e9 * Math.random()) + "." + Math.floor(1e9 * Math.random())
+                    },
+                    set: function(t) {
+                        t.trim().startsWith("_ga") || Object.getOwnPropertyDescriptor(Document.prototype, "cookie").set.call(document, t)
                     }
-                    gtag('js', new Date());
-                    gtag('config', '{{ GOOGLE_ANALYTICS }}', {
-                        'client_id': client_id,
-                        'cookie_expires': 1
-                    });
-                </script>
-            {% endif %}
-            <script type="module">
-                document.documentElement.classList.remove('no-js');
-                document.documentElement.classList.add('js');
+                });
             </script>
-        </head>
-        <body class=" 
-            {% block bodyclass %}{% endblock %}
-             ">
+            <script defer
+                    src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS }}"></script>
+            <script>
+                var client_id = Math.floor(Math.random() * 1000000000) + '.' + Math.floor(Math.random() * 1000000000);
+                window.dataLayer = window.dataLayer || [];
 
-            {% include 'votes/includes/header.html' %}
+                function gtag() {
+                    dataLayer.push(arguments);
+                }
+                gtag('js', new Date());
+                gtag('config', '{{ GOOGLE_ANALYTICS }}', {
+                    'client_id': client_id,
+                    'cookie_expires': 1
+                });
+            </script>
+        {% endif %}
+        <script type="module">
+            document.documentElement.classList.remove('no-js');
+            document.documentElement.classList.add('js');
+        </script>
+    </head>
+    <body class=" 
+        {% block bodyclass %}{% endblock %}
+         ">
 
-            {% block content %}
-                <div class="main-content">
-                    <div class="container">
-                        <div class="col-lg-8 pt-5 pb-6">
+        {% include 'votes/includes/header.html' %}
 
-                            {% block content.inner %}
-                            {% endblock content.inner %}
+        {% block content %}
+            <div class="main-content">
+                <div class="container">
+                    <div class="col-lg-8 pt-5 pb-6">
 
-                        </div>
+                        {% block content.inner %}
+                        {% endblock content.inner %}
+
                     </div>
                 </div>
-            {% endblock %}
+            </div>
+        {% endblock %}
 
-            {% include 'votes/includes/footer.html' %}
+        {% include 'votes/includes/footer.html' %}
 
-            {% block script %}
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
-                        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
-                        crossorigin="anonymous"></script>
-                <script src="https://code.jquery.com/jquery-3.7.0.min.js"
-                        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
-                        crossorigin="anonymous"></script>
-            {% endblock %}
+        {% block script %}
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+                    integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+                    crossorigin="anonymous"></script>
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+                    integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g="
+                    crossorigin="anonymous"></script>
+        {% endblock %}
 
-            {% block menujs %}
-            {% endblock menujs %}
+        {% block menujs %}
+        {% endblock menujs %}
 
-            {% block extrajs %}
-            {% endblock extrajs %}
+        {% block extrajs %}
+        {% endblock extrajs %}
 
-        </body>
+    </body>
