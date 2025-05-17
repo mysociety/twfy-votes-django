@@ -24,9 +24,9 @@ The goal of this is that little heavy lifting should happen at run time - and th
 
 `script/populate --all` - will run through all the steps to create the database from scratch.
 
-Individual steps can be run with `scripts/populate --group votes` - see 'populate/register.py` for a list of groups. 
+Individual steps can be run with `scripts/populate --group votes` - see `script/populate --show-options` for a complete list of available groups and models, displayed in a nice table format. 
 
-This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes). `--update-last [x]` does the laxt x days.
+This populate command can also take an `--update-since` isodate. Where this make sense, it is respected (biggest benefit is not reloading all votes). `--update-last [x]` does the last x days.
 
 The policy calculation treats this being set as a flag that makes it only compare the hashes since it was last calculated, and recalculate the difference - rather than the default starting from scratch. 
 
@@ -43,10 +43,21 @@ And to update motions and agreements (if analysis repo was delayed):
 
 or `script/populate --shortcut refresh_motions_agreements`
 
+## Available shortcuts
+
+Several shortcuts are predefined to run common groups of tasks:
+
+- `refresh_commons_api` - Update from the Commons API (last 1 day)
+- `refresh_motions_agreements` - Update motions and agreements (last 3 days)
+- `refresh_daily` - Run all models for the last day
+- `refresh_recent` - Run all models for the last 10 days
+- `refresh_policies` - Update just the policies (last 7 days)
+
+You can see all available shortcuts and their descriptions with `script/populate --show-options`.
 
 To add new steps, follow the example of one of files in `votes/populate` - adding a Group to the ImportOrder enum if necessary. 
 
-Groups and models are different concepts when multiple models logically can be created at the same time (order doens't matter) - but before or after other steps. 
+Groups and models are different concepts when multiple models logically can be created at the same time (order doesn't matter) - but before or after other steps. 
 
 # The automatic update process
 
