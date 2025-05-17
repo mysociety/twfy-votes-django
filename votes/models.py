@@ -944,7 +944,7 @@ class Motion(DjangoVoteModel):
 
 @is_valid_decision_model
 class Division(DjangoVoteModel):
-    key: str
+    key: str  # this is the id from the twfy database (pw-date-divisionnum-chamber)
     chamber_slug: ChamberSlug
     chamber_id: Dummy[int]
     chamber: DoNothingForeignKey[Chamber] = related_name("divisions")
@@ -1099,14 +1099,35 @@ class Division(DjangoVoteModel):
             "is_outlier": is_outlier,
         }
 
+    def deep_gid_ref(self) -> str:
+        """
+        Link to the division within the debate
+        """
+        debate_gid = self.debate_gid.split("/")[-1]
+        source_gid = self.source_gid.split("/")[-1]
+        source_gid = ".".join(source_gid.split(".")[-2:])
+        return f"{debate_gid}#g{source_gid}"
+
     def gid(self) -> str:
         gid = self.source_gid.split("/")[-1]
         if not gid:
             return ""
         return gid
 
+    def twfy_division_link(self) -> str:
+        """
+        Link to the standalone division page
+        """
+        return f"https://www.theyworkforyou.com/divisions/{self.key}"
+
     def twfy_link(self) -> str:
-        return self.chamber.twfy_debate_link(self.gid())
+        """
+        Deep link to the division within the debate
+        """
+        if self.debate_gid and self.source_gid:
+            return self.chamber.twfy_debate_link(self.deep_gid_ref())
+        else:
+            return self.twfy_division_link()
 
     @property
     def decision_type(self) -> str:
