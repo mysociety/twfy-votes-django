@@ -25,8 +25,7 @@
     name: "Medium conflict: Opposition Aye, Government No"
     tag_type: gov_clusters
     description: |
-        This vote is most similar to a group of votes where the motion is proposed by the opposition, the result is quite polarized, but there is a medium level of participation (most MPs, but not all).
-        This usually reflects votes it would be embarrassing for the government to lose, but is not a major flashpoint.
+        This vote is most similar to a group of votes where the motion is proposed by the opposition, generally opposed by the government, but either there is a medium level of turn-out, or the result is less polarised by party.
 -   slug: gov_aye_opp_weak_no
     name: "Nominal opposition: Government Aye Opposition Weak No"
     tag_type: gov_clusters
