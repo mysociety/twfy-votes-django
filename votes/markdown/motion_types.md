@@ -54,9 +54,9 @@ This is a vote to accept or reject a change made by the House of Lords to a bill
 
 This is a vote to approve a clause in a bill.
 
-## Second stage committee
+## Add clause to bill
 
-This is a vote to approve clauses in a bill in committee.
+This is a vote to approve adding a clause to a bill. 
 
 ## Timetable change
 

@@ -66,7 +66,7 @@ closure = PhraseDetector(
     criteria=["claimed to move the closure"],
 )
 
-second_stage_committee = AndPhraseDetector(
+second_stage_clause = AndPhraseDetector(
     criteria=[
         PhraseDetector(criteria=["second reading", "read a second time"]),
         "clause",
@@ -149,7 +149,7 @@ criteria_map: dict[Callable[[str], bool], MotionType] = {
     standing_order_change: MotionType.STANDING_ORDER_CHANGE,
     first_reading: MotionType.FIRST_STAGE,
     closure: MotionType.CLOSURE,
-    second_stage_committee: MotionType.SECOND_STAGE_COMMITTEE,
+    second_stage_clause: MotionType.ADD_CLAUSE_TO_BILL,
     committee_clause: MotionType.COMMITEE_CLAUSE,
     programme_change: MotionType.PROGRAMME,
     third_stage: MotionType.THIRD_STAGE,

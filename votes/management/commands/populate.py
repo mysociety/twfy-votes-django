@@ -2,6 +2,9 @@ from datetime import date, timedelta
 
 from django.core.management.base import BaseCommand
 
+from rich.console import Console
+from rich.table import Table
+
 from votes.models import InstructionDict
 from votes.populate import import_register
 
@@ -33,8 +36,56 @@ shortcuts: dict[str, InstructionDict] = {
 
 
 class Command(BaseCommand):
-    help = "Upload data"
+    help = "Upload data by running specific models or groups (see --show-options for details)"
     message = "Uploading data"
+
+    def print_help_table(self):
+        """Print a rich table showing all available groups and models"""
+        console = Console()
+
+        # Create table for shortcuts
+        shortcuts_table = Table(title="Available Shortcuts", border_style="blue")
+        shortcuts_table.add_column("Shortcut", style="cyan")
+        shortcuts_table.add_column("Description", style="green")
+
+        for shortcut_name, details in shortcuts.items():
+            description_parts = []
+            update_last = details.get("update_last")
+            if update_last is not None:
+                description_parts.append(f"Last {update_last} days")
+
+            start_group = details.get("start_group")
+            end_group = details.get("end_group")
+            if start_group and end_group:
+                description_parts.append(f"Groups {start_group} to {end_group}")
+
+            if details.get("all", False):
+                description_parts.append("All models")
+
+            shortcuts_table.add_row(shortcut_name, ", ".join(description_parts))
+
+        # Create table for groups and models
+        groups_table = Table(title="Available Groups and Models", border_style="blue")
+        groups_table.add_column("Group", style="cyan")
+        groups_table.add_column("Order", style="magenta")
+        groups_table.add_column("Model", style="green")
+
+        # Sort groups by their enum value
+        groups = []
+        for group_enum, model_list in import_register.groups.items():
+            groups.append((group_enum, model_list))
+        groups.sort(key=lambda x: x[0].value)
+
+        for group_enum, model_list in groups:
+            # Add each model on its own row
+            for model in model_list:
+                groups_table.add_row(
+                    group_enum.name.lower(), str(group_enum.value), model
+                )
+
+        console.print(shortcuts_table)
+        console.print("\n")
+        console.print(groups_table)
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -50,15 +101,27 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--start-group", type=str, help="Run a group of models", nargs="?", const=""
+            "--start-group",
+            type=str,
+            help="Run a group of models and all following groups up to end-group",
+            nargs="?",
+            const="",
         )
 
         parser.add_argument(
-            "--end-group", type=str, help="Run a group of models", nargs="?", const=""
+            "--end-group",
+            type=str,
+            help="End group for range of models to run",
+            nargs="?",
+            const="",
         )
 
         parser.add_argument(
-            "--shortcut", type=str, help="Run a group of models", nargs="?", const=""
+            "--shortcut",
+            type=str,
+            help="Run a group of models using a predefined configuration",
+            nargs="?",
+            const="",
         )
 
         parser.add_argument(
@@ -75,6 +138,12 @@ class Command(BaseCommand):
         )
         parser.add_argument("--all", action="store_true", help="Run all models")
 
+        parser.add_argument(
+            "--show-options",
+            action="store_true",
+            help="Show tables of available groups and models",
+        )
+
     def handle(
         self,
         *args,
@@ -87,8 +156,14 @@ class Command(BaseCommand):
         quiet: bool = False,
         update_since: date | None = None,
         update_last: int | None = None,
+        show_options: bool = False,
         **options,
     ):
+        # If show_options is True, just show the tables and exit
+        if show_options:
+            self.print_help_table()
+            return
+
         if shortcut:
             # use a stored set of instructions
             try:

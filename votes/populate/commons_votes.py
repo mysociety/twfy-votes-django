@@ -122,6 +122,7 @@ class Division(BaseModel):
             (absent_ids, StrVotePosition.ABSENT),
             (yes_teller_ids, StrVotePosition.TELLAYE),
             (no_teller_ids, StrVotePosition.TELLNO),
+            (both_ids, StrVotePosition.ABSTAIN),
         ]
 
         for ids, position in mappings:
