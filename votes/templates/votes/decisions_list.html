@@ -28,8 +28,8 @@
     <h2 id="about" class="section-header">About</h2>
     <p>Decisions includes:</p>
     <ul>
-        <li>🟡Divisions - where representatives record differences of opinion.</li>
-        <li>🟣Agreements - when a decision is made without a vote.</li>
+        <li>🟡 Divisions – where representatives record differences of opinion.</li>
+        <li>🟣 Agreements – when a decision is made without a vote.</li>
     </ul>
     {% regroup search.decisions by date.month as decisions_by_date %}
     {% for month, month_decisions in decisions_by_date %}
@@ -42,7 +42,7 @@
         <ul>
             {% for division in month_decisions %}
                 <li class="decision-type-{{ division.decision_type.lower }}">
-                    {{ division.date|date:"j M" }} - <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
+                    {{ division.date|date:"j M" }} – <a href="{{ division.url }}">{{ division.safe_decision_name|safe }}</a>
                     {% if division.decision_type == "Agreement" %}
                         {% if division.negative %}
                             ❌
