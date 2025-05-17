@@ -147,9 +147,7 @@ class MotionType(StrEnum):
     FIRST_STAGE = "first_stage"
     SECOND_STAGE = "second_stage"
     COMMITEE_CLAUSE = "committee_clause"
-    SECOND_STAGE_COMMITTEE = (
-        "second_stage_committee"  # approval of clauses in committee
-    )
+    ADD_CLAUSE_TO_BILL = "add_clause_to_bill"  # second reading of a clause in report
     THIRD_STAGE = "third_stage"
     CLOSURE = "closure"
     PROGRAMME = "programme"
