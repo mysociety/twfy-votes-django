@@ -783,6 +783,13 @@ class Chamber(DjangoVoteModel):
     def twfy_debate_link(self, gid: str) -> str:
         return f"https://www.theyworkforyou.com/{self.twfy_alias}/?id={gid}"
 
+    def twfy_division_link(self, date, num) -> str:
+        if self.slug == ChamberSlug.WALES:
+            slug = "en-senedd"
+        else:
+            slug = self.slug
+        return f"https://www.theyworkforyou.com/divisions/pw-{date}-{num}-{slug}"
+
 
 class GovernmentParty(DjangoVoteModel):
     label: str
@@ -1041,8 +1048,7 @@ class Division(DjangoVoteModel):
 
     def motion_speech_url(self) -> str:
         if self.motion:
-            gid = self.motion.speech_id.split("/")[-1]
-            return self.chamber.twfy_debate_link(gid)
+            return self.chamber.twfy_division_link(self.date, self.division_number)
         return ""
 
     def single_breakdown(self):
@@ -1106,7 +1112,7 @@ class Division(DjangoVoteModel):
         return gid
 
     def twfy_link(self) -> str:
-        return self.chamber.twfy_debate_link(self.gid())
+        return self.chamber.twfy_division_link(self.date, self.division_number)
 
     @property
     def decision_type(self) -> str:
