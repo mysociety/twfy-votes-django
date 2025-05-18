@@ -5,8 +5,40 @@ from typing import Any, Optional
 from django.urls import URLPattern, path, register_converter
 from django.views.generic import View
 
-from .views import views
 from .views.api import api
+from .views.opengraph_views import (
+    AgreementOpenGraphImageView,
+    DecisionsListOpenGraphImageView,
+    DivisionOpenGraphImageView,
+    GeneralOpenGraphImageView,
+    MarkdownOpenGraphImageView,
+    PersonOpenGraphImageView,
+    PolicyOpenGraphImageView,
+    TagOpenGraphImageView,
+)
+from .views.views import (
+    AgreementPageView,
+    DataView,
+    DecisionsListMonthPageView,
+    DecisionsListPageView,
+    DecisionsPageView,
+    DivisionPageView,
+    FormsView,
+    HomePageView,
+    MarkdownView,
+    PeoplePageView,
+    PersonPageView,
+    PersonPoliciesView,
+    PersonPolicyView,
+    PersonVotesPageView,
+    PoliciesPageView,
+    PoliciesReportsPageView,
+    PolicyCollectionPageView,
+    PolicyPageView,
+    PolicyReportPageView,
+    TagListView,
+    TagsHomeView,
+)
 
 
 class ISODateConverter:
@@ -61,86 +93,116 @@ def fast_path(
 
 
 urlpatterns = [
-    fast_path("", views.HomePageView, name="home"),
-    fast_path("people/{filter:slug}", views.PeoplePageView, name="people"),
-    fast_path("person/{person_id:int}", views.PersonPageView, name="person"),
+    fast_path("", HomePageView, name="home"),
+    fast_path("people/{filter:slug}", PeoplePageView, name="people"),
+    fast_path("person/{person_id:int}", PersonPageView, name="person"),
     fast_path(
         "person/{person_id:int}/votes/{year:str}",
-        views.PersonVotesPageView,
+        PersonVotesPageView,
         name="person_votes",
     ),
-    fast_path("decisions", views.DecisionsPageView, name="decisions"),
-    fast_path("tags", views.TagsHomeView, name="tag_home"),
-    fast_path("tags/{tag_type:slug}", views.TagsHomeView, name="tag_home"),
-    fast_path("tags/{tag_type:slug}/{tag_slug:slug}", views.TagListView, name="tag"),
+    fast_path("decisions", DecisionsPageView, name="decisions"),
+    fast_path("tags", TagsHomeView, name="tag_home"),
+    fast_path("tags/{tag_type:slug}", TagsHomeView, name="tag_home"),
+    fast_path("tags/{tag_type:slug}/{tag_slug:slug}", TagListView, name="tag"),
     fast_path(
         "decisions/division/{chamber_slug:str}/{decision_date:date}/{decision_num:int}",
-        views.DivisionPageView,
+        DivisionPageView,
         name="division",
     ),
     fast_path(
         "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str_not_json}",
-        views.AgreementPageView,
+        AgreementPageView,
         name="agreement",
     ),
     fast_path(
         "decisions/{chamber_slug:str}/{year:int}",
-        views.DecisionsListPageView,
+        DecisionsListPageView,
         name="decisions_list",
     ),
     fast_path(
         "decisions/{chamber_slug:str}/{year:int}/{month:int}",
-        views.DecisionsListMonthPageView,
+        DecisionsListMonthPageView,
         name="decisions_list_month",
     ),
     fast_path(
         "policies/reports",
-        views.PoliciesReportsPageView,
+        PoliciesReportsPageView,
         name="policies_reports",
     ),
-    fast_path("policies", views.PoliciesPageView, name="policies"),
-    fast_path("policy/{policy_id:int}", views.PolicyPageView, name="policy"),
+    fast_path("policies", PoliciesPageView, name="policies"),
+    fast_path("policy/{policy_id:int}", PolicyPageView, name="policy"),
     fast_path(
         "policy/{policy_id:int}/report",
-        views.PolicyReportPageView,
+        PolicyReportPageView,
         name="policy_reports",
     ),
     fast_path(
         "policies/{chamber_slug:str}/{status_slug:str}/{group_slug:slug}",
-        views.PolicyCollectionPageView,
+        PolicyCollectionPageView,
         name="policy_collection",
     ),
     fast_path(
         "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}",
-        views.PersonPoliciesView,
+        PersonPoliciesView,
         name="person_policy",
     ),
     fast_path(
         "person/{person_id:int}/policies/{chamber_slug:slug}/{party_slug:slug}/{period_slug:slug}/{policy_id:int}",
-        views.PersonPolicyView,
+        PersonPolicyView,
         name="person_policy_solo",
     ),
     fast_path(
         "submit/{form_slug:slug}/{decision_id:int}",
-        views.FormsView,
+        FormsView,
         name="forms",
     ),
-    fast_path("help/{markdown_slug:slug}", views.MarkdownView, name="help"),
-    fast_path("data", views.DataView, name="data"),
+    fast_path("help/{markdown_slug:slug}", MarkdownView, name="help"),
+    fast_path("data", DataView, name="data"),
     fast_path(
         "opengraph/division/{division_id:int}",
-        views.DivisionOpenGraphImageView,
+        DivisionOpenGraphImageView,
         name="division_opengraph_image",
     ),
     fast_path(
         "opengraph/agreement/{agreement_id:int}",
-        views.AgreementOpenGraphImageView,
+        AgreementOpenGraphImageView,
         name="agreement_opengraph_image",
     ),
     fast_path(
         "opengraph/misc/{page_slug:slug}",
-        views.GeneralOpenGraphImageView,
+        GeneralOpenGraphImageView,
         name="general_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/person/{person_id:int}",
+        PersonOpenGraphImageView,
+        name="person_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/policy/{policy_id:int}",
+        PolicyOpenGraphImageView,
+        name="policy_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/tag/{tag_type:slug}/{tag_slug:slug}",
+        TagOpenGraphImageView,
+        name="tag_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/markdown/{markdown_slug:slug}",
+        MarkdownOpenGraphImageView,
+        name="markdown_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/decisions/{chamber_slug:slug}/{year:int}",
+        DecisionsListOpenGraphImageView,
+        name="decisions_list_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/decisions/{chamber_slug:slug}/{year:int}/{month:int}",
+        DecisionsListOpenGraphImageView,
+        name="decisions_list_month_opengraph_image",
     ),
     path("", api.urls),
 ]

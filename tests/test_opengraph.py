@@ -2,7 +2,7 @@ from django.test import Client
 
 import pytest
 
-from votes.models import Agreement, Division
+from votes.models import Agreement, DecisionTag, Division, Person, Policy
 
 pytestmark = pytest.mark.django_db
 
@@ -25,5 +25,57 @@ def test_division_image(client: Client, division_id: int):
 
 def test_agreement_image(client: Client, agreement_id: int):
     response = client.get(f"/opengraph/agreement/{agreement_id}")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+def test_general_image(client: Client):
+    response = client.get("/opengraph/misc/home")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+@pytest.fixture
+def person_id():
+    person = Person.objects.first()
+    if person:
+        return person.id
+    # Skip test if no person exists
+    pytest.skip("No persons in database")
+
+
+@pytest.fixture
+def policy_id():
+    policy = Policy.objects.first()
+    if policy:
+        return policy.id
+    # Skip test if no policy exists
+    pytest.skip("No policies in database")
+
+
+@pytest.fixture
+def tag():
+    tag = DecisionTag.objects.first()
+    if tag:
+        return (tag.tag_type, tag.slug)
+    # Skip test if no tag exists
+    pytest.skip("No tags in database")
+
+
+def test_person_image(client: Client, person_id: int):
+    response = client.get(f"/opengraph/person/{person_id}")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+def test_policy_image(client: Client, policy_id: int):
+    response = client.get(f"/opengraph/policy/{policy_id}")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+def test_tag_image(client: Client, tag):
+    tag_type, tag_slug = tag
+    response = client.get(f"/opengraph/tag/{tag_type}/{tag_slug}")
     assert response.status_code == 200
     assert response["Content-Type"] == "image/png"

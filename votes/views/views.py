@@ -12,7 +12,6 @@ from django.db.models import Count
 from django.http import (
     Http404,
     HttpRequest,
-    HttpResponse,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
 )
@@ -20,12 +19,11 @@ from django.shortcuts import redirect
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.views.generic import TemplateView, View
+from django.views.generic import TemplateView
 
 import markdown
 import pandas as pd
 from bs4 import BeautifulSoup
-from PIL import Image
 
 from ..consts import (
     ChamberSlug,
@@ -69,7 +67,6 @@ from .helper_models import (
     PolicyReport,
 )
 from .mixins import TitleMixin
-from .opengraph import draw_custom_image, draw_vote_image
 
 
 class FormsView(TemplateView):
@@ -203,6 +200,7 @@ class MarkdownView(TemplateView):
         ), "Markdown file should start with an H1 header '# title'"
         markdown_body = "\n".join(lines[1:])
         context["page_title"] = h1_header[2:]
+        context["og_image"] = reverse("markdown_opengraph_image", args=[markdown_slug])
 
         markdown_content = markdown.markdown(markdown_body, extensions=["toc"])
 
@@ -276,6 +274,7 @@ class DataView(TitleMixin, TemplateView):
         }
 
         context["data"] = data
+        context["og_image"] = reverse("general_opengraph_image", args=["data"])
 
         return context
 
@@ -331,6 +330,7 @@ class PeoplePageView(TitleMixin, TemplateView):
             "current_scottish_parliament": "Current Scottish Parliament",
             "current_senedd": "Current Senedd",
         }
+        context["og_image"] = reverse("general_opengraph_image", args=["people"])
         return context
 
 
@@ -342,6 +342,7 @@ class PersonPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["person"] = Person.objects.get(id=person_id)
         context["person_view"] = "overview"
+        context["og_image"] = reverse("person_opengraph_image", args=[person_id])
         return context
 
 
@@ -369,6 +370,8 @@ class PersonVotesPageView(TitleMixin, TemplateView):
                 person_id=person_id, division__date__year=int_year
             )
             context["votes_df"] = person.votes_df(int_year)
+
+        context["og_image"] = reverse("person_opengraph_image", args=[person_id])
         return context
 
 
@@ -379,6 +382,7 @@ class DecisionsPageView(TitleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["chambers"] = Chamber.objects.all().exclude(slug="ni")
+        context["og_image"] = reverse("general_opengraph_image", args=["decisions"])
         return context
 
 
@@ -511,6 +515,7 @@ class TagsHomeView(TitleMixin, TemplateView):
         ).order_by("tag_type", "slug")
 
         context["tags"] = tags
+        context["og_image"] = reverse("general_opengraph_image", args=["tags"])
         return context
 
 
@@ -529,6 +534,7 @@ class TagListView(TitleMixin, TemplateView):
         context["total_len"] = sum(
             [len(x) for x in context["decisions_by_chamber"].values()]
         )
+        context["og_image"] = reverse("tag_opengraph_image", args=[tag_type, tag_slug])
         return context
 
 
@@ -566,6 +572,9 @@ class DecisionsListPageView(TitleMixin, TemplateView):
         search = self.decision_search(chamber, year_start, year_end)
         context["search"] = search
         context["page_title"] = f"{year} {chamber.name} Decisions"
+        context["og_image"] = reverse(
+            "decisions_list_opengraph_image", args=[chamber_slug, year]
+        )
 
         return context
 
@@ -585,6 +594,9 @@ class DecisionsListMonthPageView(DecisionsListPageView):
         context["page_title"] = (
             f"{month_start.strftime('%B %Y')} {chamber.name} Decisions"
         )
+        context["og_image"] = reverse(
+            "decisions_list_month_opengraph_image", args=[chamber_slug, year, month]
+        )
 
         return context
 
@@ -602,6 +614,7 @@ class PoliciesPageView(TitleMixin, TemplateView):
         if not can_view_draft_content(self.request.user):
             do_not_display.append(PolicyStatus.DRAFT)
         context["statuses"] = [x for x in PolicyStatus if x not in do_not_display]
+        context["og_image"] = reverse("general_opengraph_image", args=["policies"])
 
         return context
 
@@ -625,6 +638,7 @@ class PoliciesReportsPageView(TitleMixin, TemplateView):
         context["division_level_errors"] = sum(
             [x.len_division_issues() for x in reports]
         )
+        context["og_image"] = reverse("general_opengraph_image", args=["policies"])
         return context
 
 
@@ -636,6 +650,7 @@ class PolicyPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["policy"] = Policy.objects.get(id=policy_id)
         context["page_title"] = context["policy"].name + " | TheyWorkForYou Votes"
+        context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
         return context
 
 
@@ -648,6 +663,7 @@ class PolicyReportPageView(TitleMixin, TemplateView):
         context["policy"] = Policy.objects.get(id=policy_id)
         context["policy_report"] = PolicyReport.from_policy(context["policy"])
         context["page_title"] = f"{context['policy'].name} Report"
+        context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
 
         return context
 
@@ -690,6 +706,7 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
             )
 
         context["policy_collection"] = policy_collection
+        context["og_image"] = reverse("general_opengraph_image", args=["policies"])
 
         return context
 
@@ -749,6 +766,7 @@ class PersonPoliciesView(TitleMixin, TemplateView):
         context["page_title"] = (
             f"{person.name} {chamber.name} {party.name} {period.description} Policies"
         )
+        context["og_image"] = reverse("person_opengraph_image", args=[person_id])
 
         return context
 
@@ -986,69 +1004,6 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["other_distribution"] = other_distribution
         context["decision_links_and_votes"] = decision_links_and_votes
         context["page_title"] = f"{policy.name} votes for {person.name}"
+        context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
 
         return context
-
-
-class BaseOpenGraphView(View):
-    def get_image(self, request, *args, **kwargs) -> Image.Image:
-        raise NotImplementedError
-
-    def get(self, request, *args, **kwargs):
-        image = self.get_image(request, *args, **kwargs)
-        response = HttpResponse(content_type="image/png")
-        image.save(response, "PNG")  # type: ignore
-        return response
-
-
-class DivisionOpenGraphImageView(BaseOpenGraphView):
-    """
-    View for serving the OpenGraph image for a division.
-    Returns a PNG image with the correct MIME type.
-    """
-
-    def get_image(self, request, division_id: int, **kwargs) -> Image.Image:
-        try:
-            division = Division.objects.get(id=division_id)
-            return draw_vote_image(division)
-
-        except Division.DoesNotExist:
-            raise Http404("Division not found")
-
-
-class AgreementOpenGraphImageView(BaseOpenGraphView):
-    """
-    View for serving the OpenGraph image for a Agreement.
-    Returns a PNG image with the correct MIME type.
-    """
-
-    def get_image(self, request, agreement_id: int, **kwargs) -> Image.Image:
-        try:
-            agreement = Agreement.objects.get(id=agreement_id)
-            header = agreement.safe_decision_name()
-            chamber = agreement.chamber.name
-            date = agreement.date.strftime("%Y-%m-%d")
-            subheader = f"{chamber} - {date}"
-            return draw_custom_image(header, subheader, include_logo=True)
-
-        except Agreement.DoesNotExist:
-            raise Http404("Agreement not found")
-
-
-class GeneralOpenGraphImageView(BaseOpenGraphView):
-    """
-    View for serving the OpenGraph image for a range of pages.
-    Needs to be a permitted used.
-    Returns a PNG image with the correct MIME type.
-    """
-
-    def get_image(self, request, page_slug: str, **kwargs) -> Image.Image:
-        match page_slug:
-            case "home":
-                return draw_custom_image(
-                    "TheyWorkForYou Votes",
-                    include_logo=False,
-                )
-            case _:
-                # return 404 if page_slug is not found
-                raise Http404("Page not found")
