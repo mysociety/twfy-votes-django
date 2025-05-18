@@ -137,5 +137,10 @@ urlpatterns = [
         views.AgreementOpenGraphImageView,
         name="agreement_opengraph_image",
     ),
+    fast_path(
+        "opengraph/misc/{page_slug:slug}",
+        views.GeneralOpenGraphImageView,
+        name="general_opengraph_image",
+    ),
     path("", api.urls),
 ]
