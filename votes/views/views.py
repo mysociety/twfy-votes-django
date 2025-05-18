@@ -296,6 +296,7 @@ class HomePageView(TitleMixin, TemplateView):
         context["last_dates"] = [
             (x, x.last_decision_date()) for x in context["chambers"]
         ]
+        context["og_image"] = reverse("general_opengraph_image", args=["home"])
 
         return context
 
@@ -1028,7 +1029,26 @@ class AgreementOpenGraphImageView(BaseOpenGraphView):
             chamber = agreement.chamber.name
             date = agreement.date.strftime("%Y-%m-%d")
             subheader = f"{chamber} - {date}"
-            return draw_custom_image(header, subheader)
+            return draw_custom_image(header, subheader, include_logo=True)
 
         except Agreement.DoesNotExist:
             raise Http404("Agreement not found")
+
+
+class GeneralOpenGraphImageView(BaseOpenGraphView):
+    """
+    View for serving the OpenGraph image for a range of pages.
+    Needs to be a permitted used.
+    Returns a PNG image with the correct MIME type.
+    """
+
+    def get_image(self, request, page_slug: str, **kwargs) -> Image.Image:
+        match page_slug:
+            case "home":
+                return draw_custom_image(
+                    "TheyWorkForYou Votes",
+                    include_logo=False,
+                )
+            case _:
+                # return 404 if page_slug is not found
+                raise Http404("Page not found")

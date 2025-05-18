@@ -362,7 +362,9 @@ def draw_vote_image(division: Division) -> Image.Image:
     return image
 
 
-def draw_custom_image(header: str, subheader: str) -> Image.Image:
+def draw_custom_image(
+    header: str, subheader: str = "", include_logo: bool = True
+) -> Image.Image:
     """
     Create an image with custom header and subheader text, centered vertically and horizontally
     """
@@ -406,7 +408,8 @@ def draw_custom_image(header: str, subheader: str) -> Image.Image:
     subheader_y = start_y + header_dims.height + 20
     draw.text((subheader_x, subheader_y), subheader, fill="black", font=subheader_font)
 
-    # Draw footer with "You" bolded
-    draw_footer(draw=draw, font_path=merriweather_font_path)
+    if include_logo:
+        # Draw footer with "You" bolded
+        draw_footer(draw=draw, font_path=merriweather_font_path)
 
     return image
