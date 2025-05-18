@@ -133,8 +133,10 @@
                 Part of tag: <a href="{{ lt.url }}">{{ lt.name }}</a>
             </p>
         {% elif decision.decision_type == "Agreement" %}
-            <p>No parliamentary analysis for the agreement</p>
-            .
+            <p>As collective decisions, we can't provide breakdown analysis for agreements.</p>
+            <p>
+                Agreements may represent unanimous decisions, or not opposed where an outcome is predetermined and time can be spent elsewhere.
+            </p>
         {% endif %}
     {% endwith %}
     {% if decision.decision_type == "Division" %}
