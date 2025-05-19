@@ -290,6 +290,7 @@ def draw_vote_image(division: Division) -> Image.Image:
     # Filter votes by type
 
     absent_count = len(df[df["vote"] == "Absent"])
+    abstain_count = len(df[df["vote"] == "Abstain"])
     aye_count = len(df[df["vote"] == "Aye"])
     no_count = len(df[df["vote"] == "No"])
 
@@ -298,6 +299,7 @@ def draw_vote_image(division: Division) -> Image.Image:
     # We can include just the total if aye + no is only 3 lines between them
     include_absent_dots = aye_count <= 250 and no_count <= 250 and absent_count <= 250
     include_absent_title = (aye_count + no_count) < 250 * 3
+    has_abstain_votes = abstain_count > 0
 
     # Prepare the dataframe for display
     if include_absent_dots:
@@ -308,11 +310,12 @@ def draw_vote_image(division: Division) -> Image.Image:
 
     if include_absent_title:
         vote_types_to_include = ["Aye", "No", "Absent"]
+        if has_abstain_votes:
+            vote_types_to_include.append("Abstain")
     else:
         vote_types_to_include = ["Aye", "No"]
 
     filtered_df = df[df["vote"].isin(vote_types_to_include)]
-
     # Group by vote type
     votes_by_type = filtered_df.groupby("vote")
 
@@ -331,7 +334,17 @@ def draw_vote_image(division: Division) -> Image.Image:
         group = votes_by_type.get_group(vote_type)
         vote_count = len(group)
         member_plural = division.chamber.member_plural
-        vote_label = f"{vote_type}: {vote_count} {member_plural}"
+
+        # Special handling for Absent + Abstain when both are present
+        if vote_type == "Absent" and "Abstain" in votes_by_type.groups:
+            abstain_group = votes_by_type.get_group("Abstain")
+            abstain_count = len(abstain_group)
+            vote_label = f"Absent: {vote_count} {member_plural}, Abstain: {abstain_count} {member_plural}"
+        else:
+            # Skip "Abstain" as it's handled with "Absent"
+            if vote_type == "Abstain":
+                continue
+            vote_label = f"{vote_type}: {vote_count} {member_plural}"
 
         # Draw vote label
         label_width, label_height = get_text_dimensions(
