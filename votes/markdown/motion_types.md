@@ -1,6 +1,6 @@
 # Motion types
 
-We group motions into common categories - this page describes the role they play in shaping internal and external parliamentary action. 
+We group motions into common categories – this page describes the role they play in shaping internal and external parliamentary action. 
 
 ## First stage
 
@@ -42,9 +42,9 @@ An amendment is a change to the text of a motion or bill.
 
 ## Reasoned amendment
 
-A reasoned amendment is an attempt to convert 'this bill has passed the second stage' motions into 'this bill should not pass *because* reason a,b,c'.
+A reasoned amendment is an attempt to convert ‘this bill has passed the second stage’ motions into ‘this bill should not pass *because* reason a,b,c’.
 
-This opposition amendment will rarely if ever passed - but is the framing for the opposition's final critique of the bill at this stage.
+This opposition amendment will rarely if ever passed – but is the framing for the opposition’s final critique of the bill at this stage.
 
 ## Lords amendment
 
@@ -64,7 +64,7 @@ This is a vote to change the order of business in the chamber.
 
 ## Adjournment
 
-This is a vote to end the day's business.
+This is a vote to end the day’s business.
 
 Adjournment debates are usually used as a mechanism to have a debate on a topic without a vote.
 
@@ -74,7 +74,7 @@ This is used as a way of Parliament compelling the government to release informa
 
 ## Government agenda
 
-This is a vote on the government's agenda (monarch's speech).
+This is a vote on the government’s agenda (monarch’s speech).
 
 ## Financial
 
@@ -108,4 +108,4 @@ Now historical, but a vote recognising an EU document in Parliament was a requir
 
 ## Other
 
-This is a vote that doesn't fit into any current category.
+This is a vote that doesn’t fit into any current category.

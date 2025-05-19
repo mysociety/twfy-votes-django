@@ -12,10 +12,10 @@ You can read more about votes in general, and our voting summary information [in
 
 ## Decisions, Divisions & Agreements
 
-This site lists decisions made in the UK's Parliaments, and provides analysis of the results.
+This site lists decisions made in the UK’s Parliaments, and provides analysis of the results.
 On this site a decision can be a Division or an Agreement.
 
-A division is when representatives vote "Aye/No" (or equivalents) and the names are recorded, as happens in the Commons, Lords, Scottish Parliament, and Senedd Cymru.
+A division is when representatives vote “Aye/No” (or equivalents) and the names are recorded, as happens in the Commons, Lords, Scottish Parliament, and Senedd Cymru.
 
 Alternatively, a decision may be an Agreement. In this case, the chair asks whether anyone objects, and if no one does, the motion passes without a recorded vote. We create an entry for this agreement to better associate it with the text of the motion. 
 
@@ -40,11 +40,11 @@ We list agreements for the House of Commons, and the Scottish Parliament.
 
 Agreements do not necessarily mean that all MPs supported the result, just that there was no opposition, and so the decision was made collectively. 
 
-In practice, this can mean "everyone loved this", "we all agree you'd win so it is a waste of time voting", or "this is a small piece of house business". 
+In practice, this can mean “everyone loved this”, “we all agree you’d win so it is a waste of time voting”, or “this is a small piece of house business”.
 
 Our goal in listing agreements is to be able to better explain decisions made without a vote, by creating a page to attach motions that are passed this way. 
 
-We can add these into voting summaries, but do so infrequently - when we feel we can make a clear interpretation of the decision. 
+We can add these into voting summaries, but do so infrequently – when we feel we can make a clear interpretation of the decision. 
 
 ---
 
@@ -96,9 +96,9 @@ Because whip instructions are not always public, we calculate a **party‑alignm
 
 Absent votes don’t count towards the score. Lower scores indicate greater rebellion. Annual aggregates appear on each representative’s profile.
 
-This is slightly different from 'rebelliousness' scores because even those who consistently vote with the majority of the party will not score 100% (as they will pick up small percentage from the average differences because of rebels).
+This is slightly different from ‘rebelliousness’ scores because even those who consistently vote with the majority of the party will not score 100% (as they will pick up small percentage from the average differences because of rebels).
 
-The advantage of this statistic is being responsive the size of rebellions - e.g. in a free vote a sizable group of representatives voting against the majority of the party will be more aligned with the average party position in this vote, than a single MP going the other way in another vote. 
+The advantage of this statistic is being responsive the size of rebellions – e.g. in a free vote a sizable group of representatives voting against the majority of the party will be more aligned with the average party position in this vote, than a single MP going the other way in another vote. 
 
 Our long term goal is to calculate rebellion information based on actual whip information. 
 
