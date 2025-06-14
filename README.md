@@ -81,7 +81,7 @@ There is a CLI to handle updating the policy yamls (although you can do this man
 When done, this will just process the changed policies. 
 
 ```
-script/populate --start-group POLICIES --end-group POLICYCALC --update-since 2024-09-17
+script/populate --start-group POLICIES --end-group POLICYCALC --update-since 2024-09-17 --export
 ```
 
 # Tests

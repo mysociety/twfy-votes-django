@@ -116,12 +116,13 @@ class ImportRegister:
         end_group_order = ImportOrder[end_group.upper()]
 
         # iterate through ImportOrder from start_group to end_group
-
         for group in ImportOrder:
             if group < start_group_order:
                 continue
             if group > end_group_order:
                 break
+            if not quiet:
+                rich.print(f"[blue]Running group {group.name}[/blue]")
             self.run_group(group.name, quiet=quiet, update_since=update_since)
 
     def run_all(

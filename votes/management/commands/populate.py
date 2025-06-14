@@ -13,6 +13,7 @@ shortcuts: dict[str, InstructionDict] = {
         "update_last": 1,
         "start_group": "api_votes",
         "end_group": "person_stats",
+        "export": True,
     },
     "refresh_motions_agreements": {
         "update_last": 3,
@@ -31,6 +32,7 @@ shortcuts: dict[str, InstructionDict] = {
         "update_last": 7,
         "start_group": "policies",
         "end_group": "policycalc",
+        "export": True,
     },
 }
 
@@ -58,6 +60,10 @@ class Command(BaseCommand):
             end_group = details.get("end_group")
             if start_group and end_group:
                 description_parts.append(f"Groups {start_group} to {end_group}")
+
+            export = details.get("export")
+            if export:
+                description_parts.append("Run export after completion")
 
             if details.get("all", False):
                 description_parts.append("All models")
@@ -119,7 +125,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--shortcut",
             type=str,
-            help="Run a group of models using a predefined configuration",
+            help="Run a group of models using a predefined configuration.",
             nargs="?",
             const="",
         )
@@ -139,6 +145,12 @@ class Command(BaseCommand):
         parser.add_argument("--all", action="store_true", help="Run all models")
 
         parser.add_argument(
+            "--export",
+            action="store_true",
+            help="Run the export group after the main operation completes",
+        )
+
+        parser.add_argument(
             "--show-options",
             action="store_true",
             help="Show tables of available groups and models",
@@ -156,6 +168,7 @@ class Command(BaseCommand):
         quiet: bool = False,
         update_since: date | None = None,
         update_last: int | None = None,
+        export: bool = False,
         show_options: bool = False,
         **options,
     ):
@@ -182,6 +195,7 @@ class Command(BaseCommand):
             quiet = quiet or instructions.get("quiet", False)
             update_since = update_since or instructions.get("update_since", None)
             update_last = update_last or instructions.get("update_last", None)
+            export = export or instructions.get("export", False)
 
         if group and (start_group or end_group):
             self.stdout.write("You cannot specify both group and start/end group")
@@ -209,3 +223,5 @@ class Command(BaseCommand):
         else:
             self.stdout.write("You must specify a model, group or all")
             return
+        if export:
+            import_register.run_group("export", quiet, update_since)
