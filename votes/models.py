@@ -104,6 +104,7 @@ class InstructionDict(TypedDict):
     quiet: NotRequired[bool]
     update_since: NotRequired[datetime.date]
     update_last: NotRequired[int]
+    skip_groups: NotRequired[list[str]]
 
 
 @dataclass
