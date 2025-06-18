@@ -233,6 +233,10 @@
             {% style_df decision.party_breakdown_df "For motion percentage" "Party turnout" %}
         </div>
         <h2 class="section-header" id ="voting-list">Voting list</h2>
+        <p>
+            <a href="/decisions/division/{{ decision.chamber_slug }}/{{ decision.date|date:'Y-m-d' }}/{{ decision.division_number }}/voting_list.csv"
+               class="btn btn-sm btn-outline-secondary">Download as CSV</a>
+        </p>
         {% if can_add_annotations %}
             <p>
                 <a href="{% url 'forms' 'open_rep_annotation' decision.id %}">Add a vote annotation</a>

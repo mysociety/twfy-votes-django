@@ -2,8 +2,9 @@ import datetime
 from typing import Any, Literal
 
 from django.conf import settings
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 
+import pandas as pd
 from ninja import ModelSchema, NinjaAPI, Schema
 from ninja.security import HttpBearer
 from pydantic import BaseModel
@@ -376,6 +377,75 @@ def get_division(
             f"Division not found for {chamber_slug} {date} {division_number}"
         )
     return division.apply_analysis_override()
+
+
+@api.get(
+    "/decisions/division/{chamber_slug}/{date}/{division_number}/voting_list.csv",
+)
+def get_division_csv(
+    request: HttpRequest, chamber_slug: str, date: datetime.date, division_number: int
+):
+    """
+    Export division voting information as a CSV file using pandas for efficient handling.
+    """
+    division = (
+        Division.objects.filter(
+            chamber_slug=chamber_slug, date=date, division_number=division_number
+        )
+        .prefetch_related(
+            "votes", "votes__person", "votes__membership", "votes__membership__party"
+        )
+        .first()
+    )
+
+    if division is None:
+        raise ValueError(
+            f"Division not found for {chamber_slug} {date} {division_number}"
+        )
+
+    # Apply any analysis overrides
+    division = division.apply_analysis_override()
+
+    # Create a list of dictionaries for pandas DataFrame
+    vote_data = [
+        {
+            "person_id": vote.person.id,
+            "name": vote.person.name,
+            "party_name": (
+                vote.membership.party.name
+                if vote.membership and vote.membership.party
+                else ""
+            ),
+            "party_slug": (
+                vote.membership.party.slug
+                if vote.membership and vote.membership.party
+                else ""
+            ),
+            "vote": vote.vote.name.title(),
+            "effective_vote": vote.effective_vote.name.title(),
+            "is_government": "Yes" if vote.is_gov else "No",
+            "division_name": division.division_name,
+            "division_date": division.date,
+            "division_number": division.division_number,
+            "chamber": division.chamber_slug,
+        }
+        for vote in division.votes.all()
+    ]
+
+    # Create DataFrame from the data
+    df = pd.DataFrame(vote_data)
+
+    # Create a CSV response
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = (
+        f'attachment; filename="voting-list-{chamber_slug}-{date}-{division_number}.csv"'
+    )
+
+    # Use pandas to write the CSV to the response
+    csv_data = df.to_csv(index=False)
+    response.write(csv_data)
+
+    return response
 
 
 @api.get("/people/{people_option}.json", response=list[PersonSchema])
