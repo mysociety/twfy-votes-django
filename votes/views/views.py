@@ -8,18 +8,20 @@ from pathlib import Path
 from typing import Literal
 
 from django.conf import settings
-from django.db.models import Count
+from django.db.models import Count, F
 from django.http import (
     Http404,
     HttpRequest,
     HttpResponsePermanentRedirect,
     HttpResponseRedirect,
+    JsonResponse,
 )
 from django.shortcuts import redirect
 from django.template import Context, Template
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.safestring import mark_safe
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, View
 
 import markdown
 import pandas as pd
@@ -43,6 +45,7 @@ from ..forms import (
 )
 from ..models import (
     Agreement,
+    BulkAPIUser,
     Chamber,
     DecisionTag,
     Division,
@@ -270,7 +273,6 @@ class DataView(TitleMixin, TemplateView):
             "per_person_party_diff_year": "Voting alignment scores by year",
             "policy_calc_to_load": "The calculated policy alignment data",
             "policy_comparison_period": "The policy comparison periods",
-            "votes_with_diff": "All individual votes with alignment scores",
         }
 
         context["data"] = data
@@ -1007,3 +1009,34 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
 
         return context
+
+
+class DuckDBDownloadView(View):
+    """
+    A view that redirects to the DuckDB database file.
+
+    Requires token authentication for access.
+    """
+
+    def get(self, request: HttpRequest, *args, **kwargs):
+        """
+        Redirect to the static DuckDB file if valid token is provided.
+
+        Checks if the token exists in the BulkAPIUser table.
+        If it does, increment the access count and redirect to the file.
+        If not, return an access denied response.
+        """
+        token = request.GET.get("token")
+
+        if not token:
+            return JsonResponse({"error": "Authentication token required"}, status=401)
+
+        if not BulkAPIUser.objects.filter(token=token).exists():
+            return JsonResponse({"error": "Invalid authentication token"}, status=401)
+
+        # update access found
+        BulkAPIUser.objects.filter(token=token).update(
+            access_count=F("access_count") + 1,
+            last_accessed=timezone.now(),
+        )
+        return redirect("/static/data/twfy_votes.duckdb")
