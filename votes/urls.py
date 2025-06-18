@@ -23,6 +23,7 @@ from .views.views import (
     DecisionsListPageView,
     DecisionsPageView,
     DivisionPageView,
+    DuckDBDownloadView,
     FormsView,
     HomePageView,
     MarkdownView,
@@ -204,5 +205,6 @@ urlpatterns = [
         DecisionsListOpenGraphImageView,
         name="decisions_list_month_opengraph_image",
     ),
+    fast_path("data/duck", DuckDBDownloadView, name="duckdb_download"),
     path("", api.urls),
 ]
