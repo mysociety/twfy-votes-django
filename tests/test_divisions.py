@@ -1,5 +1,8 @@
+import io
+
 from django.test import Client
 
+import pandas as pd
 import pytest
 
 pytestmark = pytest.mark.django_db
@@ -75,3 +78,22 @@ class TestDivision2023(BaseTestResponse):
         assert len(data["votes"]) == (
             650
         ), f"Expected 650 votes (inc absents), got {len(data['votes'])}"
+
+
+def test_voting_list():
+    client = Client()
+    url = "/decisions/division/commons/2023-12-13/33/voting_list.csv"
+
+    response = client.get(url)
+
+    assert response.status_code == 200, f"Expected 200 OK, got {response.status_code}"
+    assert response.headers["Content-Type"] == "text/csv", "Expected CSV content type"
+
+    file = io.StringIO(response.content.decode("utf-8"))
+    df = pd.read_csv(file)
+    assert not df.empty, "Expected non-empty DataFrame"
+
+    assert "person_id" in df.columns, "Expected 'member_id' column in DataFrame"
+
+    # check length is 650
+    assert len(df) == 650, f"Expected 650 rows, got {len(df)}"
