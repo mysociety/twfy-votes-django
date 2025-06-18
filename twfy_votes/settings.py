@@ -30,6 +30,7 @@ env = environ.Env(
     EMAIL_HOST=(str, "localhost"),
     EMAIL_PORT=(int, 1025),
     DEFAULT_FROM_EMAIL=(str, "webmaster@localhost"),
+    LIVE_URL=(str, "https://votes.theyworkforyou.com"),
 )
 
 
@@ -46,6 +47,7 @@ CACHE_FILE = env("CACHE_FILE")
 HIDE_DEBUG_TOOLBAR = env("HIDE_DEBUG_TOOLBAR")
 GOOGLE_ANALYTICS = env("GOOGLE_ANALYTICS")
 TWFY_API_KEY = env("TWFY_API_KEY")
+LIVE_URL = env("LIVE_URL")
 
 if env("BUGS_EMAIL"):
     SERVER_EMAIL = env("BUGS_EMAIL")
