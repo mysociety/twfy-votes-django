@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import html
+import secrets
 from dataclasses import dataclass
 from itertools import groupby
 from typing import (
@@ -20,6 +21,7 @@ from typing import (
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import F
 from django.urls import reverse
 from django.utils import timezone
 
@@ -34,9 +36,11 @@ from twfy_votes.helpers.typed_django.models import (
     Dummy,
     DummyManyToMany,
     DummyOneToMany,
+    EmailField,
     JSONField,
     ManyToMany,
     OptionalDateTimeField,
+    PositiveIntegerField,
     PrimaryKey,
     TextField,
     field,
@@ -1880,3 +1884,47 @@ def get_same_day_decision_navigation(decision: DecisionType) -> NavigationResult
             previous_decision = same_day_decisions[current_index + 1]
 
     return NavigationResult(next_decision, previous_decision)
+
+
+class BulkAPIUser(DjangoVoteModel):
+    """
+    Model to track users who have access to bulk API data via token authentication.
+    """
+
+    email: EmailField
+    token: str = ""
+    purpose: TextField = ""
+    enabled: bool = True
+    access_count: PositiveIntegerField = 0
+    created_at: datetime.datetime
+    last_accessed: OptionalDateTimeField = None
+
+    @classmethod
+    def valid_token(cls, token: str) -> bool:
+        """
+        Check if the provided token is valid.
+        """
+        if BulkAPIUser.objects.filter(token=token, enabled=True).exists():
+            # increment access
+            BulkAPIUser.objects.filter(token=token).update(
+                access_count=F("access_count") + 1,
+                last_accessed=timezone.now(),
+            )
+            return True
+        return False
+
+    @classmethod
+    def get_fresh_token(cls) -> str:
+        token = secrets.token_hex(16)
+        while cls.objects.filter(token=token).exists():
+            token = secrets.token_hex(16)
+        return token
+
+    def __str__(self):
+        return self.email
+
+    def save(self, *args, **kwargs):
+        """Generate token if it's blank"""
+        if not self.token:
+            self.token = BulkAPIUser.get_fresh_token()
+        super().save(*args, **kwargs)
