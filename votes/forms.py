@@ -4,7 +4,7 @@ from typing import Type
 from django import forms
 from django.http import Http404, HttpRequest
 
-from .consts import EvidenceType, WhipDirection, WhipPriority
+from .consts import EvidenceType, VotePosition, WhipDirection, WhipPriority
 from .models import (
     AgreementAnnotation,
     Division,
@@ -12,6 +12,7 @@ from .models import (
     Membership,
     Organization,
     UserPersonLink,
+    Vote,
     VoteAnnotation,
     WhipReport,
 )
@@ -24,7 +25,7 @@ def enum_to_choices(en: Type[StrEnum]) -> list[tuple[str, str]]:
 class DecisionIdMixin:
     @classmethod
     def from_decision_id(cls, decision_id: int):
-        return cls(initial={"decision_id": decision_id})
+        return cls(initial={"decision_id": decision_id})  # type: ignore
 
 
 class WhipForm(forms.Form, DecisionIdMixin):
@@ -35,6 +36,12 @@ class WhipForm(forms.Form, DecisionIdMixin):
         label="Select a Party",
         empty_label="Choose a Party",
         widget=forms.Select(attrs={"class": "form-control"}),
+        required=False,
+    )
+    apply_to_all_parties = forms.BooleanField(
+        required=False,
+        label="Apply to all voting parties",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     whip_direction = forms.ChoiceField(
         choices=enum_to_choices(WhipDirection),
@@ -52,16 +59,43 @@ class WhipForm(forms.Form, DecisionIdMixin):
         widget=forms.Textarea(attrs={"class": "form-control"}), required=False
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        apply_to_all_parties = cleaned_data.get("apply_to_all_parties")
+        party = cleaned_data.get("party")
+
+        if not apply_to_all_parties and not party:
+            self.add_error(
+                "party", 'Please select a party or check "Apply to all voting parties"'
+            )
+
+        return cleaned_data
+
     def save(self, request: HttpRequest, decision_id: int):
-        model = WhipReport(
-            division_id=decision_id,
-            party_id=self.cleaned_data["party"].id,
-            whip_direction=self.cleaned_data["whip_direction"],
-            whip_priority=self.cleaned_data["whip_priority"],
-            evidence_type=self.cleaned_data["evidence_type"],
-            evidence_detail=self.cleaned_data["evidence_detail"],
-        )
-        model.save()
+        if self.cleaned_data.get("apply_to_all_parties"):
+            # Get all parties that had members voting in this division
+            voting_parties_ids = (
+                Vote.objects.filter(division_id=decision_id)
+                .exclude(vote=VotePosition.ABSENT)
+                .select_related("person")
+                .values_list("person__memberships__party_id", flat=True)
+                .distinct()
+            )
+
+            voting_parties = Organization.objects.filter(id__in=voting_parties_ids)
+        else:
+            voting_parties = [self.cleaned_data["party"]]
+
+        for party in voting_parties:
+            model = WhipReport(
+                division_id=decision_id,
+                party=party,
+                whip_direction=self.cleaned_data["whip_direction"],
+                whip_priority=self.cleaned_data["whip_priority"],
+                evidence_type=self.cleaned_data["evidence_type"],
+                evidence_detail=self.cleaned_data["evidence_detail"],
+            )
+            model.save()
 
 
 class RepWhipForm(forms.Form, DecisionIdMixin):

@@ -8,7 +8,9 @@
         {% if form.errors %}<div class="alert alert-danger" role="alert">{{ form.errors }}</div>{% endif %}
         <form method="post">
             {% csrf_token %}
-            {{ form }}
+            <table class="table">
+                {{ form.as_table }}
+            </table>
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
