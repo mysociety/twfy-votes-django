@@ -44,6 +44,11 @@ colours = {
     "green": ColourSettings(colour="#6AB023"),
     "dup": ColourSettings(colour="#193264"),
     "social-democratic-and-labour-party": ColourSettings(colour="#3C783C"),
+    "independent": ColourSettings(colour="#666666"),
+    "reform": ColourSettings(colour="#12B6CF"),
+    "uup": ColourSettings(colour="#A6A6A6"),
+    "traditional-unionist-voice": ColourSettings(colour="#A6A6A6"),
+    "alliance": ColourSettings(colour="#F2C94C"),
 }
 
 
@@ -78,12 +83,12 @@ def simplify_votes_df(division: Division) -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     df["background_colour"] = df["party"].map(
-        lambda x: colours[x].colour if x in colours else "#000000"
+        lambda x: colours[x].colour if x in colours else "#666666"
     )
 
     # set the bordercolour to the same as the background colour if not defined
     df["border_colour"] = df["party"].map(
-        lambda x: colours[x].border_colour if x in colours else "#000000"
+        lambda x: colours[x].border_colour if x in colours else "#666666"
     )
     df["border_colour"] = df.apply(
         lambda x: (
