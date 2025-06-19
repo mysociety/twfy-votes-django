@@ -44,6 +44,11 @@ colours = {
     "green": ColourSettings(colour="#6AB023"),
     "dup": ColourSettings(colour="#193264"),
     "social-democratic-and-labour-party": ColourSettings(colour="#3C783C"),
+    "independent": ColourSettings(colour="#666666"),
+    "reform": ColourSettings(colour="#FF7F00"),
+    "uup": ColourSettings(colour="#A6A6A6"),
+    "traditional-unionist-voice": ColourSettings(colour="#A6A6A6"),
+    "alliance": ColourSettings(colour="#F2C94C"),
 }
 
 
@@ -78,12 +83,12 @@ def simplify_votes_df(division: Division) -> pd.DataFrame:
     df = pd.DataFrame(data)
 
     df["background_colour"] = df["party"].map(
-        lambda x: colours[x].colour if x in colours else "#000000"
+        lambda x: colours[x].colour if x in colours else "#666666"
     )
 
     # set the bordercolour to the same as the background colour if not defined
     df["border_colour"] = df["party"].map(
-        lambda x: colours[x].border_colour if x in colours else "#000000"
+        lambda x: colours[x].border_colour if x in colours else "#666666"
     )
     df["border_colour"] = df.apply(
         lambda x: (
@@ -332,6 +337,12 @@ def draw_vote_image(division: Division) -> Image.Image:
 
         # Get the group for this vote type
         group = votes_by_type.get_group(vote_type)
+
+        # Sort this group by party count (most common parties first)
+        party_counts_in_group = group["party"].value_counts()
+        group["party_count"] = group.copy()["party"].map(party_counts_in_group)
+        group = group.sort_values(by=["party_count", "party"], ascending=[False, True])
+
         vote_count = len(group)
         member_plural = division.chamber.member_plural
 
