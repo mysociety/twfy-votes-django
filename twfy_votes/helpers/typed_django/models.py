@@ -180,6 +180,11 @@ FloatField = Annotated[float, models.FloatField()]
 DurationField = Annotated[datetime.timedelta, models.DurationField()]
 BinaryField = Annotated[bytes, models.BinaryField()]
 JSONField = Annotated[Union[list, dict], models.JSONField()]
+DateTimeAutoNowField = Annotated[
+    datetime.datetime,
+    models.DateTimeField(auto_now=True),
+    PydanticField(default_factory=datetime.datetime.now),
+]
 
 # Lookup table for field types.
 types_to_fields: dict[type | str, Annotated] = {
