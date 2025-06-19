@@ -337,6 +337,12 @@ def draw_vote_image(division: Division) -> Image.Image:
 
         # Get the group for this vote type
         group = votes_by_type.get_group(vote_type)
+
+        # Sort this group by party count (most common parties first)
+        party_counts_in_group = group["party"].value_counts()
+        group["party_count"] = group.copy()["party"].map(party_counts_in_group)
+        group = group.sort_values(by=["party_count", "party"], ascending=[False, True])
+
         vote_count = len(group)
         member_plural = division.chamber.member_plural
 
