@@ -1271,6 +1271,12 @@ class Division(DjangoVoteModel):
                 group = "Aye (Teller)"
             if group == "Tellno":
                 group = "No (Teller)"
+
+            # Sort this group by party count (most common parties first)
+            party_counts_in_group = df["Party"].value_counts()
+            df["party_count"] = df["Party"].map(party_counts_in_group)
+            df = df.sort_values(by=["party_count", "Party"], ascending=[False, True])
+
             vote_group = {
                 "grouping": group,
                 "count": len(df),
