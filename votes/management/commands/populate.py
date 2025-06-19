@@ -12,7 +12,8 @@ shortcuts: dict[str, InstructionDict] = {
     "refresh_commons_api": {
         "update_last": 1,
         "start_group": "api_votes",
-        "end_group": "person_stats",
+        "end_group": "export",
+        "skip_groups": ["policies", "prep_policycalc", "policycalc"],
     },
     "refresh_motions_agreements": {
         "update_last": 3,
@@ -58,6 +59,10 @@ class Command(BaseCommand):
             end_group = details.get("end_group")
             if start_group and end_group:
                 description_parts.append(f"Groups {start_group} to {end_group}")
+
+            skip_groups = details.get("skip_groups")
+            if skip_groups:
+                description_parts.append(f"Skip {', '.join(skip_groups)}")
 
             if details.get("all", False):
                 description_parts.append("All models")
@@ -119,7 +124,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--shortcut",
             type=str,
-            help="Run a group of models using a predefined configuration",
+            help="Run a group of models using a predefined configuration. Some shortcuts include skip-groups.",
             nargs="?",
             const="",
         )
@@ -139,6 +144,14 @@ class Command(BaseCommand):
         parser.add_argument("--all", action="store_true", help="Run all models")
 
         parser.add_argument(
+            "--skip-groups",
+            type=str,
+            nargs="+",
+            help="Skip specific groups when running a group range",
+            default=[],
+        )
+
+        parser.add_argument(
             "--show-options",
             action="store_true",
             help="Show tables of available groups and models",
@@ -156,9 +169,14 @@ class Command(BaseCommand):
         quiet: bool = False,
         update_since: date | None = None,
         update_last: int | None = None,
+        skip_groups: list[str] | None = None,
         show_options: bool = False,
         **options,
     ):
+        # If skip_groups is None, initialize it with an empty list
+        if skip_groups is None:
+            skip_groups = []
+
         # If show_options is True, just show the tables and exit
         if show_options:
             self.print_help_table()
@@ -182,6 +200,7 @@ class Command(BaseCommand):
             quiet = quiet or instructions.get("quiet", False)
             update_since = update_since or instructions.get("update_since", None)
             update_last = update_last or instructions.get("update_last", None)
+            skip_groups = instructions.get("skip_groups", [])
 
         if group and (start_group or end_group):
             self.stdout.write("You cannot specify both group and start/end group")
@@ -203,7 +222,9 @@ class Command(BaseCommand):
         elif group:
             import_register.run_group(group, quiet, update_since)
         elif start_group:
-            import_register.run_group_range(start_group, end_group, quiet, update_since)
+            import_register.run_group_range(
+                start_group, end_group, quiet, update_since, skip_groups
+            )
         elif all:
             import_register.run_all(quiet, update_since)
         else:

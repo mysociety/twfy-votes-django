@@ -111,9 +111,12 @@ class ImportRegister:
         end_group: str,
         quiet: bool = False,
         update_since: datetime.date | None = None,
+        skip_groups: list[str] | None = None,
     ) -> None:
         start_group_order = ImportOrder[start_group.upper()]
         end_group_order = ImportOrder[end_group.upper()]
+        skip_groups = skip_groups or []
+        skip_groups_enum = [ImportOrder[group.upper()] for group in skip_groups]
 
         # iterate through ImportOrder from start_group to end_group
 
@@ -122,6 +125,10 @@ class ImportRegister:
                 continue
             if group > end_group_order:
                 break
+            if group in skip_groups_enum:
+                if not quiet:
+                    rich.print(f"[yellow]Skipping group {group.name}[/yellow]")
+                continue
             self.run_group(group.name, quiet=quiet, update_since=update_since)
 
     def run_all(

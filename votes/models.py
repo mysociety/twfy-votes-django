@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import datetime
 import html
+import secrets
 from dataclasses import dataclass
 from itertools import groupby
 from typing import (
@@ -30,13 +31,16 @@ from numpy import nan
 
 from twfy_votes.helpers.base_model import DjangoVoteModel
 from twfy_votes.helpers.typed_django.models import (
+    DateTimeAutoNowField,
     DoNothingForeignKey,
     Dummy,
     DummyManyToMany,
     DummyOneToMany,
+    EmailField,
     JSONField,
     ManyToMany,
     OptionalDateTimeField,
+    PositiveIntegerField,
     PrimaryKey,
     TextField,
     field,
@@ -104,6 +108,7 @@ class InstructionDict(TypedDict):
     quiet: NotRequired[bool]
     update_since: NotRequired[datetime.date]
     update_last: NotRequired[int]
+    skip_groups: NotRequired[list[str]]
 
 
 @dataclass
@@ -1879,3 +1884,25 @@ def get_same_day_decision_navigation(decision: DecisionType) -> NavigationResult
             previous_decision = same_day_decisions[current_index + 1]
 
     return NavigationResult(next_decision, previous_decision)
+
+
+class BulkAPIUser(DjangoVoteModel):
+    """
+    Model to track users who have access to bulk API data via token authentication.
+    """
+
+    email: EmailField
+    token: str = ""
+    purpose: TextField = ""
+    access_count: PositiveIntegerField = 0
+    created_at: DateTimeAutoNowField
+    last_accessed: DateTimeAutoNowField
+
+    def __str__(self):
+        return self.email
+
+    def save(self, *args, **kwargs):
+        """Generate token if it's blank"""
+        if not self.token:
+            self.token = secrets.token_hex(16)
+        super().save(*args, **kwargs)

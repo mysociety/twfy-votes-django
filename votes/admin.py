@@ -5,6 +5,7 @@ from .models import (
     Agreement,
     AgreementAnnotation,
     AnalysisOverride,
+    BulkAPIUser,
     Division,
     DivisionAnnotation,
     Person,
@@ -76,3 +77,25 @@ class VoteAnnotationAdmin(admin.ModelAdmin):
     list_display = ("id", "division", "person", "detail", "link")
     search_fields = ("division",)
     autocomplete_fields = ("division", "person")
+
+
+@admin.register(BulkAPIUser)
+class BulkAPIUserAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "email",
+        "purpose",
+        "access_count",
+        "created_at",
+        "last_accessed",
+    )
+    search_fields = ("email", "purpose")
+    readonly_fields = ("token", "access_count")
+    fields = (
+        "email",
+        "purpose",
+        "token",
+        "access_count",
+        "created_at",
+        "last_accessed",
+    )
