@@ -171,4 +171,21 @@ $huge-screen: 71.25em;
         background-color: rgb(60, 120, 60);
     }
 
+    &.independent:before {
+        background-color: rgb(102, 102, 102);
+    }
+
+    &.reform-uk:before {
+        background-color: rgb(18, 182, 207);
+    }
+
+    &.uup:before,
+    &.traditional-unionist-voice:before {
+        background-color: rgb(166, 166, 166);
+    }
+
+    &.alliance:before {
+        background-color: rgb(242, 201, 76);
+    }
+
 }
