@@ -32,6 +32,13 @@ division_links:
     date: 2024-11-29
     division_number: 51
   alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-06-20
+    division_number: 245
+  alignment: agree
   strength: strong
   notes: ''
 agreement_links: []
