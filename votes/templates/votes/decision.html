@@ -194,23 +194,23 @@
         {% endif %}
     {% endwith %}
     {% if decision.decision_type == "Division" %}
-        {% with decision.whip_report_df as whip_report_df %}
-            <h2 class="section-header" id="whip-reports">Whip reports</h2>
-            {% if whip_report_df is not None %}
-                {% style_df whip_report_df %}
-            {% else %}
-                <p>No whip reports for this decision.</p>
-            {% endif %}
-            {% if can_report_whip %}
-                <p>
-                    <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
-                </p>
-            {% elif can_report_self_whip %}
-                <p>
-                    <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
-                </p>
-            {% endif %}
-        {% endwith %}
+        <h2 class="section-header" id="whip-reports">Whip reports</h2>
+        {% if whip_report_df_with_admin_links is not None and request.user.is_superuser %}
+            {% style_df whip_report_df_with_admin_links %}
+        {% elif whip_report_df is not None %}
+            {% style_df whip_report_df %}
+        {% else %}
+            <p>No whip reports for this decision.</p>
+        {% endif %}
+        {% if can_report_whip %}
+            <p>
+                <a href="{% url 'forms' 'whip' decision.id %}">Report whip info</a>
+            </p>
+        {% elif can_report_self_whip %}
+            <p>
+                <a href="{% url 'forms' 'rep_whip' decision.id %}">Report your whip</a>
+            </p>
+        {% endif %}
     {% endif %}
     {% if relevant_policies %}
         <h2 class="section-header" id="policies">Policies</h2>

@@ -437,6 +437,10 @@ class DivisionPageView(TitleMixin, TemplateView):
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
 
+        context["whip_report_df"] = decision.whip_report_df(
+            include_admin_links=self.request.user.is_superuser
+        )
+
         context["og_image"] = reverse("division_opengraph_image", args=[decision.id])
 
         return context
