@@ -37,6 +37,7 @@ from .views.views import (
     PolicyCollectionPageView,
     PolicyPageView,
     PolicyReportPageView,
+    StatementPageView,
     TagListView,
     TagsHomeView,
 )
@@ -115,6 +116,11 @@ urlpatterns = [
         "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str_not_json}",
         AgreementPageView,
         name="agreement",
+    ),
+    fast_path(
+        "statements/{chamber_slug:str}/{statement_date:date}/{statement_slug:slug}",
+        StatementPageView,
+        name="statement",
     ),
     fast_path(
         "decisions/{chamber_slug:str}/{year:int}",

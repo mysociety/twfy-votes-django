@@ -1,0 +1,88 @@
+{% extends "votes/base_with_menu.html" %}
+
+{% load hub_filters %}
+
+{% block content.title %}
+    <h1 id="top-header">{{ statement.chamber.name }} – {{ statement.date }}</h1>
+    <h2>{{ statement.nice_title }}</h2>
+    <p class="text-muted">Type: {{ statement.type_display }}</p>
+{% endblock content.title %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">{{ statement.date }} – {{ statement.slug }}</a>
+    </p>
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#content">Content</a>
+    </li>
+    {% if statement.extra_info|filter_metadata %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#metadata">Metadata</a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#signatures">Signatures</a>
+    </li>
+    {% if statement.url %}
+        <hr />
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="{{ statement.url }}">View source</a>
+        </li>
+    {% endif %}
+{% endblock content.menu %}
+
+{% block content.inner %}
+    <h2 class="section-header" id="content">Content</h2>
+    <div class="motion_text">
+        <p>{{ statement.statement_text|linebreaks }}</p>
+    </div>
+    {% if statement.url %}
+        <p>
+            <a href="{{ statement.url }}">View source</a>
+        </p>
+    {% endif %}
+    {% if statement.extra_info %}
+        {% with statement.extra_info|filter_metadata as filtered_metadata %}
+            {% if filtered_metadata %}
+                <h2 class="section-header" id="metadata">Additional Metadata</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Field</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for key, value in filtered_metadata.items %}
+                            <tr>
+                                <td>{{ key|title|replace_underscore_with_space }}</td>
+                                <td>{{ value|smart_number }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        {% endwith %}
+    {% endif %}
+    <h2 class="section-header" id="signatures">Signatures</h2>
+    {% with statement.signatures_df as signatures_df %}
+        {% if signatures_df.shape.0 > 0 %}
+            {% style_df signatures_df %}
+        {% else %}
+            <p>No signatures for this statement.</p>
+        {% endif %}
+    {% endwith %}
+{% endblock content.inner %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+
+    {% include 'votes/includes/_table_script.html' %}
+{% endblock extrajs %}
