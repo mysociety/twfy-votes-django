@@ -154,10 +154,20 @@ Dummy = Annotated[T, AllowJustAnnotated]
 PrimaryKey = Annotated[
     Optional[int], models.BigAutoField(primary_key=True), PydanticField(default=None)
 ]
+OptionalDateField = Annotated[
+    Optional[datetime.date],
+    models.DateField(null=True, blank=True),
+    PydanticField(default=None),
+]
 OptionalDateTimeField = Annotated[
     Optional[datetime.datetime],
     models.DateTimeField(null=True, blank=True),
     PydanticField(default=None),
+]
+OptionalStr = Annotated[
+    Optional[str],
+    models.CharField(max_length=255, null=True, blank=True),
+    PydanticField(default=None, max_length=255),
 ]
 CharField = Annotated[
     str, models.CharField(max_length=255), PydanticField(max_length=255)
@@ -180,6 +190,11 @@ FloatField = Annotated[float, models.FloatField()]
 DurationField = Annotated[datetime.timedelta, models.DurationField()]
 BinaryField = Annotated[bytes, models.BinaryField()]
 JSONField = Annotated[Union[list, dict], models.JSONField()]
+DictField = Annotated[
+    dict[str, Any],
+    models.JSONField(default=dict),
+    PydanticField(default_factory=dict),
+]
 DateTimeAutoNowField = Annotated[
     datetime.datetime,
     models.DateTimeField(auto_now=True),
