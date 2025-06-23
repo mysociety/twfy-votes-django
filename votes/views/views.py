@@ -60,6 +60,7 @@ from ..models import (
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
+    Statement,
     UrlColumn,
     UserPersonLink,
     Vote,
@@ -548,6 +549,33 @@ class AgreementPageView(TitleMixin, TemplateView):
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
         context["og_image"] = reverse("agreement_opengraph_image", args=[decision.id])
+        return context
+
+
+class StatementPageView(TitleMixin, TemplateView):
+    page_title = "Statement"
+    template_name = "votes/statement.html"
+
+    def get_context_data(
+        self,
+        chamber_slug: str,
+        statement_date: datetime.date,
+        statement_slug: str,
+        **kwargs,
+    ):
+        context = super().get_context_data(**kwargs)
+        try:
+            statement = Statement.objects.get(
+                chamber__slug=chamber_slug,
+                date=statement_date,
+                slug=statement_slug,
+            )
+        except Statement.DoesNotExist:
+            raise Http404("Statement not found")
+
+        context["statement"] = statement
+        context["page_title"] = f"{statement.date} - {statement.title}"
+
         return context
 
 

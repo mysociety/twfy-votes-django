@@ -1013,6 +1013,59 @@ class Statement(DjangoVoteModel):
     )
     url: str = ""
 
+    @classmethod
+    def get_free_slug(cls, slug: str, date: datetime.date) -> str:
+        """
+        Get a free slug for this statement.
+        If the slug is already taken, append a number to it.
+        """
+        base_slug = slug
+        counter = 1
+        while cls.objects.filter(slug=slug, date=date).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
+
+    def signatures_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of signatures for this statement, sorted by order
+        """
+        signatures = (
+            self.signatures.all().order_by("order", "date").prefetch_related("person")
+        )
+
+        data = [
+            {
+                "Person": UrlColumn(url=sig.person.url(), text=sig.person.name),
+                "Date Signed": sig.date or self.date,
+                "Status": sig.withdrawn_status(),
+            }
+            for sig in signatures
+        ]
+
+        return pd.DataFrame(data=data)
+
+    def page_url(self) -> str:
+        """
+        Generate URL for this statement's page
+        """
+        return reverse("statement", args=[self.chamber_slug, self.date, self.slug])
+
+    def nice_title(self) -> str:
+        """
+        Return a properly formatted title. If the title is entirely uppercase,
+        return a title case version. Otherwise, return the title as-is.
+        """
+        if self.title.isupper():
+            return self.title.title()
+        return self.title
+
+    def type_display(self) -> str:
+        """
+        Return a properly formatted type display name.
+        """
+        return self.type.replace("_", " ").title()
+
 
 @is_valid_decision_model
 class Division(DjangoVoteModel):
@@ -1511,6 +1564,17 @@ class Signature(DjangoVoteModel):
     withdrawn: bool = False
     withdrawn_date: OptionalDateField = None
     extra_info: DictField
+
+    def withdrawn_status(self) -> str | None:
+        """
+        Return withdrawal status - either None or 'withdrawn on {date}'
+        """
+        if self.withdrawn and self.withdrawn_date:
+            return f"withdrawn on {self.withdrawn_date}"
+        elif self.withdrawn:
+            return "withdrawn"
+        else:
+            return "-"
 
 
 class Vote(DjangoVoteModel):
