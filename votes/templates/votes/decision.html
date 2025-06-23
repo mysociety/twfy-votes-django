@@ -98,6 +98,18 @@
 {% endblock content.menu %}
 
 {% block content.inner %}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show"
+                 role="alert">
+                {{ message }}
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert"
+                        aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
     {% featureflag pg.ADVANCED_INFO %}
         <p>Decision Key: {{ decision.key }}</p>
     {% endfeatureflag %}
@@ -235,12 +247,20 @@
         <h2 class="section-header" id ="voting-list">Voting list</h2>
         {% if can_add_annotations %}
             <p>
-                <a href="{% url 'forms' 'open_rep_annotation' decision.id %}">Add a vote annotation</a>
+                <a href="{% url 'forms' 'open_rep_annotation' decision.id %}"
+                   class="btn btn-sm btn-secondary">Add a vote annotation</a>
             </p>
         {% elif can_add_self_annotations %}
             <p>
-                <a href="{% url 'forms' 'rep_annotation' decision.id %}">Add your vote annotation</a>
+                <a href="{% url 'forms' 'rep_annotation' decision.id %}"
+                   class="btn btn-sm btn-secondary">Add your vote annotation</a>
             </p>
+        {% endif %}
+        {% if can_bulk_edit_annotations %}
+            <div class="admin-actions">
+                <a href="{{ decision.bulk_annotations_url }}"
+                   class="btn btn-sm btn-secondary">Bulk edit vote annotations</a>
+            </div>
         {% endif %}
         {% style_df decision.votes_df "Party alignment" %}
     {% elif decision.decision_type == "Agreement" %}
