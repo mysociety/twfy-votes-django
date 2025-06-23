@@ -17,3 +17,7 @@ def can_view_advanced_info(user: AbstractBaseUser | AnonymousUser):
 
 def can_view_draft_content(user: AbstractBaseUser | AnonymousUser):
     return super_users_or_group(user, PermissionGroupSlug.CAN_VIEW_DRAFT)
+
+
+def can_bulk_edit_annotations(user: AbstractBaseUser | AnonymousUser):
+    return super_users_or_group(user, PermissionGroupSlug.CAN_BULK_EDIT_ANNOTATIONS)
