@@ -421,6 +421,21 @@ class PersonVotesPageView(TitleMixin, TemplateView):
         return context
 
 
+class PersonStatementsPageView(TitleMixin, TemplateView):
+    page_title = "Person Statements"
+    template_name = "votes/person_statements.html"
+
+    def get_context_data(self, person_id: int, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        person = Person.objects.get(id=person_id)
+        context["person"] = person
+        context["statements_df"] = person.statements_df()
+        context["page_title"] = f"{person.name} - Signed Statements"
+        context["og_image"] = reverse("person_opengraph_image", args=[person_id])
+        return context
+
+
 class DecisionsPageView(TitleMixin, TemplateView):
     page_title = "Decisions"
     template_name = "votes/decisions.html"
@@ -574,7 +589,7 @@ class StatementPageView(TitleMixin, TemplateView):
             raise Http404("Statement not found")
 
         context["statement"] = statement
-        context["page_title"] = f"{statement.date} - {statement.title}"
+        context["page_title"] = f"{statement.date} - {statement.nice_title()}"
 
         return context
 
