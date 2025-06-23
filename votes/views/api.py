@@ -29,6 +29,8 @@ from ..models import (
     PolicyDivisionLink,
     PolicyGroup,
     RebellionRate,
+    Signature,
+    Statement,
     Update,
     Vote,
     VoteAnnotation,
@@ -269,6 +271,42 @@ class RebellionRateSchema(ModelSchema):
         exclude = ["id"]
 
 
+class SignatureSchema(ModelSchema):
+    person: PersonSchema
+    withdrawn_status: str
+
+    @staticmethod
+    def resolve_withdrawn_status(obj: Signature) -> str:
+        return obj.withdrawn_status() or "-"
+
+    class Meta:
+        model = Signature
+        fields = "__all__"
+
+
+class StatementSchema(ModelSchema):
+    signatures: list[SignatureSchema]
+    url: str
+    nice_title: str
+    type_display: str
+
+    @staticmethod
+    def resolve_url(obj: Statement) -> str:
+        return obj.page_url()
+
+    @staticmethod
+    def resolve_nice_title(obj: Statement) -> str:
+        return obj.nice_title()
+
+    @staticmethod
+    def resolve_type_display(obj: Statement) -> str:
+        return obj.type_display()
+
+    class Meta:
+        model = Statement
+        fields = "__all__"
+
+
 class PairedPolicySchema(BaseModel):
     policy: PolicySchema
     own_distribution: VoteDistributionSchema
@@ -467,6 +505,57 @@ def get_person(request: HttpRequest, person_id: int):
 @api.get("/person/{person_id}/votes.json", response=PersonWithVoteSchema)
 def get_person_with_votes(request: HttpRequest, person_id: int):
     return Person.objects.get(id=person_id)
+
+
+@api.get("/person/{person_id}/statements.json", response=dict)
+def get_person_statements(request: HttpRequest, person_id: int):
+    """
+    Get statements data for a person, returning the statements dataframe as JSON
+    """
+    from .views import PersonStatementsPageView
+
+    data = PersonStatementsPageView().get_context_data(person_id)
+
+    # Convert the statements DataFrame to records
+    statements_data = data["statements_df"].to_dict(orient="records")
+
+    return {
+        "person": PersonSchema.model_validate(data["person"]).model_dump(),
+        "statements": statements_data,
+    }
+
+
+@api.get(
+    "/statements/{chamber_slug}/{statement_date}/{slug:statement_slug}.json",
+    response=StatementSchema,
+)
+def get_statement(
+    request: HttpRequest,
+    chamber_slug: str,
+    statement_date: datetime.date,
+    statement_slug: str,
+):
+    """
+    Get statement data with all signatures
+    """
+
+    statement = (
+        Statement.objects.filter(
+            chamber__slug=chamber_slug,
+            date=statement_date,
+            slug=statement_slug,
+        )
+        .prefetch_related(
+            "signatures",
+            "signatures__person",
+        )
+        .first()
+    )
+
+    if not statement:
+        raise ValueError(f"Statement not found: {statement_slug}")
+
+    return statement
 
 
 @api.get(
