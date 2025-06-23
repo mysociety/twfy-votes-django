@@ -558,6 +558,7 @@ class Person(DjangoVoteModel):
     votes: DummyOneToMany[Vote] = related_name("person")
     vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
     rebellion_rates: DummyOneToMany[RebellionRate] = related_name("person")
+    signatures: DummyOneToMany[Signature] = related_name("person")
 
     class Meta:
         ordering = ["name"]
@@ -570,6 +571,9 @@ class Person(DjangoVoteModel):
 
     def votes_url(self, year: str = "all"):
         return reverse("person_votes", kwargs={"person_id": self.id, "year": year})
+
+    def statements_url(self) -> str:
+        return reverse("person_statements", args=[self.id])
 
     def recent_years_with_votes(self):
         items = (
@@ -677,6 +681,32 @@ class Person(DjangoVoteModel):
 
         # sort by data decending
         data = sorted(data, key=lambda x: x["Date"], reverse=True)
+
+        return pd.DataFrame(data=data)
+
+    def statements_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of statements signed by this person, sorted by date signed (latest first)
+        """
+        signatures = (
+            self.signatures.all()
+            .order_by("-statement__date", "-date", "order")
+            .prefetch_related("statement", "statement__chamber")
+        )
+
+        data = [
+            {
+                "Date": sig.statement.date,
+                "Statement": UrlColumn(
+                    url=sig.statement.page_url(), text=sig.statement.nice_title()
+                ),
+                "Type": sig.statement.type_display(),
+                "Chamber": sig.statement.chamber.name,
+                "Date Signed": sig.date or sig.statement.date,
+                "Status": sig.withdrawn_status(),
+            }
+            for sig in signatures
+        ]
 
         return pd.DataFrame(data=data)
 
@@ -1036,7 +1066,9 @@ class Statement(DjangoVoteModel):
 
         data = [
             {
-                "Person": UrlColumn(url=sig.person.url(), text=sig.person.name),
+                "Person": UrlColumn(
+                    url=sig.person.statements_url(), text=sig.person.name
+                ),
                 "Date Signed": sig.date or self.date,
                 "Status": sig.withdrawn_status(),
             }

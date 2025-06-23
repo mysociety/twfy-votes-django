@@ -2,15 +2,21 @@
 
 {% block title %}{{ settings.site_name }}{% endblock %}
 
-{% block content.title %}<h1 id="top-header">{{ person.name }} Votes: {{ period }}</h1>{% endblock %}
+{% block content.title %}<h1 id="top-header">{{ person.name }} - Signed Statements</h1>{% endblock %}
 
 {% block content.menu %}
 
-    {% include 'votes/includes/_person_menu.html' with current_section='votes' year=year period=period %}
+    {% include 'votes/includes/_person_menu.html' with current_section='statements' %}
 {% endblock content.menu %}
 
 {% block content.inner %}
-    {% style_df votes_df "Party alignment" %}
+    {% with statements_df as statements_df %}
+        {% if statements_df.shape.0 > 0 %}
+            {% style_df statements_df %}
+        {% else %}
+            <p>{{ person.name }} has not signed any statements.</p>
+        {% endif %}
+    {% endwith %}
 {% endblock content.inner %}
 
 {% block extracss %}
