@@ -986,6 +986,12 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def bulk_annotations_url(self) -> str:
+        """
+        Get the URL for the bulk vote annotations admin page
+        """
+        return reverse("forms", args=["bulk_vote_annotation", self.id])
+
     def first_breakdown(self):
         """
         This doesn't use the 'first' because it's been prefetched.
