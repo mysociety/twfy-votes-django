@@ -18,6 +18,9 @@ from ..models import (
     DivisionTagLink,
     Organization,
     PolicyComparisonPeriod,
+    Signature,
+    Statement,
+    StatementTagLink,
 )
 from .register import ImportOrder, import_register
 
@@ -218,6 +221,36 @@ def dump_models(quiet: bool = False):
             "extra_data"
         ].apply(json.dumps)
         all_agreement_tag_links.to_parquet(DATA_DIR / "agreement_tag_link.parquet")
+
+    # Export Statements
+    all_statements = pd.DataFrame(list(Statement.objects.all().values()))
+    if len(all_statements) > 0:
+        if "extra_data" in all_statements.columns:
+            all_statements["extra_data"] = all_statements["extra_data"].apply(
+                json.dumps
+            )
+        all_statements.to_parquet(DATA_DIR / "statements.parquet")
+
+    # Export Signatures
+    all_signatures = pd.DataFrame(list(Signature.objects.all().values()))
+    if len(all_signatures) > 0:
+        if "extra_data" in all_signatures.columns:
+            all_signatures["extra_data"] = all_signatures["extra_data"].apply(
+                json.dumps
+            )
+        all_signatures = all_signatures.drop(columns=["key"])
+        all_signatures.to_parquet(DATA_DIR / "signatures.parquet")
+
+    # Export StatementTagLinks
+    all_statement_tag_links = pd.DataFrame(
+        list(StatementTagLink.objects.all().values())
+    )
+    if len(all_statement_tag_links) > 0:
+        if "extra_data" in all_statement_tag_links.columns:
+            all_statement_tag_links["extra_data"] = all_statement_tag_links[
+                "extra_data"
+            ].apply(json.dumps)
+        all_statement_tag_links.to_parquet(DATA_DIR / "statement_tag_link.parquet")
 
     all_periods = pd.DataFrame(list(PolicyComparisonPeriod.objects.all().values()))
     all_periods.to_parquet(DATA_DIR / "policy_comparison_period.parquet")
