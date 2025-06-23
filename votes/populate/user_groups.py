@@ -10,4 +10,5 @@ from .register import ImportOrder, import_register
 def add_user_groups(quiet: bool = False):
     for g in PermissionGroupSlug:
         Group.objects.get_or_create(name=g)
-    rich.print(f"[green]{len(PermissionGroupSlug)}[/green] user groups added.")
+    if not quiet:
+        rich.print(f"[green]{len(PermissionGroupSlug)}[/green] user groups added.")
