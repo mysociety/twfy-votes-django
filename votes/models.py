@@ -32,6 +32,7 @@ from numpy import nan
 
 from twfy_votes.helpers.base_model import DjangoVoteModel
 from twfy_votes.helpers.typed_django.models import (
+    DictField,
     DoNothingForeignKey,
     Dummy,
     DummyManyToMany,
@@ -39,7 +40,9 @@ from twfy_votes.helpers.typed_django.models import (
     EmailField,
     JSONField,
     ManyToMany,
+    OptionalDateField,
     OptionalDateTimeField,
+    OptionalStr,
     PositiveIntegerField,
     PrimaryKey,
     TextField,
@@ -58,6 +61,7 @@ from .consts import (
     PolicyStrength,
     PowersAnalysis,
     RebellionPeriodType,
+    StatementType,
     StrengthMeaning,
     TagType,
     VotePosition,
@@ -297,6 +301,41 @@ class BaseTagLink(DjangoVoteModel, abstract=True):
                 edit_objects,  # type: ignore
                 ["extra_data"],
             )
+
+
+class StatementTagLink(BaseTagLink):
+    """
+    A link between a statement and a tag
+    """
+
+    tag: DoNothingForeignKey[DecisionTag] = related_name("statement_tag_links")
+    statement: DoNothingForeignKey[Statement] = related_name("tag_links")
+    statement_id: Dummy[int] = 0
+
+    @property
+    def decision_id(self) -> int:
+        return self.statement_id
+
+    @classmethod
+    def sync_tag_from_statement_id_list(
+        cls,
+        tag: DecisionTag,
+        statement_ids: list[int],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        """
+        Sync the tags for a set of links.
+        This will remove any existing links and add the new ones
+        """
+
+        links = [
+            cls(tag=tag, statement_id=x, extra_data={})
+            for x in statement_ids
+            if x is not None
+        ]
+        cls.sync_tags(links, quiet=quiet, clear_absent=clear_absent)
 
 
 class DivisionTagLink(BaseTagLink):
@@ -950,6 +989,30 @@ class Motion(DjangoVoteModel):
         return text
 
 
+class Statement(DjangoVoteModel):
+    key: str
+    chamber_slug: ChamberSlug
+    chamber_id: Dummy[int]
+    title: str
+    slug: str
+    statement_text: TextField
+    original_id: OptionalStr
+    chamber: DoNothingForeignKey[Chamber] = related_name("statements")
+    info_source: str = ""
+    date: datetime.date
+    type: StatementType = StatementType.OTHER
+    extra_info: DictField
+    tags: DummyManyToMany[DecisionTag] = field(
+        models.ManyToManyField,
+        to=DecisionTag,
+        related_name="statements",
+        through=StatementTagLink,
+        through_fields=("statement", "tag"),
+        default=None,
+    )
+    url: str = ""
+
+
 @is_valid_decision_model
 class Division(DjangoVoteModel):
     key: str  # this is the id from the twfy database (pw-date-divisionnum-chamber)
@@ -1430,6 +1493,23 @@ class DivisionPartyBreakdown(DjangoVoteModel):
     motion_majority: int
     for_motion_percentage: float
     motion_result_int: int
+
+
+class Signature(DjangoVoteModel):
+    """
+    A signature is connected to a statement (like a vote is to a division)
+    """
+
+    key: str
+    statement_id: Dummy[int]
+    statement: DoNothingForeignKey[Statement] = related_name("signatures")
+    person_id: Dummy[int]
+    person: DoNothingForeignKey[Person] = related_name("signatures")
+    date: OptionalDateField  # if different from statement date
+    order: int = 999
+    withdrawn: bool = False
+    withdrawn_date: OptionalDateField = None
+    extra_info: DictField
 
 
 class Vote(DjangoVoteModel):

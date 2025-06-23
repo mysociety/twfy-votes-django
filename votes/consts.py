@@ -51,6 +51,7 @@ class ChamberSlug(StrEnum):
     SCOTLAND = "scotland"
     WALES = "senedd"
     NI = "ni"
+    OTHER = "other"
 
     @classmethod
     def from_parlparse(cls, parlparse: str, *, passthrough: bool = False) -> str:
@@ -211,6 +212,13 @@ class IssueType(StrEnum):
     NO_STRONG_VOTES_AFTER_POWER_CHANGE = "no_strong_votes_after_power_change"
     STRONG_VOTE_GOV_AGENDA = "strong_vote_gov_agenda"
     ONLY_ONE_STRONG_VOTE = "only_one_strong_vote"
+
+
+class StatementType(StrEnum):
+    PROPOSED_MOTION = "proposed_motion"
+    PROPOSED_AMENDMENT = "proposed_amendment"
+    LETTER = "letter"
+    OTHER = "other"
 
 
 class OrganisationType(StrEnum):

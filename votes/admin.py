@@ -9,6 +9,7 @@ from .models import (
     Division,
     DivisionAnnotation,
     Person,
+    Statement,
     Update,
     VoteAnnotation,
     WhipReport,
@@ -44,6 +45,14 @@ class AgreementAdmin(admin.ModelAdmin):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("id", "name")
     search_fields = ("id",)
+
+
+@admin.register(Statement)
+class StatementAdmin(admin.ModelAdmin):
+    list_display = ("id", "chamber_slug", "date", "title", "type")
+    list_filter = ("chamber_slug", "type", "date")
+    search_fields = ("title", "key")
+    date_hierarchy = "date"
 
 
 @admin.register(AnalysisOverride)
