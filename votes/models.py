@@ -1002,6 +1002,7 @@ class Statement(DjangoVoteModel):
     date: datetime.date
     type: StatementType = StatementType.OTHER
     extra_info: DictField
+    signatures: DummyOneToMany[Signature] = related_name("statement")
     tags: DummyManyToMany[DecisionTag] = field(
         models.ManyToManyField,
         to=DecisionTag,
