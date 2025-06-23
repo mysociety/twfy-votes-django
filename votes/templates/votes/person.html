@@ -7,30 +7,8 @@
 {% endblock content.title %}
 
 {% block content.menu %}
-    <p>
-        <a id="side-top-header"
-           class="nav-link h6 pl-0 mb-0"
-           href="#top"
-           style="display:none">{{ person.name }}</a>
-    </p>
-    <li class="nav-item">
-        <a class="nav-link h6 pl-0 mb-0 {% if person_view == 'overview' %}active{% endif %}"
-           href="{% url 'person' person.id %}">Overview</a>
-    </li>
-    {% with person.policy_distribution_groups as pdg %}
-        {% if pdg %}
-            <li class="nav-item">
-                <ul class="nav flex-column py-2 border-top my-2">
-                    {% for record in person.policy_distribution_groups %}
-                        <li class="nav-item" class="nav-item">
-                            <a class="nav-link  h6 pl-0 mb-0"
-                               href="{% url 'person_policy' person.id record.chamber.slug record.party_slug record.period.slug.lower %}">Voting summary – {{ record.party_name }} (Period: {{ record.period.description }})</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endif %}
-    {% endwith %}
+
+    {% include 'votes/includes/_person_menu.html' with current_section='overview' %}
 {% endblock content.menu %}
 
 {% block content.inner %}
