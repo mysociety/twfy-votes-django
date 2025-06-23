@@ -109,6 +109,16 @@ class TestPersonPolicy(BaseTestResponse):
     has_json = True
 
 
+class TestPersonStatements(BaseTestResponse):
+    url = "/person/25846/statements"
+    has_json = True
+
+
+class TestStatement(BaseTestResponse):
+    url = "/statements/commons/2015-01-05/london-housing-and-foreign-investors"
+    has_json = False  # API endpoint is at different path
+
+
 class TestTagHome(BaseTestResponse):
     url = "/tags"
     has_json = True
