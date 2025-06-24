@@ -1,5 +1,7 @@
 {% extends "votes/base_with_menu.html" %}
 
+{% load hub_filters %}
+
 {% block title %}{{ settings.site_name }}{% endblock %}
 
 {% block content.title %}
@@ -21,6 +23,11 @@
 {% endblock content.menu %}
 
 {% block content.inner %}
+    {% featureflag permission_group.CAN_ADD_STATEMENT %}
+        <div class="mb-3">
+            <a href="{% url 'statement_form' %}" class="btn btn-primary">Add New Statement</a>
+        </div>
+    {% endfeatureflag %}
     {% for c in chambers %}
         <h2 class="section-header" id="{{ c.slug }}">{{ c.name }}</h2>
         {% with c.statement_year_range as year_range %}
