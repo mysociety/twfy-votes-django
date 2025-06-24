@@ -1,0 +1,45 @@
+{% extends "votes/base_with_menu.html" %}
+
+{% block title %}{{ settings.site_name }}{% endblock %}
+
+{% block content.title %}
+    <h1 id="top-header">Statements by Parliament and year</h1>
+{% endblock content.title %}
+
+{% block content.menu %}
+    <p>
+        <a id="side-top-header"
+           class="nav-link h6 pl-0 mb-0"
+           href="#top"
+           style="display:none">Statements by Parliament and year</a>
+    </p>
+    {% for chamber in chambers %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#{{ chamber.slug }}">{{ chamber.name }}</a>
+        </li>
+    {% endfor %}
+{% endblock content.menu %}
+
+{% block content.inner %}
+    {% for c in chambers %}
+        <h2 class="section-header" id="{{ c.slug }}">{{ c.name }}</h2>
+        {% with c.statement_year_range as year_range %}
+            {% if year_range %}
+                <p>
+                    Latest year: <a href="{% url 'statements_list' c.slug year_range|last %}">{{ year_range|last }}</a>
+                </p>
+                <div class="decision-year-list">
+                    <ul>
+                        {% for year in year_range %}
+                            <li>
+                                <a href="{% url 'statements_list' c.slug year %}">{{ year }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <p>No statements available for {{ c.name }}.</p>
+            {% endif %}
+        {% endwith %}
+    {% endfor %}
+{% endblock content.inner %}
