@@ -11,6 +11,9 @@ class PermissionGroupSlug(StrEnum):
     CAN_ADD_ANNOTATIONS = "can_add_annotations"  # can add annotations
     CAN_ADD_SELF_ANNOTATIONS = "can_add_self_annotations"  # can add self annotations
     CAN_ADD_STATEMENT = "can_add_statement"  # can add statements
+    CAN_ADD_SIGNATORIES = (
+        "can_add_signatories"  # can add signatories to existing statements
+    )
 
 
 class PolicyStrength(StrEnum):

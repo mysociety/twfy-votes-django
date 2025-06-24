@@ -34,6 +34,7 @@ from ..consts import (
     VotePosition,
 )
 from ..forms import (
+    AddSignatoriesForm,
     AgreementAnnotationForm,
     DivisionAnnotationForm,
     OpenRepAnnotationForm,
@@ -91,6 +92,8 @@ class FormsView(TemplateView):
                 return RepAnnotationForm
             case "statement":
                 return StatementForm
+            case "add_signatories":
+                return AddSignatoriesForm
             case _:
                 raise Http404("Form not found")
 
@@ -129,6 +132,10 @@ class FormsView(TemplateView):
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_STATEMENT
                 )
+            case "add_signatories":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_SIGNATORIES
+                )
             case _:
                 return False
 
@@ -140,6 +147,10 @@ class FormsView(TemplateView):
             case "statement":
                 # Statement forms don't need a decision instance
                 return None
+            case "add_signatories":
+                # For add_signatories, decision_id is actually the statement_id
+                statement = Statement.objects.get(id=decision_id)
+                return statement
             case _:
                 division = Division.objects.get(id=decision_id)
                 return division
@@ -149,7 +160,21 @@ class FormsView(TemplateView):
         decision = self.get_decision_instance(form_slug, decision_id)
         if not self.user_has_permission(form_slug):
             raise Http404(f"User does not have permission to save form {form_slug}")
-        form = form_model(request.POST)
+
+        if form_slug == "add_signatories":
+            # For add_signatories, decision is actually the statement
+            from typing import cast
+
+            from ..models import Statement as StatementModel
+
+            statement = cast(StatementModel, decision)
+            # Use the alternate constructor for POST data
+            form = form_model(request.POST, statement=statement)  # type: ignore
+        elif form_slug == "statement":
+            form = form_model(request.POST)
+        else:
+            form = form_model(request.POST)
+
         if form.is_valid():
             if form_slug == "statement":
                 # Statement form has different save signature and redirect
@@ -160,6 +185,10 @@ class FormsView(TemplateView):
                 statement = cast(
                     Statement, form.save(request, 0)
                 )  # Pass 0 as dummy decision_id
+                return redirect(statement.page_url())
+            elif form_slug == "add_signatories":
+                # Add signatories form saves to existing statement
+                statement = form.save(request, decision_id)
                 return redirect(statement.page_url())
             else:
                 form.save(request, decision_id)
@@ -178,10 +207,18 @@ class FormsView(TemplateView):
         if not self.user_has_permission(form_slug):
             raise Http404(f"User does not have permission to access form {form_slug}")
 
-        if issubclass(form_model, StatementForm):
+        if form_slug == "statement":
             # Statement form doesn't need a decision instance
             form = form_model()
             decision = None
+        elif form_slug == "add_signatories":
+            # AddSignatoriesForm needs the statement
+            decision = self.get_decision_instance(form_slug, decision_id)
+            from typing import cast
+
+            from ..forms import AddSignatoriesForm
+
+            form = cast(AddSignatoriesForm, form_model).from_statement_id(decision_id)
         else:
             decision = self.get_decision_instance(form_slug, decision_id)
             form = form_model.from_decision_id(decision_id)
