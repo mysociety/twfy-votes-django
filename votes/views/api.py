@@ -307,6 +307,48 @@ class StatementSchema(ModelSchema):
         fields = "__all__"
 
 
+class StatementListSchema(ModelSchema):
+    url: str
+    nice_title: str
+    type_display: str
+    signature_count: int
+
+    @staticmethod
+    def resolve_url(obj: Statement) -> str:
+        return obj.page_url()
+
+    @staticmethod
+    def resolve_nice_title(obj: Statement) -> str:
+        return obj.nice_title()
+
+    @staticmethod
+    def resolve_type_display(obj: Statement) -> str:
+        return obj.type_display()
+
+    @staticmethod
+    def resolve_signature_count(obj: Statement) -> int:
+        # Use the annotated signature_count field from the queryset
+        return getattr(obj, "signature_count", 0)
+
+    class Meta:
+        model = Statement
+        fields = [
+            "id",
+            "key",
+            "chamber_slug",
+            "title",
+            "slug",
+            "statement_text",
+            "original_id",
+            "chamber",
+            "info_source",
+            "date",
+            "type",
+            "extra_info",
+            "url",
+        ]
+
+
 class PairedPolicySchema(BaseModel):
     policy: PolicySchema
     own_distribution: VoteDistributionSchema
@@ -526,7 +568,7 @@ def get_person_statements(request: HttpRequest, person_id: int):
 
 
 @api.get(
-    "/statements/{chamber_slug}/{statement_date}/{slug:statement_slug}.json",
+    "/statement/{chamber_slug}/{statement_date}/{slug:statement_slug}.json",
     response=StatementSchema,
 )
 def get_statement(
@@ -556,6 +598,37 @@ def get_statement(
         raise ValueError(f"Statement not found: {statement_slug}")
 
     return statement
+
+
+@api.get("/statements/{chamber_slug}/{year}.json", response=list[StatementListSchema])
+def get_statements_by_year(request: HttpRequest, chamber_slug: str, year: int):
+    from django.db.models import Count
+
+    return (
+        Statement.objects.filter(chamber_slug=chamber_slug, date__year=year)
+        .annotate(signature_count=Count("signatures"))
+        .select_related("chamber")
+        .order_by("-date", "title")
+    )
+
+
+@api.get(
+    "/statements/{chamber_slug}/{int:year}/{int:month}.json",
+    response=list[StatementListSchema],
+)
+def get_statements_by_month(
+    request: HttpRequest, chamber_slug: str, year: int, month: int
+):
+    from django.db.models import Count
+
+    return (
+        Statement.objects.filter(
+            chamber_slug=chamber_slug, date__year=year, date__month=month
+        )
+        .annotate(signature_count=Count("signatures"))
+        .select_related("chamber")
+        .order_by("-date", "title")
+    )
 
 
 @api.get(

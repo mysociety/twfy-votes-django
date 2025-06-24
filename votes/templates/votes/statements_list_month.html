@@ -1,0 +1,17 @@
+{% extends "votes/base.html" %}
+
+{% block extracss %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+{% endblock extracss %}
+
+{% block extrajs %}
+
+    {% include 'votes/includes/_table_script.html' %}
+{% endblock extrajs %}
+
+{% block content.inner %}
+    <h1>Statements in {{ search.chamber.name }}</h1>
+    <p>{{ search.statements|length }} statements from {{ search.start_date }} to {{ search.end_date }} (table)</p>
+    {% style_df search.statements_df %}
+{% endblock content.inner %}

@@ -73,6 +73,7 @@ from .helper_models import (
     DivisionSearch,
     PolicyCollection,
     PolicyReport,
+    StatementSearch,
 )
 from .mixins import TitleMixin
 
@@ -1128,3 +1129,75 @@ class DuckDBDownloadView(View):
             return JsonResponse({"error": "Invalid authentication token"}, status=401)
 
         return redirect("/static/data/twfy_votes.duckdb")
+
+
+class StatementsPageView(TitleMixin, TemplateView):
+    page_title = "Statements"
+    template_name = "votes/statements.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["chambers"] = Chamber.objects.all().exclude(slug="ni")
+        context["og_image"] = reverse("general_opengraph_image", args=["statements"])
+        return context
+
+
+class StatementsListPageView(TitleMixin, TemplateView):
+    page_title = "Statements List"
+    template_name = "votes/statements_list.html"
+
+    def statement_search(
+        self, chamber: Chamber, start_date: datetime.date, end_date: datetime.date
+    ):
+        statements = (
+            Statement.objects.filter(
+                chamber=chamber, date__range=(start_date, end_date)
+            )
+            .prefetch_related("tags")
+            .annotate(signature_count=Count("signatures"))
+            .order_by("-date")
+        )
+
+        return StatementSearch(
+            start_date=start_date,
+            end_date=end_date,
+            chamber=chamber,
+            statements=list(statements),
+        )
+
+    def get_context_data(self, chamber_slug: str, year: int, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year_start = datetime.date(year, 1, 1)
+        year_end = datetime.date(year, 12, 31)
+        chamber = Chamber.objects.get(slug=chamber_slug)
+
+        search = self.statement_search(chamber, year_start, year_end)
+        context["search"] = search
+        context["page_title"] = f"{year} {chamber.name} Statements"
+        context["og_image"] = reverse(
+            "statements_list_opengraph_image", args=[chamber_slug, year]
+        )
+
+        return context
+
+
+class StatementsListMonthPageView(StatementsListPageView):
+    page_title = "Statements List Month"
+    template_name = "votes/statements_list_month.html"
+
+    def get_context_data(self, chamber_slug: str, year: int, month: int, **kwargs):
+        context = super(StatementsListPageView, self).get_context_data(**kwargs)
+        month_start = datetime.date(year, month, 1)
+        month_end = datetime.date(year, month, calendar.monthrange(year, month)[1])
+
+        chamber = Chamber.objects.get(slug=chamber_slug)
+        search = self.statement_search(chamber, month_start, month_end)
+        context["search"] = search
+        context["page_title"] = (
+            f"{month_start.strftime('%B %Y')} {chamber.name} Statements"
+        )
+        context["og_image"] = reverse(
+            "statements_list_month_opengraph_image", args=[chamber_slug, year, month]
+        )
+
+        return context

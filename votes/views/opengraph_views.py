@@ -216,3 +216,25 @@ class DecisionsListOpenGraphImageView(BaseOpenGraphView):
             return draw_custom_image(header, include_logo=True)
         except (Chamber.DoesNotExist, ValueError):
             raise Http404("Chamber or date not found")
+
+
+class StatementsListOpenGraphImageView(BaseOpenGraphView):
+    """View for serving OpenGraph images for statements list pages."""
+
+    def get_image(
+        self, request, chamber_slug: str, year: int, month: int | None = None, **kwargs
+    ) -> Image.Image:
+        try:
+            chamber = Chamber.objects.get(slug=chamber_slug)
+
+            if month:
+                # Format for monthly view
+                date_obj = datetime.date(year, month, 1)
+                header = f"{date_obj.strftime('%B %Y')} {chamber.name} Statements"
+            else:
+                # Format for yearly view
+                header = f"{chamber.name} Statements ({year})"
+
+            return draw_custom_image(header, include_logo=True)
+        except (Chamber.DoesNotExist, ValueError):
+            raise Http404("Chamber or date not found")

@@ -831,6 +831,13 @@ class Chamber(DjangoVoteModel):
         years = rel_divisions + rel_agreements
         return sorted(list(set(years)))
 
+    def statement_year_range(self) -> list[int]:
+        """
+        Return a list of all years there is a statement for this chamber.
+        """
+        rel_statements = [x.date.year for x in Statement.objects.filter(chamber=self)]
+        return sorted(list(set(rel_statements)))
+
     @property
     def pw_alias(self):
         # Alias for internal debate storage
