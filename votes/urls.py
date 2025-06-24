@@ -95,7 +95,7 @@ def fast_path(
     # and any just plain {year} to <year>
     route = re.sub(r"{(\w+)}", r"<\1>", route)
 
-    return path(route, view.as_view(), name=name)
+    return path(route, view.as_view(), name=name, kwargs=kwargs or {})
 
 
 urlpatterns = [
@@ -183,6 +183,12 @@ urlpatterns = [
         "submit/{form_slug:slug}/{decision_id:int}",
         FormsView,
         name="forms",
+    ),
+    fast_path(
+        "submit/statement",
+        FormsView,
+        kwargs={"form_slug": "statement", "decision_id": 0},
+        name="statement_form",
     ),
     fast_path("help/{markdown_slug:slug}", MarkdownView, name="help"),
     fast_path("data", DataView, name="data"),
