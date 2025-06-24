@@ -39,6 +39,7 @@ from ..forms import (
     OpenRepAnnotationForm,
     RepAnnotationForm,
     RepWhipForm,
+    StatementForm,
     WhipForm,
 )
 from ..models import (
@@ -88,6 +89,8 @@ class FormsView(TemplateView):
                 return OpenRepAnnotationForm
             case "rep_annotation":
                 return RepAnnotationForm
+            case "statement":
+                return StatementForm
             case _:
                 raise Http404("Form not found")
 
@@ -122,6 +125,10 @@ class FormsView(TemplateView):
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_SELF_ANNOTATIONS
                 )
+            case "statement":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_STATEMENT
+                )
             case _:
                 return False
 
@@ -130,6 +137,9 @@ class FormsView(TemplateView):
             case "agreement_annotation":
                 agreement = Agreement.objects.get(id=decision_id)
                 return agreement
+            case "statement":
+                # Statement forms don't need a decision instance
+                return None
             case _:
                 division = Division.objects.get(id=decision_id)
                 return division
@@ -141,9 +151,22 @@ class FormsView(TemplateView):
             raise Http404(f"User does not have permission to save form {form_slug}")
         form = form_model(request.POST)
         if form.is_valid():
-            form.save(request, decision_id)
+            if form_slug == "statement":
+                # Statement form has different save signature and redirect
+                from typing import cast
 
-            return redirect(decision.url())
+                from votes.models import Statement
+
+                statement = cast(
+                    Statement, form.save(request, 0)
+                )  # Pass 0 as dummy decision_id
+                return redirect(statement.page_url())
+            else:
+                form.save(request, decision_id)
+                if decision:
+                    return redirect(decision.url())
+                else:
+                    return redirect("statements")
 
         else:
             # return the form with errors
@@ -155,9 +178,13 @@ class FormsView(TemplateView):
         if not self.user_has_permission(form_slug):
             raise Http404(f"User does not have permission to access form {form_slug}")
 
-        decision = self.get_decision_instance(form_slug, decision_id)
-
-        form = form_model.from_decision_id(decision_id)
+        if issubclass(form_model, StatementForm):
+            # Statement form doesn't need a decision instance
+            form = form_model()
+            decision = None
+        else:
+            decision = self.get_decision_instance(form_slug, decision_id)
+            form = form_model.from_decision_id(decision_id)
 
         return {"form": form, "decision": decision}
 

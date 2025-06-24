@@ -10,6 +10,7 @@ class PermissionGroupSlug(StrEnum):
     CAN_REPORT_SELF_WHIP = "can_report_self_whip"  # can add self whipreports
     CAN_ADD_ANNOTATIONS = "can_add_annotations"  # can add annotations
     CAN_ADD_SELF_ANNOTATIONS = "can_add_self_annotations"  # can add self annotations
+    CAN_ADD_STATEMENT = "can_add_statement"  # can add statements
 
 
 class PolicyStrength(StrEnum):
