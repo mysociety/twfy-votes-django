@@ -191,6 +191,12 @@ urlpatterns = [
         kwargs={"form_slug": "statement", "decision_id": 0},
         name="statement_form",
     ),
+    fast_path(
+        "submit/add_signatories/{decision_id:int}",
+        FormsView,
+        kwargs={"form_slug": "add_signatories"},
+        name="add_signatories_form",
+    ),
     fast_path("help/{markdown_slug:slug}", MarkdownView, name="help"),
     fast_path("data", DataView, name="data"),
     fast_path(
