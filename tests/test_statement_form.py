@@ -48,14 +48,14 @@ def test_regular_user():
 def test_statement_form_visible_anonymous(client: Client):
     """Anonymous users should not be able to access the statement form"""
     response = client.get("/submit/statement")
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 
 def test_statement_form_visible_regular_user(client: Client, test_regular_user: User):
     """Regular users without permissions should not be able to access the statement form"""
     client.force_login(test_regular_user)
     response = client.get("/submit/statement")
-    assert response.status_code == 404
+    assert response.status_code == 403
 
 
 def test_statement_form_visible_superuser(client: Client, test_super_user: User):
@@ -213,7 +213,7 @@ def test_statement_form_submission_permission_denied(
     response = client.post("/submit/statement", form_data)
 
     # Should get 404 due to permission check
-    assert response.status_code == 404
+    assert response.status_code == 403
 
     # Check that no statement was created
     statement = Statement.objects.filter(title="Unauthorized Statement").first()
@@ -301,3 +301,52 @@ def test_statement_form_fields_rendered(client: Client, test_super_user: User):
     assert "Source URL" in content
     assert "Statement Content" in content
     assert "Signatories" in content
+
+
+def test_statement_form_submission_former_mp_signatory(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test statement form submission with signatory who was an MP in a previous session but isn't current"""
+    client.force_login(test_super_user)
+
+    form_data = {
+        "statement_title": "Test Statement Former MP",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION,
+        "content": "This statement includes a former MP as signatory.",
+        # Using a date when they might not be current - this should test the edge case
+        # of someone who was an MP in previous sessions
+        "signatories": "Diane Abbott\nTony Blair",  # Assuming 'Former MP Name' is someone who was an MP but isn't current
+    }
+
+    response = client.post("/submit/statement", form_data)
+
+    # Should return form with errors for the former MP who can't be found for this date
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Could not find person" in content or response.status_code == 302
+
+
+def test_statement_form_submission_other_chamber_member(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test statement form submission with signatory who is a member of a different chamber"""
+    client.force_login(test_super_user)
+
+    form_data = {
+        "statement_title": "Test Statement Other Chamber",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,  # Commons chamber
+        "statement_type": StatementType.LETTER,
+        "content": "This statement attempts to include a MSP member as signatory to a Commons statement.",
+        # Trying to add someone who is in Lords to a Commons statement
+        "signatories": "Diane Abbott\nKaren Adam",
+    }
+
+    response = client.post("/submit/statement", form_data)
+
+    # Should return form with errors for the Lords member who shouldn't sign Commons statements
+    assert response.status_code == 200
+    content = response.content.decode()
+    assert "Could not find person" in content

@@ -565,4 +565,123 @@ class StatementForm(forms.Form):
 
         return statement
 
+
+class AddSignatoriesForm(forms.Form):
+    title = "Add Signatories to Statement"
+    desc = "This form is for adding new signatories to an existing statement."
+
+    statement_id = forms.IntegerField(
+        widget=forms.HiddenInput(),
+        label="Statement ID",
+    )
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        label="Signature Date",
+        help_text="Date when the signatories signed (may be different from statement date)",
+    )
+    signatories = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 5}),
+        label="New Signatories (one name per line)",
+        help_text="Enter one signatory name per line. Names will be validated against the chamber membership.",
+        required=False,  # We'll handle validation in clean_signatories
+    )
+
+    def __init__(self, *args, statement: Statement | None = None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.statement = statement
+        if statement:
+            self.initial["statement_id"] = statement.id
+
+    @classmethod
+    def from_statement_id(cls, statement_id: int) -> "AddSignatoriesForm":
+        """Create form from a statement ID"""
+        statement = Statement.objects.get(id=statement_id)
+        return cls(statement=statement)
+
+    def clean_date(self):
+        """Ensure the date is not more than a month after the current date."""
+        date = self.cleaned_data["date"]
+        if not isinstance(date, datetime.date):
+            raise forms.ValidationError("Invalid date format.")
+        if date > datetime.date.today() + datetime.timedelta(days=30):
+            raise forms.ValidationError("Date cannot be more than a month after today.")
+        return date
+
+    def clean_statement_id(self):
+        """Validate that the statement exists"""
+        statement_id = self.cleaned_data["statement_id"]
+        try:
+            statement = Statement.objects.get(id=statement_id)
+            self.statement = statement
+            return statement_id
+        except Statement.DoesNotExist:
+            raise forms.ValidationError("Statement not found.")
+
+    def clean_signatories(self):
+        """Validate that all signatories can be found and return person IDs"""
+        signatories_text = self.cleaned_data.get("signatories", "")
+        date = self.cleaned_data.get("date")
+
+        if not self.statement:
+            # Try to get statement from statement_id if not set
+            statement_id = self.cleaned_data.get("statement_id")
+            if statement_id:
+                try:
+                    self.statement = Statement.objects.get(id=statement_id)
+                except Statement.DoesNotExist:
+                    raise forms.ValidationError(
+                        "Cannot validate signatories without valid statement."
+                    )
+            else:
+                raise forms.ValidationError(
+                    "Cannot validate signatories without statement information."
+                )
+
+        if not date:
+            raise forms.ValidationError(
+                "Cannot validate signatories without signature date."
+            )
+
+        chamber_slug = self.statement.chamber.popolo_slug_alias()
+        validated_names = validate_signatories_text(
+            signatories_text, chamber_slug, date
+        )
+
+        # Check for duplicate signatories (people who already signed this statement)
+        existing_signatures = Signature.objects.filter(statement=self.statement)
+        existing_person_ids = set()
+
+        for signature in existing_signatures:
+            existing_person_ids.add(signature.person_id)
+
+        duplicate_errors = []
+        for line_num, name in enumerate(validated_names, 1):
+            person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
+            if person_id and person_id in existing_person_ids:
+                duplicate_errors.append(
+                    f"Line {line_num}: '{name}' has already signed this statement"
+                )
+
+        if duplicate_errors:
+            raise forms.ValidationError(duplicate_errors)
+
+        return validated_names
+
+    def save(self, request: HttpRequest, statement_id: int) -> Statement:
+        """Add new signatories to the existing statement"""
+        statement = Statement.objects.get(id=statement_id)
+        signatories = self.cleaned_data["signatories"]
+        date = self.cleaned_data["date"]
+
+        # Get the current maximum order to continue numbering
+        existing_signatures = Signature.objects.filter(statement=statement)
+        max_order = 0
+        if existing_signatures.exists():
+            max_order = max(sig.order for sig in existing_signatures)
+
+        # Create new signatures starting after the existing ones
+        create_signatures_for_statement(
+            statement, signatories, date, start_order=max_order + 1
+        )
+
         return statement

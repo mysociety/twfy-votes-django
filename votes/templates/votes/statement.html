@@ -44,6 +44,13 @@
             <a class="nav-link h6 pl-0 mb-0" href="{{ statement.url }}">View source</a>
         </li>
     {% endif %}
+    {% featureflag permission_group.CAN_ADD_SIGNATORIES %}
+        <hr />
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0"
+               href="{% url 'add_signatories_form' statement.id %}">Add Signatories</a>
+        </li>
+    {% endfeatureflag %}
 {% endblock content.menu %}
 
 {% block content.inner %}

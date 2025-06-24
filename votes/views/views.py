@@ -38,6 +38,7 @@ from ..consts import (
     VotePosition,
 )
 from ..forms import (
+    AddSignatoriesForm,
     AgreementAnnotationForm,
     BulkVoteAnnotationForm,
     DivisionAnnotationForm,
@@ -100,6 +101,8 @@ class FormsView(TemplateView):
                 return BulkVoteAnnotationForm
             case "statement":
                 return StatementForm
+            case "add_signatories":
+                return AddSignatoriesForm
             case _:
                 raise Http404("Form not found")
 
@@ -142,6 +145,10 @@ class FormsView(TemplateView):
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_STATEMENT
                 )
+            case "add_signatories":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_SIGNATORIES
+                )
             case _:
                 return False
 
@@ -153,6 +160,10 @@ class FormsView(TemplateView):
             case "statement":
                 # Statement forms don't need a decision instance
                 return None
+            case "add_signatories":
+                # For add_signatories, decision_id is actually the statement_id
+                statement = Statement.objects.get(id=decision_id)
+                return statement
             case _:
                 division = Division.objects.get(id=decision_id)
                 return division
@@ -164,29 +175,25 @@ class FormsView(TemplateView):
             raise PermissionDenied(
                 f"User does not have permission to save form {form_slug}"
             )
-        form = form_model(request.POST)
+
+        match form_slug:
+            case "add_signatories":
+                # For add_signatories, decision is actually the statement
+                form = form_model(request.POST, statement=decision)  # type: ignore
+            case _:
+                form = form_model(request.POST)
+
         if form.is_valid():
-            if form_slug == "statement":
-                # Statement form has different save signature and redirect
-                from typing import cast
+            result = form.save(request, 0 if form_slug == "statement" else decision_id)
 
-                from votes.models import Statement
-
-                statement = cast(
-                    Statement, form.save(request, 0)
-                )  # Pass 0 as dummy decision_id
-                return redirect(statement.page_url())
-            else:
-                result = form.save(request, decision_id)
-
-                # If the form's save method returns a message, add it to Django messages
-                if result and isinstance(result, str):
+            match result:
+                case str():
                     messages.success(request, result)
+                case Statement():
+                    return redirect(result.page_url())
 
-                if decision:
-                    return redirect(decision.url())
-                else:
-                    return redirect("statements")
+            if isinstance(decision, Division | Agreement):
+                return redirect(decision.url())
 
         else:
             # Form has validation errors, return the form with errors
@@ -201,12 +208,19 @@ class FormsView(TemplateView):
             )
 
         if issubclass(form_model, StatementForm):
-            # Statement form doesn't need a decision instance
-            form = form_model()
             decision = None
+            form = form_model()
+        elif issubclass(form_model, AddSignatoriesForm):
+            decision = Statement.objects.get(id=decision_id)
+            form = form_model(statement=decision)
         else:
+            # For other forms, we need to fetch the decision instance
+            # This could be a Division or Agreement depending on the form
             decision = self.get_decision_instance(form_slug, decision_id)
             form = form_model.from_decision_id(decision_id)
+
+            if decision is None:
+                raise Http404("Decision not found for the given ID")
 
         # For bulk vote annotation form, pre-populate with existing annotations
         if form_slug == "bulk_vote_annotation":
