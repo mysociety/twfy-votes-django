@@ -581,7 +581,7 @@ class StatementPageView(TitleMixin, TemplateView):
     ):
         context = super().get_context_data(**kwargs)
         try:
-            statement = Statement.objects.get(
+            statement = Statement.objects.prefetch_related("tags").get(
                 chamber__slug=chamber_slug,
                 date=statement_date,
                 slug=statement_slug,
@@ -607,7 +607,8 @@ class TagsHomeView(TitleMixin, TemplateView):
             query = DecisionTag.objects.all()
         tags = query.annotate(
             decision_count=Count("divisions", distinct=True)
-            + Count("agreements", distinct=True)
+            + Count("agreements", distinct=True),
+            statement_count=Count("statements", distinct=True),
         ).order_by("tag_type", "slug")
 
         context["tags"] = tags
@@ -623,12 +624,27 @@ class TagListView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["tag_type"] = tag_type
         context["tag_slug"] = tag_slug
-        tag = DecisionTag.objects.get(tag_type=tag_type, slug=tag_slug)
+        tag = DecisionTag.objects.prefetch_related(
+            "divisions",
+            "agreements",
+            "statements",
+            "divisions__tags",
+            "agreements__tags",
+            "statements__tags",
+        ).get(tag_type=tag_type, slug=tag_slug)
         context["page_title"] = f"Tag: {tag.name}"
         context["tag"] = tag
         context["decisions_by_chamber"] = tag.decisions_df_by_chamber()
+        context["statements_by_chamber"] = tag.statements_df_by_chamber()
         context["total_len"] = sum(
             [len(x) for x in context["decisions_by_chamber"].values()]
+        )
+        context["total_statements_len"] = (
+            sum([len(x) for x in context["statements_by_chamber"].values()])
+            if context["statements_by_chamber"]
+            else 0
+            if context["statements_by_chamber"]
+            else 0
         )
         context["og_image"] = reverse("tag_opengraph_image", args=[tag_type, tag_slug])
         return context

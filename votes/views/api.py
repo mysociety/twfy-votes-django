@@ -255,15 +255,6 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
-class TagWithDecisionsSchema(ModelSchema):
-    divisions: list[DivisionSchema]
-    agreements: list[AgreementSchema]
-
-    class Meta:
-        model = DecisionTag
-        fields = "__all__"
-
-
 class RebellionRateSchema(ModelSchema):
     class Meta:
         model = RebellionRate
@@ -286,6 +277,7 @@ class SignatureSchema(ModelSchema):
 
 class StatementSchema(ModelSchema):
     signatures: list[SignatureSchema]
+    tags: list[DecisionTagSchema]
     url: str
     nice_title: str
     type_display: str
@@ -304,6 +296,16 @@ class StatementSchema(ModelSchema):
 
     class Meta:
         model = Statement
+        fields = "__all__"
+
+
+class TagWithDecisionsSchema(ModelSchema):
+    divisions: list[DivisionSchema]
+    agreements: list[AgreementSchema]
+    statements: list[StatementSchema]
+
+    class Meta:
+        model = DecisionTag
         fields = "__all__"
 
 
@@ -415,7 +417,24 @@ def tag_to_api(request: HttpRequest, tag_type: str, tag: str):
     return (
         DecisionTag.objects.filter(tag_type=tag_type, slug=tag)
         .prefetch_related(
-            "divisions", "agreements", "divisions__tags", "agreements__tags"
+            "divisions",
+            "divisions__tags",
+            "divisions__chamber",
+            "divisions__motion",
+            "divisions__votes",
+            "divisions__votes__person",
+            "divisions__overall_breakdowns",
+            "divisions__party_breakdowns",
+            "divisions__is_gov_breakdowns",
+            "agreements",
+            "agreements__tags",
+            "agreements__chamber",
+            "agreements__motion",
+            "statements",
+            "statements__tags",
+            "statements__chamber",
+            "statements__signatures",
+            "statements__signatures__person",
         )
         .first()
     )
@@ -590,6 +609,7 @@ def get_statement(
         .prefetch_related(
             "signatures",
             "signatures__person",
+            "tags",
         )
         .first()
     )

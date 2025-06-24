@@ -23,6 +23,11 @@
             <a class="nav-link h6 pl-0 mb-0" href="#metadata">Metadata</a>
         </li>
     {% endif %}
+    {% if statement.tags.all %}
+        <li class="nav-item">
+            <a class="nav-link h6 pl-0 mb-0" href="#tags">Tags</a>
+        </li>
+    {% endif %}
     <li class="nav-item">
         <a class="nav-link h6 pl-0 mb-0" href="#signatures">Signatures</a>
     </li>
@@ -73,6 +78,17 @@
                 </table>
             {% endif %}
         {% endwith %}
+    {% endif %}
+    {% if statement.tags.all %}
+        <h2 class="section-header" id="tags">Tags</h2>
+        <p>This statement is tagged with the following:</p>
+        <ul>
+            {% for tag in statement.tags.all %}
+                <li>
+                    <a href="{{ tag.url }}">{{ tag.name }}</a> - {{ tag.desc|truncatewords:20 }}
+                </li>
+            {% endfor %}
+        </ul>
     {% endif %}
     <h2 class="section-header" id="signatures">Signatures</h2>
     {% with statement.signatures_df as signatures_df %}
