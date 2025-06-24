@@ -14,6 +14,7 @@ from .views.opengraph_views import (
     MarkdownOpenGraphImageView,
     PersonOpenGraphImageView,
     PolicyOpenGraphImageView,
+    StatementsListOpenGraphImageView,
     TagOpenGraphImageView,
 )
 from .views.views import (
@@ -39,6 +40,9 @@ from .views.views import (
     PolicyPageView,
     PolicyReportPageView,
     StatementPageView,
+    StatementsListMonthPageView,
+    StatementsListPageView,
+    StatementsPageView,
     TagListView,
     TagsHomeView,
 )
@@ -124,9 +128,20 @@ urlpatterns = [
         name="agreement",
     ),
     fast_path(
-        "statements/{chamber_slug:str}/{statement_date:date}/{statement_slug:slug}",
+        "statement/{chamber_slug:str}/{statement_date:date}/{statement_slug:slug}",
         StatementPageView,
         name="statement",
+    ),
+    fast_path("statements", StatementsPageView, name="statements"),
+    fast_path(
+        "statements/{chamber_slug:str}/{year:int}",
+        StatementsListPageView,
+        name="statements_list",
+    ),
+    fast_path(
+        "statements/{chamber_slug:str}/{year:int}/{month:int}",
+        StatementsListMonthPageView,
+        name="statements_list_month",
     ),
     fast_path(
         "decisions/{chamber_slug:str}/{year:int}",
@@ -218,5 +233,15 @@ urlpatterns = [
         name="decisions_list_month_opengraph_image",
     ),
     fast_path("data/duck", DuckDBDownloadView, name="duckdb_download"),
+    fast_path(
+        "opengraph/statements/{chamber_slug:slug}/{year:int}",
+        StatementsListOpenGraphImageView,
+        name="statements_list_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/statements/{chamber_slug:slug}/{year:int}/{month:int}",
+        StatementsListOpenGraphImageView,
+        name="statements_list_month_opengraph_image",
+    ),
     path("", api.urls),
 ]

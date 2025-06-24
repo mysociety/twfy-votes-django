@@ -63,6 +63,22 @@ li.decision-type-division::marker {
     content: "🟡 ";
 }
 
+li.statement-type-proposed_motion::marker {
+    content: "🟢 ";
+}
+
+li.statement-type-proposed_amendment::marker {
+    content: "🔵 ";
+}
+
+li.statement-type-letter::marker {
+    content: "📄 ";
+}
+
+li.statement-type-other::marker {
+    content: "⚪ ";
+}
+
 
 
 

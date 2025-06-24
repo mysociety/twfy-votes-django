@@ -27,6 +27,7 @@ from ..models import (
     Policy,
     PolicyDivisionLink,
     PolicyGroup,
+    Statement,
     UrlColumn,
     VoteDistribution,
 )
@@ -440,3 +441,27 @@ class PolicyReport(BaseModel):
         if strong_count == 1:
             report.add_policy_issue(issue=IssueType.ONLY_ONE_STRONG_VOTE, warning=True)
         return report
+
+
+class StatementSearch(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+    start_date: datetime.date
+    end_date: datetime.date
+    chamber: Chamber
+    statements: list[Statement]
+
+    def statements_df(self) -> pd.DataFrame:
+        """
+        This depends on signature_count having been annotated in the queryset.
+        """
+        data = [
+            {
+                "Date": s.date,
+                "Statement": UrlColumn(url=s.page_url(), text=s.nice_title()),
+                "Type": s.type_display(),
+                "Signatures": getattr(s, "signature_count", 0),
+            }
+            for s in self.statements
+        ]
+
+        return pd.DataFrame(data=data)
