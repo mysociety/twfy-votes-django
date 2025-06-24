@@ -10,6 +10,10 @@
     name: Tied vote
     tag_type: misc
     description: Where this actually happens, this is a win for the status quo. In some cases this differs from the teller read result (which is the one that matters).
+-   slug: objection_to_si
+    name: Objection to Statutory Instrument
+    tag_type: statement_tags
+    description: Objection (or prayer against) a SI through the negative procedure. 
 -   slug: gov_aye_opp_lean_no
     name: "Divided opposition: Government Aye, Opposition divided"
     tag_type: gov_clusters

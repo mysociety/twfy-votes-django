@@ -164,6 +164,7 @@ class DecisionTag(DjangoVoteModel):
     extra_data: JSONField = field(default=dict)
     agreements: DummyManyToMany[Agreement] = related_name("tags")
     divisions: DummyManyToMany[Division] = related_name("tags")
+    statements: DummyManyToMany["Statement"] = related_name("tags")
 
     def desc_markdown(self):
         """
@@ -182,6 +183,9 @@ class DecisionTag(DjangoVoteModel):
             self.agreements.all().prefetch_related("tags", "chamber", "motion")
         ) + list(self.divisions.all().prefetch_related("tags", "chamber", "motion"))
 
+    def get_statements(self):
+        return list(self.statements.all().prefetch_related("tags", "chamber"))
+
     def decisions_df_by_chamber(self) -> dict[Chamber, pd.DataFrame]:
         """
         Get a dataframe of decisions by chamber
@@ -191,8 +195,9 @@ class DecisionTag(DjangoVoteModel):
 
         # group by chamber
         chambers = {}
-        for chamber, df in data.groupby("Chamber"):
-            chambers[chamber] = df
+        if not data.empty:
+            for chamber, df in data.groupby("Chamber"):
+                chambers[chamber] = df
 
         return chambers
 
@@ -220,8 +225,43 @@ class DecisionTag(DjangoVoteModel):
         ]
 
         df = pd.DataFrame(data=data)
-        df = df.sort_values("Date", ascending=False)
+        if not df.empty:
+            df = df.sort_values("Date", ascending=False)
         return df
+
+    def statements_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of statements for this tag
+        """
+        data = [
+            {
+                "Chamber": s.chamber,
+                "Date": s.date,
+                "Statement": UrlColumn(url=s.page_url(), text=s.nice_title()),
+                "Type": s.type_display(),
+            }
+            for s in self.get_statements()
+        ]
+
+        df = pd.DataFrame(data=data)
+        if not df.empty:
+            df = df.sort_values("Date", ascending=False)
+
+        return df
+
+    def statements_df_by_chamber(self) -> dict[Chamber, pd.DataFrame]:
+        """
+        Get a dataframe of statements by chamber
+        """
+        data = self.statements_df()
+
+        # group by chamber
+        chambers = {}
+        if not data.empty:
+            for chamber, df in data.groupby("Chamber"):
+                chambers[chamber] = df
+
+        return chambers
 
 
 class BaseTagLink(DjangoVoteModel, abstract=True):
