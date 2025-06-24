@@ -35,7 +35,10 @@
         <ul>
             {% for tag in tags %}
                 <li class="tag">
-                    <a href="{{ tag.url }}">{{ tag.name }}</a> ({{ tag.decision_count }})
+                    <a href="{{ tag.url }}">{{ tag.name }}</a>
+                    ({{ tag.decision_count }} decisions
+                    {% if tag.statement_count %}, {{ tag.statement_count }} statements{% endif %}
+                    )
                 </li>
             {% endfor %}
         </ul>

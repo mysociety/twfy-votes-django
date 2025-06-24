@@ -229,6 +229,7 @@ class OrganisationType(StrEnum):
 
 class TagType(StrEnum):
     GOV_CLUSTERS = "gov_clusters"
+    STATEMENT_TAGS = "statement_tags"
     MISC = "misc"
     LEGISLATION = "legislation"
 
