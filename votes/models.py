@@ -807,6 +807,24 @@ class Chamber(DjangoVoteModel):
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
 
+    def popolo_slug_alias(self) -> str:
+        """
+        Return the slug used in Popolo for this chamber.
+        """
+        match self.slug:
+            case ChamberSlug.COMMONS:
+                return "house-of-commons"
+            case ChamberSlug.LORDS:
+                return "house-of-lords"
+            case ChamberSlug.SCOTLAND:
+                return "scottish-parliament"
+            case ChamberSlug.WALES:
+                return "welsh-parliament"
+            case ChamberSlug.NI:
+                return "ni-assembly"
+            case _:
+                raise ValueError(f"Invalid house slug {self.slug}")
+
     def __str__(self) -> str:
         return self.name
 

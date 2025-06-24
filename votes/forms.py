@@ -1,29 +1,97 @@
+import datetime
 import json
 from enum import StrEnum
 from typing import Type
 
 from django import forms
 from django.http import Http404, HttpRequest
+from django.utils.text import slugify
 
 from pydantic import BaseModel, Field, RootModel, ValidationError, model_validator
 
-from .consts import EvidenceType, VotePosition, WhipDirection, WhipPriority
+from .consts import (
+    EvidenceType,
+    StatementType,
+    VotePosition,
+    WhipDirection,
+    WhipPriority,
+)
 from .models import (
     AgreementAnnotation,
+    Chamber,
     Division,
     DivisionAnnotation,
     Membership,
     Organization,
     Person,
+    Signature,
+    Statement,
     UserPersonLink,
     Vote,
     VoteAnnotation,
     WhipReport,
 )
+from .name_reconciliation import person_id_from_name
 
 
 def enum_to_choices(en: Type[StrEnum]) -> list[tuple[str, str]]:
     return [(enum_.value, enum_.value.title().replace("_", " ")) for enum_ in en]
+
+
+def validate_signatories_text(
+    signatories_text: str, chamber_slug: str, date: datetime.date
+) -> list[str]:
+    """
+    Validate signatories text and return list of names if all are valid.
+    """
+    if not signatories_text.strip():
+        raise forms.ValidationError("At least one signatory is required.")
+
+    lines = [line.strip() for line in signatories_text.split("\n") if line.strip()]
+    signatory_errors = []
+
+    for line_num, name in enumerate(lines, 1):
+        person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
+        if person_id is None:
+            signatory_errors.append(f"Line {line_num}: Could not find person '{name}'")
+
+    if signatory_errors:
+        raise forms.ValidationError(signatory_errors)
+
+    return lines
+
+
+def create_signatures_for_statement(
+    statement: Statement,
+    signatories: list[str],
+    date: datetime.date,
+    start_order: int = 0,
+) -> list[Signature]:
+    """
+    Create Signature objects for a given statement based on the provided signatories.
+    """
+    signatures = []
+    chamber_slug = statement.chamber.popolo_slug_alias()
+
+    statement_id = statement.id
+    if not statement_id:
+        raise ValueError("Statement must be saved before creating signatures.")
+
+    for order, name in enumerate(signatories, start=start_order):
+        person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
+        if person_id:  # This should always be true due to validation
+            signature = Signature(
+                key=f"{statement.key}-{person_id}",
+                statement_id=statement_id,
+                person_id=person_id,
+                date=date,
+                order=order,
+                extra_info={},
+            )
+            signature.save()
+            signatures.append(signature)
+
+    return signatures
 
 
 class VoteAnnotationUpdate(BaseModel):
@@ -384,3 +452,117 @@ class BulkVoteAnnotationForm(forms.Form, DecisionIdMixin):
             result_message += f", {deleted_count} deleted"
 
         return result_message
+
+
+class StatementForm(forms.Form):
+    title = "Add Statement Form"
+    desc = "This form is for adding new statements with signatories."
+
+    statement_title = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label="Title",
+    )
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+        label="Date",
+    )
+
+    chamber = forms.ModelChoiceField(
+        queryset=Chamber.objects.all(),
+        widget=forms.Select(attrs={"class": "form-control"}),
+        label="Chamber",
+    )
+    statement_type = forms.ChoiceField(
+        choices=enum_to_choices(StatementType),
+        widget=forms.Select(attrs={"class": "form-control"}),
+        label="Statement Type",
+    )
+    url = forms.URLField(
+        required=False,
+        widget=forms.URLInput(attrs={"class": "form-control"}),
+        label="Source URL",
+    )
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 10}),
+        label="Statement Content",
+    )
+    signatories = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 5}),
+        label="Signatories (one name per line)",
+    )
+
+    def clean_date(self):
+        """Ensure the date is not more than a month after the current date."""
+        date = self.cleaned_data["date"]
+        if not isinstance(date, datetime.date):
+            raise forms.ValidationError("Invalid date format.")
+        if date > datetime.date.today() + datetime.timedelta(days=30):
+            raise forms.ValidationError("Date cannot be more than a month after today.")
+        return date
+
+    def clean_signatories(self):
+        """Validate that all signatories can be found and return person IDs"""
+        signatories_text = self.cleaned_data.get("signatories", "")
+
+        # Check if chamber and date are available in cleaned_data
+        chamber = self.cleaned_data.get("chamber")
+        date = self.cleaned_data.get("date")
+
+        if not chamber or not date:
+            # If chamber or date is invalid, we can't validate signatories
+            # Return the lines for now and let other field validation handle the errors
+            if signatories_text.strip():
+                return [
+                    line.strip()
+                    for line in signatories_text.split("\n")
+                    if line.strip()
+                ]
+            return []
+
+        return validate_signatories_text(
+            signatories_text, chamber.popolo_slug_alias(), date
+        )
+
+    def save(self, request: HttpRequest, decision_id: int | None = None) -> Statement:
+        """Save the statement and its signatures"""
+        # Create the statement
+        chamber: Chamber = self.cleaned_data["chamber"]
+        date: datetime.date = self.cleaned_data["date"]
+        title: str = self.cleaned_data["statement_title"]
+
+        if not chamber.id:
+            raise ValueError("Chamber must be selected and have a valid ID")
+
+        # Generate a unique key and slug
+        key = f"stmt-{chamber.slug}-{date.isoformat()}-{slugify(title)}"
+        slug = slugify(title)
+        slug = Statement.get_free_slug(slug, date=date)
+
+        statement = Statement(
+            key=key,
+            chamber_slug=chamber.slug,
+            chamber_id=chamber.id,
+            title=title,
+            slug=slug,
+            statement_text=self.cleaned_data["content"],
+            original_id=None,
+            date=date,
+            type=StatementType(self.cleaned_data["statement_type"]),
+            url=self.cleaned_data.get("url", ""),
+            extra_info={},
+        )
+        statement.save()
+
+        # Verify the statement was saved and has an ID
+        if not statement.id:
+            raise ValueError("Failed to save statement - no ID generated")
+
+        # Create signatures for each signatory
+        signatories = self.cleaned_data["signatories"]
+        create_signatures_for_statement(statement, signatories, date)
+
+        return statement
+
+        return statement

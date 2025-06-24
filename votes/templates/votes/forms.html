@@ -4,7 +4,9 @@
     <h1>{{ form.title }}</h1>
     <p>{{ form.desc }}</p>
     <p>
-        {{ decision.chamber.name }} {{ decision.decision_type }}: <a href="{{ decision.url }}">{{ decision.safe_decision_name }}</a>.
+        {% if decision %}
+            {{ decision.chamber.name }} {{ decision.decision_type }}: <a href="{{ decision.url }}">{{ decision.safe_decision_name }}</a>.
+        {% endif %}
         {% if form.errors %}<div class="alert alert-danger" role="alert">{{ form.errors }}</div>{% endif %}
         <form method="post">
             {% csrf_token %}
