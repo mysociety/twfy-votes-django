@@ -15,6 +15,7 @@ GROUP_SPACING = 30  # Space between grid groups
 DOT_SPACING = 3  # Spacing between dots
 MARGIN = 40
 TOP_MARGIN = 25
+FOOTER_MARGIN = 40  # Space reserved at the bottom for the footer
 BACKGROUND_COLOR = "#f3f1eb"
 
 
@@ -303,7 +304,13 @@ def draw_vote_image(division: Division) -> Image.Image:
     # We can include absent dots if each of Aye and No take up one line
     # We can include just the total if aye + no is only 3 lines between them
     include_absent_dots = aye_count <= 250 and no_count <= 250 and absent_count <= 250
-    include_absent_title = (aye_count + no_count) < 250 * 3
+
+    # Simple calculation for available height
+    total_votes = aye_count + no_count + (absent_count if include_absent_dots else 0)
+    # Estimate if we have enough space for all content plus labels
+    include_absent_title = (total_votes < 550) or (
+        absent_count > 0 and total_votes < 650
+    )
     has_abstain_votes = abstain_count > 0
 
     # Prepare the dataframe for display
@@ -358,11 +365,16 @@ def draw_vote_image(division: Division) -> Image.Image:
             vote_label = f"{vote_type}: {vote_count} {member_plural}"
 
         # Draw vote label
-        label_width, label_height = get_text_dimensions(
-            font=label_font, text=vote_label
-        )
+        label_dimensions = get_text_dimensions(font=label_font, text=vote_label)
         draw.text((MARGIN, max_y_used), vote_label, fill="black", font=label_font)
-        vote_start_y = max_y_used + label_height + 15
+        vote_start_y = max_y_used + label_dimensions.height + 15
+
+        # Simple adaptive spacing based on total votes
+        if total_votes > 500:
+            # For large numbers of votes, use smaller spacing
+            adjusted_group_spacing = max(10, GROUP_SPACING // 2)
+        else:
+            adjusted_group_spacing = GROUP_SPACING
 
         # Only draw dots grid for displayed types
         if vote_type in display_dots_for:
@@ -375,10 +387,21 @@ def draw_vote_image(division: Division) -> Image.Image:
             )
 
             # Update the max_y_used to include the height of the grid
-            max_y_used = max_y_this_section + GROUP_SPACING
+            max_y_used = max_y_this_section + adjusted_group_spacing
+
+            # Simple boundary check to ensure we have space for the footer
+            if max_y_used > IMAGE_HEIGHT - FOOTER_MARGIN:
+                max_y_used = (
+                    max_y_this_section + 5
+                )  # Minimal spacing when close to boundary
         else:
             # For Absent and Abstain, just update max_y_used past the label
-            max_y_used = vote_start_y + GROUP_SPACING
+            max_y_used = vote_start_y + adjusted_group_spacing
+
+    # Final check to ensure footer has enough space
+    footer_height = 40  # Approximate height needed for footer
+    if max_y_used > IMAGE_HEIGHT - footer_height - 10:
+        max_y_used = IMAGE_HEIGHT - footer_height - 10
 
     # Draw footer with "You" bolded
     draw_footer(draw=draw, font_path=merriweather_font_path)
