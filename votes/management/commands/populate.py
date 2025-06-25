@@ -99,7 +99,7 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "--model", type=str, help="Run a single model", nargs="?", const=""
+            "--model", type=str, help="Run one or more models", nargs="*", default=[]
         )
 
         parser.add_argument(
@@ -159,7 +159,7 @@ class Command(BaseCommand):
     def handle(
         self,
         *args,
-        model: str = "",
+        model: list[str] | None = None,
         group: str = "",
         start_group: str = "",
         end_group: str = "",
@@ -177,6 +177,12 @@ class Command(BaseCommand):
             self.print_help_table()
             return
 
+        if model is None:
+            model = []
+
+        if isinstance(model, str):
+            model = [model]
+
         if shortcut:
             # use a stored set of instructions
             try:
@@ -186,8 +192,10 @@ class Command(BaseCommand):
                 return
 
             # shortcut should be the base, and then update if specified
-
-            model = model or instructions.get("model", "")
+            shortcut_model = instructions.get("model")
+            if shortcut_model:
+                shortcut_model = shortcut_model.split(" ")
+                model = model or shortcut_model
             group = group or instructions.get("group", "")
             start_group = start_group or instructions.get("start_group", "")
             end_group = end_group or instructions.get("end_group", "")
@@ -199,6 +207,11 @@ class Command(BaseCommand):
 
         if group and (start_group or end_group):
             self.stdout.write("You cannot specify both group and start/end group")
+            return
+        if model and (group or start_group or end_group or all):
+            self.stdout.write(
+                "You cannot specify model with group, start/end group, or all"
+            )
             return
         if start_group and not end_group:
             self.stdout.write("You must specify both start-group and end-group")
@@ -213,7 +226,12 @@ class Command(BaseCommand):
         if not quiet and update_since:
             print(f"Updating since {update_since}")
         if model:
-            import_register.run_import(model, quiet, update_since)
+            if len(model) > 1 and not quiet:
+                print(f"Running {len(model)} models: {', '.join(model)}")
+            for model_name in model:
+                if not quiet and len(model) > 1:
+                    print(f"Running model: {model_name}")
+                import_register.run_import(model_name, quiet, update_since)
         elif group:
             import_register.run_group(group, quiet, update_since)
         elif start_group:
