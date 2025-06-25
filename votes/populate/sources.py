@@ -12,6 +12,8 @@ to_fetch = [
     "https://www.theyworkforyou.com/pwdata/votes/divisions.parquet",
     "https://www.theyworkforyou.com/pwdata/votes/votes.parquet",
     "https://raw.githubusercontent.com/mysociety/parlparse/master/members/people.json",
+    "https://www.theyworkforyou.com/pwdata/scrapedjson/edm/proposals.parquet",
+    "https://www.theyworkforyou.com/pwdata/scrapedjson/edm/signatures.parquet",
 ]
 
 

@@ -33,6 +33,14 @@ def replace_underscore_with_hyphen(value: str) -> str:
     return value
 
 
+@register.filter(name="replace_underscore_with_space")
+def replace_underscore_with_space(value: str) -> str:
+    """Replaces underscores with spaces in a string."""
+    if isinstance(value, str):
+        return value.replace("_", " ")
+    return value
+
+
 @register.filter(name="split")
 def split(value: str, key: str):
     return value.split(key)
@@ -250,3 +258,28 @@ def do_userflag(parser, token):
     nodelist = parser.parse(("endfeatureflag",))
     parser.delete_first_token()
     return UserFlagNode(nodelist, flag_name.strip('"'))
+
+
+@register.filter(name="filter_metadata")
+def filter_metadata(extra_info_dict):
+    """Filter out metadata fields that shouldn't be displayed."""
+    metadata_not_to_display = [
+        "uin",
+        "status",
+        "status_date",
+        "chamber",
+        "sponsors_count",
+    ]
+    if not isinstance(extra_info_dict, dict):
+        return {}
+    return {
+        k: v for k, v in extra_info_dict.items() if k not in metadata_not_to_display
+    }
+
+
+@register.filter(name="smart_number")
+def smart_number(value):
+    """Convert float to int if it's a round number, otherwise keep as is."""
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    return value

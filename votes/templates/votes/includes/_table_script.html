@@ -47,7 +47,26 @@
             columnDefs: [{
                 targets: "na-percentage",
                 type: 'na-percentage'
-            }]
+            }],
+            order: function() {
+                // Dates should be sorted descending
+                var dateColumnIndex = -1;
+                $(this).find('thead th').each(function(index) {
+                    if ($(this).text().trim() === 'Date') {
+                        dateColumnIndex = index;
+                        return false;
+                    }
+                });
+
+                // If Date column exists, sort by it descending, otherwise use default
+                if (dateColumnIndex !== -1) {
+                    return [
+                        [dateColumnIndex, 'desc']
+                    ];
+                } else {
+                    return [];
+                }
+            }()
         });
     });
 </script>

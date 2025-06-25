@@ -109,6 +109,31 @@ class TestPersonPolicy(BaseTestResponse):
     has_json = True
 
 
+class TestPersonStatements(BaseTestResponse):
+    url = "/person/25846/statements"
+    has_json = True
+
+
+class TestStatement(BaseTestResponse):
+    url = "/statement/commons/2015-01-05/london-housing-and-foreign-investors"
+    has_json = True  # API endpoint is at statements/{chamber_slug}/{date}/{slug}.json
+
+
+class TestStatements(BaseTestResponse):
+    url = "/statements"
+    has_json = False
+
+
+class TestStatementsYear(BaseTestResponse):
+    url = "/statements/commons/2015"
+    has_json = True
+
+
+class TestStatementsMonth(BaseTestResponse):
+    url = "/statements/commons/2015/1"
+    has_json = True
+
+
 class TestTagHome(BaseTestResponse):
     url = "/tags"
     has_json = True
@@ -122,6 +147,50 @@ class TestSingleTagTypeHome(BaseTestResponse):
 class TestTag(BaseTestResponse):
     url = "/tags/gov_clusters/cross_party_aye"
     has_json = True
+
+
+def test_statement_api_endpoint(client: Client):
+    """Test that the statement API endpoint works correctly"""
+    response = client.get(
+        "/statement/commons/2015-01-05/london-housing-and-foreign-investors.json"
+    )
+    assert response.status_code == 200
+    assert "application/json" in response.headers["Content-Type"]
+
+    data = response.json()
+    assert "title" in data
+    assert "signatures" in data
+    assert "url" in data
+
+
+def test_statements_year_api_performance(client: Client):
+    """Test that the statements year API is performant and returns signature counts"""
+    response = client.get("/statements/commons/2015.json")
+    assert response.status_code == 200
+    assert "application/json" in response.headers["Content-Type"]
+
+    data = response.json()
+    assert isinstance(data, list)
+    if data:  # If there are statements
+        statement = data[0]
+        assert "signature_count" in statement
+        assert "nice_title" in statement
+        assert "type_display" in statement
+        assert "url" in statement
+
+
+def test_statements_month_api_performance(client: Client):
+    """Test that the statements month API is performant and returns signature counts"""
+    response = client.get("/statements/commons/2015/1.json")
+    assert response.status_code == 200
+    assert "application/json" in response.headers["Content-Type"]
+
+    data = response.json()
+    assert isinstance(data, list)
+    if data:  # If there are statements
+        statement = data[0]
+        assert "signature_count" in statement
+        assert isinstance(statement["signature_count"], int)
 
 
 def test_vote_popolo(client: Client):

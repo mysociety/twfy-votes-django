@@ -29,6 +29,8 @@ from ..models import (
     PolicyDivisionLink,
     PolicyGroup,
     RebellionRate,
+    Signature,
+    Statement,
     Update,
     Vote,
     VoteAnnotation,
@@ -252,20 +254,100 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
+class RebellionRateSchema(ModelSchema):
+    class Meta:
+        model = RebellionRate
+        fields = "__all__"
+        exclude = ["id"]
+
+
+class SignatureSchema(ModelSchema):
+    person: PersonSchema
+    withdrawn_status: str
+
+    @staticmethod
+    def resolve_withdrawn_status(obj: Signature) -> str:
+        return obj.withdrawn_status() or "-"
+
+    class Meta:
+        model = Signature
+        fields = "__all__"
+
+
+class StatementSchema(ModelSchema):
+    signatures: list[SignatureSchema]
+    tags: list[DecisionTagSchema]
+    url: str
+    nice_title: str
+    type_display: str
+
+    @staticmethod
+    def resolve_url(obj: Statement) -> str:
+        return obj.page_url()
+
+    @staticmethod
+    def resolve_nice_title(obj: Statement) -> str:
+        return obj.nice_title()
+
+    @staticmethod
+    def resolve_type_display(obj: Statement) -> str:
+        return obj.type_display()
+
+    class Meta:
+        model = Statement
+        fields = "__all__"
+
+
 class TagWithDecisionsSchema(ModelSchema):
     divisions: list[DivisionSchema]
     agreements: list[AgreementSchema]
+    statements: list[StatementSchema]
 
     class Meta:
         model = DecisionTag
         fields = "__all__"
 
 
-class RebellionRateSchema(ModelSchema):
+class StatementListSchema(ModelSchema):
+    url: str
+    nice_title: str
+    type_display: str
+    signature_count: int
+
+    @staticmethod
+    def resolve_url(obj: Statement) -> str:
+        return obj.page_url()
+
+    @staticmethod
+    def resolve_nice_title(obj: Statement) -> str:
+        return obj.nice_title()
+
+    @staticmethod
+    def resolve_type_display(obj: Statement) -> str:
+        return obj.type_display()
+
+    @staticmethod
+    def resolve_signature_count(obj: Statement) -> int:
+        # Use the annotated signature_count field from the queryset
+        return getattr(obj, "signature_count", 0)
+
     class Meta:
-        model = RebellionRate
-        fields = "__all__"
-        exclude = ["id"]
+        model = Statement
+        fields = [
+            "id",
+            "key",
+            "chamber_slug",
+            "title",
+            "slug",
+            "statement_text",
+            "original_id",
+            "chamber",
+            "info_source",
+            "date",
+            "type",
+            "extra_info",
+            "url",
+        ]
 
 
 class PairedPolicySchema(BaseModel):
@@ -334,7 +416,24 @@ def tag_to_api(request: HttpRequest, tag_type: str, tag: str):
     return (
         DecisionTag.objects.filter(tag_type=tag_type, slug=tag)
         .prefetch_related(
-            "divisions", "agreements", "divisions__tags", "agreements__tags"
+            "divisions",
+            "divisions__tags",
+            "divisions__chamber",
+            "divisions__motion",
+            "divisions__votes",
+            "divisions__votes__person",
+            "divisions__overall_breakdowns",
+            "divisions__party_breakdowns",
+            "divisions__is_gov_breakdowns",
+            "agreements",
+            "agreements__tags",
+            "agreements__chamber",
+            "agreements__motion",
+            "statements",
+            "statements__tags",
+            "statements__chamber",
+            "statements__signatures",
+            "statements__signatures__person",
         )
         .first()
     )
@@ -466,6 +565,89 @@ def get_person(request: HttpRequest, person_id: int):
 @api.get("/person/{person_id}/votes.json", response=PersonWithVoteSchema)
 def get_person_with_votes(request: HttpRequest, person_id: int):
     return Person.objects.get(id=person_id)
+
+
+@api.get("/person/{person_id}/statements.json", response=dict)
+def get_person_statements(request: HttpRequest, person_id: int):
+    """
+    Get statements data for a person, returning the statements dataframe as JSON
+    """
+    from .views import PersonStatementsPageView
+
+    data = PersonStatementsPageView().get_context_data(person_id)
+
+    # Convert the statements DataFrame to records
+    statements_data = data["statements_df"].to_dict(orient="records")
+
+    return {
+        "person": PersonSchema.model_validate(data["person"]).model_dump(),
+        "statements": statements_data,
+    }
+
+
+@api.get(
+    "/statement/{chamber_slug}/{statement_date}/{slug:statement_slug}.json",
+    response=StatementSchema,
+)
+def get_statement(
+    request: HttpRequest,
+    chamber_slug: str,
+    statement_date: datetime.date,
+    statement_slug: str,
+):
+    """
+    Get statement data with all signatures
+    """
+
+    statement = (
+        Statement.objects.filter(
+            chamber__slug=chamber_slug,
+            date=statement_date,
+            slug=statement_slug,
+        )
+        .prefetch_related(
+            "signatures",
+            "signatures__person",
+            "tags",
+        )
+        .first()
+    )
+
+    if not statement:
+        raise ValueError(f"Statement not found: {statement_slug}")
+
+    return statement
+
+
+@api.get("/statements/{chamber_slug}/{year}.json", response=list[StatementListSchema])
+def get_statements_by_year(request: HttpRequest, chamber_slug: str, year: int):
+    from django.db.models import Count
+
+    return (
+        Statement.objects.filter(chamber_slug=chamber_slug, date__year=year)
+        .annotate(signature_count=Count("signatures"))
+        .select_related("chamber")
+        .order_by("-date", "title")
+    )
+
+
+@api.get(
+    "/statements/{chamber_slug}/{int:year}/{int:month}.json",
+    response=list[StatementListSchema],
+)
+def get_statements_by_month(
+    request: HttpRequest, chamber_slug: str, year: int, month: int
+):
+    from django.db.models import Count
+
+    return (
+        Statement.objects.filter(
+            chamber_slug=chamber_slug, date__year=year, date__month=month
+        )
+        .annotate(signature_count=Count("signatures"))
+        .select_related("chamber")
+        .order_by("-date", "title")
+    )
 
 
 @api.get(

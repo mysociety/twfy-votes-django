@@ -34,11 +34,13 @@ from ..consts import (
     VotePosition,
 )
 from ..forms import (
+    AddSignatoriesForm,
     AgreementAnnotationForm,
     DivisionAnnotationForm,
     OpenRepAnnotationForm,
     RepAnnotationForm,
     RepWhipForm,
+    StatementForm,
     WhipForm,
 )
 from ..models import (
@@ -54,6 +56,7 @@ from ..models import (
     PolicyAgreementLink,
     PolicyComparisonPeriod,
     PolicyDivisionLink,
+    Statement,
     UrlColumn,
     UserPersonLink,
     Vote,
@@ -65,6 +68,7 @@ from .helper_models import (
     DivisionSearch,
     PolicyCollection,
     PolicyReport,
+    StatementSearch,
 )
 from .mixins import TitleMixin
 
@@ -86,6 +90,10 @@ class FormsView(TemplateView):
                 return OpenRepAnnotationForm
             case "rep_annotation":
                 return RepAnnotationForm
+            case "statement":
+                return StatementForm
+            case "add_signatories":
+                return AddSignatoriesForm
             case _:
                 raise Http404("Form not found")
 
@@ -120,6 +128,14 @@ class FormsView(TemplateView):
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_SELF_ANNOTATIONS
                 )
+            case "statement":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_STATEMENT
+                )
+            case "add_signatories":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_ADD_SIGNATORIES
+                )
             case _:
                 return False
 
@@ -128,6 +144,13 @@ class FormsView(TemplateView):
             case "agreement_annotation":
                 agreement = Agreement.objects.get(id=decision_id)
                 return agreement
+            case "statement":
+                # Statement forms don't need a decision instance
+                return None
+            case "add_signatories":
+                # For add_signatories, decision_id is actually the statement_id
+                statement = Statement.objects.get(id=decision_id)
+                return statement
             case _:
                 division = Division.objects.get(id=decision_id)
                 return division
@@ -137,11 +160,42 @@ class FormsView(TemplateView):
         decision = self.get_decision_instance(form_slug, decision_id)
         if not self.user_has_permission(form_slug):
             raise Http404(f"User does not have permission to save form {form_slug}")
-        form = form_model(request.POST)
-        if form.is_valid():
-            form.save(request, decision_id)
 
-            return redirect(decision.url())
+        if form_slug == "add_signatories":
+            # For add_signatories, decision is actually the statement
+            from typing import cast
+
+            from ..models import Statement as StatementModel
+
+            statement = cast(StatementModel, decision)
+            # Use the alternate constructor for POST data
+            form = form_model(request.POST, statement=statement)  # type: ignore
+        elif form_slug == "statement":
+            form = form_model(request.POST)
+        else:
+            form = form_model(request.POST)
+
+        if form.is_valid():
+            if form_slug == "statement":
+                # Statement form has different save signature and redirect
+                from typing import cast
+
+                from votes.models import Statement
+
+                statement = cast(
+                    Statement, form.save(request, 0)
+                )  # Pass 0 as dummy decision_id
+                return redirect(statement.page_url())
+            elif form_slug == "add_signatories":
+                # Add signatories form saves to existing statement
+                statement = form.save(request, decision_id)
+                return redirect(statement.page_url())
+            else:
+                form.save(request, decision_id)
+                if decision:
+                    return redirect(decision.url())
+                else:
+                    return redirect("statements")
 
         else:
             # return the form with errors
@@ -153,9 +207,21 @@ class FormsView(TemplateView):
         if not self.user_has_permission(form_slug):
             raise Http404(f"User does not have permission to access form {form_slug}")
 
-        decision = self.get_decision_instance(form_slug, decision_id)
+        if form_slug == "statement":
+            # Statement form doesn't need a decision instance
+            form = form_model()
+            decision = None
+        elif form_slug == "add_signatories":
+            # AddSignatoriesForm needs the statement
+            decision = self.get_decision_instance(form_slug, decision_id)
+            from typing import cast
 
-        form = form_model.from_decision_id(decision_id)
+            from ..forms import AddSignatoriesForm
+
+            form = cast(AddSignatoriesForm, form_model).from_statement_id(decision_id)
+        else:
+            decision = self.get_decision_instance(form_slug, decision_id)
+            form = form_model.from_decision_id(decision_id)
 
         return {"form": form, "decision": decision}
 
@@ -263,8 +329,11 @@ class DataView(TitleMixin, TemplateView):
             "chambers": "Chamber ids and names",
             "organization": "Party ids and names",
             "tags": "Decision tags",
+            "statements": "Statements data",
+            "signatures": "Signatures data",
             "division_tag_link": "Decision tag links",
             "agreement_tag_link": "Agreement tag links",
+            "statement_tag_link": "Statement tag links",
             "per_person_party_diff_all_time": "Voting alignment scores all time",
             "per_person_party_diff_period": "Voting alignment scores by rolling period",
             "per_person_party_diff_year": "Voting alignment scores by year",
@@ -371,6 +440,21 @@ class PersonVotesPageView(TitleMixin, TemplateView):
             )
             context["votes_df"] = person.votes_df(int_year)
 
+        context["og_image"] = reverse("person_opengraph_image", args=[person_id])
+        return context
+
+
+class PersonStatementsPageView(TitleMixin, TemplateView):
+    page_title = "Person Statements"
+    template_name = "votes/person_statements.html"
+
+    def get_context_data(self, person_id: int, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        person = Person.objects.get(id=person_id)
+        context["person"] = person
+        context["statements_df"] = person.statements_df()
+        context["page_title"] = f"{person.name} - Signed Statements"
         context["og_image"] = reverse("person_opengraph_image", args=[person_id])
         return context
 
@@ -499,6 +583,33 @@ class AgreementPageView(TitleMixin, TemplateView):
         return context
 
 
+class StatementPageView(TitleMixin, TemplateView):
+    page_title = "Statement"
+    template_name = "votes/statement.html"
+
+    def get_context_data(
+        self,
+        chamber_slug: str,
+        statement_date: datetime.date,
+        statement_slug: str,
+        **kwargs,
+    ):
+        context = super().get_context_data(**kwargs)
+        try:
+            statement = Statement.objects.prefetch_related("tags").get(
+                chamber__slug=chamber_slug,
+                date=statement_date,
+                slug=statement_slug,
+            )
+        except Statement.DoesNotExist:
+            raise Http404("Statement not found")
+
+        context["statement"] = statement
+        context["page_title"] = f"{statement.date} - {statement.nice_title()}"
+
+        return context
+
+
 class TagsHomeView(TitleMixin, TemplateView):
     page_title = "Tags"
     template_name = "votes/tags_home.html"
@@ -511,7 +622,8 @@ class TagsHomeView(TitleMixin, TemplateView):
             query = DecisionTag.objects.all()
         tags = query.annotate(
             decision_count=Count("divisions", distinct=True)
-            + Count("agreements", distinct=True)
+            + Count("agreements", distinct=True),
+            statement_count=Count("statements", distinct=True),
         ).order_by("tag_type", "slug")
 
         context["tags"] = tags
@@ -527,12 +639,27 @@ class TagListView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["tag_type"] = tag_type
         context["tag_slug"] = tag_slug
-        tag = DecisionTag.objects.get(tag_type=tag_type, slug=tag_slug)
+        tag = DecisionTag.objects.prefetch_related(
+            "divisions",
+            "agreements",
+            "statements",
+            "divisions__tags",
+            "agreements__tags",
+            "statements__tags",
+        ).get(tag_type=tag_type, slug=tag_slug)
         context["page_title"] = f"Tag: {tag.name}"
         context["tag"] = tag
         context["decisions_by_chamber"] = tag.decisions_df_by_chamber()
+        context["statements_by_chamber"] = tag.statements_df_by_chamber()
         context["total_len"] = sum(
             [len(x) for x in context["decisions_by_chamber"].values()]
+        )
+        context["total_statements_len"] = (
+            sum([len(x) for x in context["statements_by_chamber"].values()])
+            if context["statements_by_chamber"]
+            else 0
+            if context["statements_by_chamber"]
+            else 0
         )
         context["og_image"] = reverse("tag_opengraph_image", args=[tag_type, tag_slug])
         return context
@@ -1005,5 +1132,77 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["decision_links_and_votes"] = decision_links_and_votes
         context["page_title"] = f"{policy.name} votes for {person.name}"
         context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
+
+        return context
+
+
+class StatementsPageView(TitleMixin, TemplateView):
+    page_title = "Statements"
+    template_name = "votes/statements.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["chambers"] = Chamber.objects.all().exclude(slug="ni")
+        context["og_image"] = reverse("general_opengraph_image", args=["statements"])
+        return context
+
+
+class StatementsListPageView(TitleMixin, TemplateView):
+    page_title = "Statements List"
+    template_name = "votes/statements_list.html"
+
+    def statement_search(
+        self, chamber: Chamber, start_date: datetime.date, end_date: datetime.date
+    ):
+        statements = (
+            Statement.objects.filter(
+                chamber=chamber, date__range=(start_date, end_date)
+            )
+            .prefetch_related("tags")
+            .annotate(signature_count=Count("signatures"))
+            .order_by("-date")
+        )
+
+        return StatementSearch(
+            start_date=start_date,
+            end_date=end_date,
+            chamber=chamber,
+            statements=list(statements),
+        )
+
+    def get_context_data(self, chamber_slug: str, year: int, **kwargs):
+        context = super().get_context_data(**kwargs)
+        year_start = datetime.date(year, 1, 1)
+        year_end = datetime.date(year, 12, 31)
+        chamber = Chamber.objects.get(slug=chamber_slug)
+
+        search = self.statement_search(chamber, year_start, year_end)
+        context["search"] = search
+        context["page_title"] = f"{year} {chamber.name} Statements"
+        context["og_image"] = reverse(
+            "statements_list_opengraph_image", args=[chamber_slug, year]
+        )
+
+        return context
+
+
+class StatementsListMonthPageView(StatementsListPageView):
+    page_title = "Statements List Month"
+    template_name = "votes/statements_list_month.html"
+
+    def get_context_data(self, chamber_slug: str, year: int, month: int, **kwargs):
+        context = super(StatementsListPageView, self).get_context_data(**kwargs)
+        month_start = datetime.date(year, month, 1)
+        month_end = datetime.date(year, month, calendar.monthrange(year, month)[1])
+
+        chamber = Chamber.objects.get(slug=chamber_slug)
+        search = self.statement_search(chamber, month_start, month_end)
+        context["search"] = search
+        context["page_title"] = (
+            f"{month_start.strftime('%B %Y')} {chamber.name} Statements"
+        )
+        context["og_image"] = reverse(
+            "statements_list_month_opengraph_image", args=[chamber_slug, year, month]
+        )
 
         return context

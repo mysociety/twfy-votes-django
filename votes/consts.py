@@ -10,6 +10,10 @@ class PermissionGroupSlug(StrEnum):
     CAN_REPORT_SELF_WHIP = "can_report_self_whip"  # can add self whipreports
     CAN_ADD_ANNOTATIONS = "can_add_annotations"  # can add annotations
     CAN_ADD_SELF_ANNOTATIONS = "can_add_self_annotations"  # can add self annotations
+    CAN_ADD_STATEMENT = "can_add_statement"  # can add statements
+    CAN_ADD_SIGNATORIES = (
+        "can_add_signatories"  # can add signatories to existing statements
+    )
 
 
 class PolicyStrength(StrEnum):
@@ -50,6 +54,7 @@ class ChamberSlug(StrEnum):
     SCOTLAND = "scotland"
     WALES = "senedd"
     NI = "ni"
+    OTHER = "other"
 
     @classmethod
     def from_parlparse(cls, parlparse: str, *, passthrough: bool = False) -> str:
@@ -212,6 +217,13 @@ class IssueType(StrEnum):
     ONLY_ONE_STRONG_VOTE = "only_one_strong_vote"
 
 
+class StatementType(StrEnum):
+    PROPOSED_MOTION = "proposed_motion"
+    PROPOSED_AMENDMENT = "proposed_amendment"
+    LETTER = "letter"
+    OTHER = "other"
+
+
 class OrganisationType(StrEnum):
     CHAMBER = "chamber"
     PARTY = "party"
@@ -221,6 +233,7 @@ class OrganisationType(StrEnum):
 
 class TagType(StrEnum):
     GOV_CLUSTERS = "gov_clusters"
+    STATEMENT_TAGS = "statement_tags"
     MISC = "misc"
     LEGISLATION = "legislation"
 

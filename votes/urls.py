@@ -14,6 +14,7 @@ from .views.opengraph_views import (
     MarkdownOpenGraphImageView,
     PersonOpenGraphImageView,
     PolicyOpenGraphImageView,
+    StatementsListOpenGraphImageView,
     TagOpenGraphImageView,
 )
 from .views.views import (
@@ -30,12 +31,17 @@ from .views.views import (
     PersonPageView,
     PersonPoliciesView,
     PersonPolicyView,
+    PersonStatementsPageView,
     PersonVotesPageView,
     PoliciesPageView,
     PoliciesReportsPageView,
     PolicyCollectionPageView,
     PolicyPageView,
     PolicyReportPageView,
+    StatementPageView,
+    StatementsListMonthPageView,
+    StatementsListPageView,
+    StatementsPageView,
     TagListView,
     TagsHomeView,
 )
@@ -89,7 +95,7 @@ def fast_path(
     # and any just plain {year} to <year>
     route = re.sub(r"{(\w+)}", r"<\1>", route)
 
-    return path(route, view.as_view(), name=name)
+    return path(route, view.as_view(), name=name, kwargs=kwargs or {})
 
 
 urlpatterns = [
@@ -100,6 +106,11 @@ urlpatterns = [
         "person/{person_id:int}/votes/{year:str}",
         PersonVotesPageView,
         name="person_votes",
+    ),
+    fast_path(
+        "person/{person_id:int}/statements",
+        PersonStatementsPageView,
+        name="person_statements",
     ),
     fast_path("decisions", DecisionsPageView, name="decisions"),
     fast_path("tags", TagsHomeView, name="tag_home"),
@@ -114,6 +125,22 @@ urlpatterns = [
         "decisions/agreement/{chamber_slug:str}/{decision_date:date}/{decision_ref:str_not_json}",
         AgreementPageView,
         name="agreement",
+    ),
+    fast_path(
+        "statement/{chamber_slug:str}/{statement_date:date}/{statement_slug:slug}",
+        StatementPageView,
+        name="statement",
+    ),
+    fast_path("statements", StatementsPageView, name="statements"),
+    fast_path(
+        "statements/{chamber_slug:str}/{year:int}",
+        StatementsListPageView,
+        name="statements_list",
+    ),
+    fast_path(
+        "statements/{chamber_slug:str}/{year:int}/{month:int}",
+        StatementsListMonthPageView,
+        name="statements_list_month",
     ),
     fast_path(
         "decisions/{chamber_slug:str}/{year:int}",
@@ -156,6 +183,18 @@ urlpatterns = [
         "submit/{form_slug:slug}/{decision_id:int}",
         FormsView,
         name="forms",
+    ),
+    fast_path(
+        "submit/statement",
+        FormsView,
+        kwargs={"form_slug": "statement", "decision_id": 0},
+        name="statement_form",
+    ),
+    fast_path(
+        "submit/add_signatories/{decision_id:int}",
+        FormsView,
+        kwargs={"form_slug": "add_signatories"},
+        name="add_signatories_form",
     ),
     fast_path("help/{markdown_slug:slug}", MarkdownView, name="help"),
     fast_path("data", DataView, name="data"),
@@ -203,6 +242,16 @@ urlpatterns = [
         "opengraph/decisions/{chamber_slug:slug}/{year:int}/{month:int}",
         DecisionsListOpenGraphImageView,
         name="decisions_list_month_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/statements/{chamber_slug:slug}/{year:int}",
+        StatementsListOpenGraphImageView,
+        name="statements_list_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/statements/{chamber_slug:slug}/{year:int}/{month:int}",
+        StatementsListOpenGraphImageView,
+        name="statements_list_month_opengraph_image",
     ),
     path("", api.urls),
 ]

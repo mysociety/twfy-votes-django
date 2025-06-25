@@ -30,13 +30,16 @@ from numpy import nan
 
 from twfy_votes.helpers.base_model import DjangoVoteModel
 from twfy_votes.helpers.typed_django.models import (
+    DictField,
     DoNothingForeignKey,
     Dummy,
     DummyManyToMany,
     DummyOneToMany,
     JSONField,
     ManyToMany,
+    OptionalDateField,
     OptionalDateTimeField,
+    OptionalStr,
     PrimaryKey,
     TextField,
     field,
@@ -54,6 +57,7 @@ from .consts import (
     PolicyStrength,
     PowersAnalysis,
     RebellionPeriodType,
+    StatementType,
     StrengthMeaning,
     TagType,
     VotePosition,
@@ -152,6 +156,7 @@ class DecisionTag(DjangoVoteModel):
     extra_data: JSONField = field(default=dict)
     agreements: DummyManyToMany[Agreement] = related_name("tags")
     divisions: DummyManyToMany[Division] = related_name("tags")
+    statements: DummyManyToMany["Statement"] = related_name("tags")
 
     def desc_markdown(self):
         """
@@ -170,6 +175,9 @@ class DecisionTag(DjangoVoteModel):
             self.agreements.all().prefetch_related("tags", "chamber", "motion")
         ) + list(self.divisions.all().prefetch_related("tags", "chamber", "motion"))
 
+    def get_statements(self):
+        return list(self.statements.all().prefetch_related("tags", "chamber"))
+
     def decisions_df_by_chamber(self) -> dict[Chamber, pd.DataFrame]:
         """
         Get a dataframe of decisions by chamber
@@ -179,8 +187,9 @@ class DecisionTag(DjangoVoteModel):
 
         # group by chamber
         chambers = {}
-        for chamber, df in data.groupby("Chamber"):
-            chambers[chamber] = df
+        if not data.empty:
+            for chamber, df in data.groupby("Chamber"):
+                chambers[chamber] = df
 
         return chambers
 
@@ -208,8 +217,43 @@ class DecisionTag(DjangoVoteModel):
         ]
 
         df = pd.DataFrame(data=data)
-        df = df.sort_values("Date", ascending=False)
+        if not df.empty:
+            df = df.sort_values("Date", ascending=False)
         return df
+
+    def statements_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of statements for this tag
+        """
+        data = [
+            {
+                "Chamber": s.chamber,
+                "Date": s.date,
+                "Statement": UrlColumn(url=s.page_url(), text=s.nice_title()),
+                "Type": s.type_display(),
+            }
+            for s in self.get_statements()
+        ]
+
+        df = pd.DataFrame(data=data)
+        if not df.empty:
+            df = df.sort_values("Date", ascending=False)
+
+        return df
+
+    def statements_df_by_chamber(self) -> dict[Chamber, pd.DataFrame]:
+        """
+        Get a dataframe of statements by chamber
+        """
+        data = self.statements_df()
+
+        # group by chamber
+        chambers = {}
+        if not data.empty:
+            for chamber, df in data.groupby("Chamber"):
+                chambers[chamber] = df
+
+        return chambers
 
 
 class BaseTagLink(DjangoVoteModel, abstract=True):
@@ -289,6 +333,41 @@ class BaseTagLink(DjangoVoteModel, abstract=True):
                 edit_objects,  # type: ignore
                 ["extra_data"],
             )
+
+
+class StatementTagLink(BaseTagLink):
+    """
+    A link between a statement and a tag
+    """
+
+    tag: DoNothingForeignKey[DecisionTag] = related_name("statement_tag_links")
+    statement: DoNothingForeignKey[Statement] = related_name("tag_links")
+    statement_id: Dummy[int] = 0
+
+    @property
+    def decision_id(self) -> int:
+        return self.statement_id
+
+    @classmethod
+    def sync_tag_from_statement_id_list(
+        cls,
+        tag: DecisionTag,
+        statement_ids: list[int],
+        *,
+        quiet: bool = False,
+        clear_absent: bool = True,
+    ):
+        """
+        Sync the tags for a set of links.
+        This will remove any existing links and add the new ones
+        """
+
+        links = [
+            cls(tag=tag, statement_id=x, extra_data={})
+            for x in statement_ids
+            if x is not None
+        ]
+        cls.sync_tags(links, quiet=quiet, clear_absent=clear_absent)
 
 
 class DivisionTagLink(BaseTagLink):
@@ -511,6 +590,7 @@ class Person(DjangoVoteModel):
     votes: DummyOneToMany[Vote] = related_name("person")
     vote_distributions: DummyOneToMany[VoteDistribution] = related_name("person")
     rebellion_rates: DummyOneToMany[RebellionRate] = related_name("person")
+    signatures: DummyOneToMany[Signature] = related_name("person")
 
     class Meta:
         ordering = ["name"]
@@ -523,6 +603,9 @@ class Person(DjangoVoteModel):
 
     def votes_url(self, year: str = "all"):
         return reverse("person_votes", kwargs={"person_id": self.id, "year": year})
+
+    def statements_url(self) -> str:
+        return reverse("person_statements", args=[self.id])
 
     def recent_years_with_votes(self):
         items = (
@@ -633,6 +716,32 @@ class Person(DjangoVoteModel):
 
         return pd.DataFrame(data=data)
 
+    def statements_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of statements signed by this person, sorted by date signed (latest first)
+        """
+        signatures = (
+            self.signatures.all()
+            .order_by("-statement__date", "-date", "order")
+            .prefetch_related("statement", "statement__chamber")
+        )
+
+        data = [
+            {
+                "Date": sig.statement.date,
+                "Statement": UrlColumn(
+                    url=sig.statement.page_url(), text=sig.statement.nice_title()
+                ),
+                "Type": sig.statement.type_display(),
+                "Chamber": sig.statement.chamber.name,
+                "Date Signed": sig.date or sig.statement.date,
+                "Status": sig.withdrawn_status(),
+            }
+            for sig in signatures
+        ]
+
+        return pd.DataFrame(data=data)
+
 
 class Organization(DjangoVoteModel):
     id: PrimaryKey = None
@@ -689,6 +798,24 @@ class Chamber(DjangoVoteModel):
     member_plural: str
     name: str
     comparison_periods: DummyOneToMany[PolicyComparisonPeriod] = related_name("chamber")
+
+    def popolo_slug_alias(self) -> str:
+        """
+        Return the slug used in Popolo for this chamber.
+        """
+        match self.slug:
+            case ChamberSlug.COMMONS:
+                return "house-of-commons"
+            case ChamberSlug.LORDS:
+                return "house-of-lords"
+            case ChamberSlug.SCOTLAND:
+                return "scottish-parliament"
+            case ChamberSlug.WALES:
+                return "welsh-parliament"
+            case ChamberSlug.NI:
+                return "ni-assembly"
+            case _:
+                raise ValueError(f"Invalid house slug {self.slug}")
 
     def __str__(self) -> str:
         return self.name
@@ -753,6 +880,13 @@ class Chamber(DjangoVoteModel):
 
         years = rel_divisions + rel_agreements
         return sorted(list(set(years)))
+
+    def statement_year_range(self) -> list[int]:
+        """
+        Return a list of all years there is a statement for this chamber.
+        """
+        rel_statements = [x.date.year for x in Statement.objects.filter(chamber=self)]
+        return sorted(list(set(rel_statements)))
 
     @property
     def pw_alias(self):
@@ -940,6 +1074,86 @@ class Motion(DjangoVoteModel):
         text = text.replace("“SCHEDULE", "\n\n“SCHEDULE")
 
         return text
+
+
+class Statement(DjangoVoteModel):
+    key: str
+    chamber_slug: ChamberSlug
+    chamber_id: Dummy[int]
+    title: str
+    slug: str
+    statement_text: TextField
+    original_id: OptionalStr
+    chamber: DoNothingForeignKey[Chamber] = related_name("statements")
+    info_source: str = ""
+    date: datetime.date
+    type: StatementType = StatementType.OTHER
+    extra_info: DictField
+    signatures: DummyOneToMany[Signature] = related_name("statement")
+    tags: DummyManyToMany[DecisionTag] = field(
+        models.ManyToManyField,
+        to=DecisionTag,
+        related_name="statements",
+        through=StatementTagLink,
+        through_fields=("statement", "tag"),
+        default=None,
+    )
+    url: str = ""
+
+    @classmethod
+    def get_free_slug(cls, slug: str, date: datetime.date) -> str:
+        """
+        Get a free slug for this statement.
+        If the slug is already taken, append a number to it.
+        """
+        base_slug = slug
+        counter = 1
+        while cls.objects.filter(slug=slug, date=date).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
+
+    def signatures_df(self) -> pd.DataFrame:
+        """
+        Get a dataframe of signatures for this statement, sorted by order
+        """
+        signatures = (
+            self.signatures.all().order_by("order", "date").prefetch_related("person")
+        )
+
+        data = [
+            {
+                "Person": UrlColumn(
+                    url=sig.person.statements_url(), text=sig.person.name
+                ),
+                "Date Signed": sig.date or self.date,
+                "Status": sig.withdrawn_status(),
+            }
+            for sig in signatures
+        ]
+
+        return pd.DataFrame(data=data)
+
+    def page_url(self) -> str:
+        """
+        Generate URL for this statement's page
+        """
+        return reverse("statement", args=[self.chamber_slug, self.date, self.slug])
+
+    def nice_title(self) -> str:
+        """
+        Return a properly formatted title. If the title is entirely uppercase,
+        return a title case version. Otherwise, return the title as-is.
+        """
+        if self.title.isupper():
+            return self.title.title()
+        return self.title
+
+    def type_display(self) -> str:
+        """
+        Return a properly formatted type display name.
+        """
+        return self.type.replace("_", " ").title()
 
 
 @is_valid_decision_model
@@ -1406,6 +1620,34 @@ class DivisionPartyBreakdown(DjangoVoteModel):
     motion_majority: int
     for_motion_percentage: float
     motion_result_int: int
+
+
+class Signature(DjangoVoteModel):
+    """
+    A signature is connected to a statement (like a vote is to a division)
+    """
+
+    key: str
+    statement_id: Dummy[int]
+    statement: DoNothingForeignKey[Statement] = related_name("signatures")
+    person_id: Dummy[int]
+    person: DoNothingForeignKey[Person] = related_name("signatures")
+    date: OptionalDateField  # if different from statement date
+    order: int = 999
+    withdrawn: bool = False
+    withdrawn_date: OptionalDateField = None
+    extra_info: DictField
+
+    def withdrawn_status(self) -> str | None:
+        """
+        Return withdrawal status - either None or 'withdrawn on {date}'
+        """
+        if self.withdrawn and self.withdrawn_date:
+            return f"withdrawn on {self.withdrawn_date}"
+        elif self.withdrawn:
+            return "withdrawn"
+        else:
+            return "-"
 
 
 class Vote(DjangoVoteModel):

@@ -24,15 +24,28 @@
     {% regroup search.decisions by date.month as decisions_by_date %}
     {% for chamber, df in decisions_by_chamber.items %}
         <li class="nav-item">
-            <a class="nav-link h6 pl-0 mb-0" href="#{{ chamber.slug }}">{{ chamber.name }}</a>
+            <a class="nav-link h6 pl-0 mb-0" href="#decisions-{{ chamber.slug }}">{{ chamber.name }}</a>
         </li>
     {% endfor %}
+    {% if decisions_by_chanber %}<hr />{% endif %}
+    {% if statements_by_chamber %}
+        {% for chamber, df in statements_by_chamber.items %}
+            <li class="nav-item">
+                <a class="nav-link h6 pl-0 mb-0" href="#statements-{{ chamber.slug }}">{{ chamber.name }} Statements</a>
+            </li>
+        {% endfor %}
+    {% endif %}
 {% endblock content.menu %}
 
 {% block content.inner %}
     <h1 id="about">Decisions tagged ‘{{ tag.name }}’</h1>
     {{ tag.desc_markdown|safe }}
-    <p>There are {{ total_len }} decisions tagged across {{ decisions_by_chamber|length }} chambers.</p>
+    {% if decisions_by_chamber %}
+        <p>There are {{ total_len }} decisions tagged across {{ decisions_by_chamber|length }} chambers.</p>
+    {% endif %}
+    {% if statements_by_chamber %}
+        <p>There are {{ total_statements_len }} statements tagged across {{ statements_by_chamber|length }} chambers.</p>
+    {% endif %}
     <ul>
         {% for chamber, df in decisions_by_chamber.items %}
             <li>
@@ -41,7 +54,11 @@
         {% endfor %}
     </ul>
     {% for chamber, df in decisions_by_chamber.items %}
-        <h2 id="{{ chamber.slug }}" class="section-header">{{ chamber.name }}</h2>
+        <h2 id="decision-{{ chamber.slug }}" class="section-header">{{ chamber.name }}</h2>
+        {% style_df df %}
+    {% endfor %}
+    {% for chamber, df in statements_by_chamber.items %}
+        <h2 id="statement-{{ chamber.slug }}" class="section-header">{{ chamber.name }}</h2>
         {% style_df df %}
     {% endfor %}
 {% endblock content.inner %}
