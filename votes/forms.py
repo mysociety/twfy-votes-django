@@ -1,10 +1,13 @@
+import json
 from enum import StrEnum
 from typing import Type
 
 from django import forms
 from django.http import Http404, HttpRequest
 
-from .consts import EvidenceType, WhipDirection, WhipPriority
+from pydantic import BaseModel, Field, RootModel, ValidationError
+
+from .consts import EvidenceType, VotePosition, WhipDirection, WhipPriority
 from .models import (
     AgreementAnnotation,
     Division,
@@ -12,6 +15,7 @@ from .models import (
     Membership,
     Organization,
     UserPersonLink,
+    Vote,
     VoteAnnotation,
     WhipReport,
 )
@@ -21,10 +25,31 @@ def enum_to_choices(en: Type[StrEnum]) -> list[tuple[str, str]]:
     return [(enum_.value, enum_.value.title().replace("_", " ")) for enum_ in en]
 
 
+class VoteAnnotationUpdate(BaseModel):
+    """
+    Represents a single vote annotation update for a person
+    """
+
+    person_id: int
+    link: str = ""
+    detail: str = ""  # Optional field for annotation details
+    delete: bool = Field(
+        default=False, description="Set to true to delete this annotation"
+    )
+
+
+class VoteUpdates(RootModel):
+    """
+    Root model containing a list of vote annotation updates
+    """
+
+    root: list[VoteAnnotationUpdate]
+
+
 class DecisionIdMixin:
     @classmethod
     def from_decision_id(cls, decision_id: int):
-        return cls(initial={"decision_id": decision_id})
+        return cls(initial={"decision_id": decision_id})  # type: ignore
 
 
 class WhipForm(forms.Form, DecisionIdMixin):
@@ -35,6 +60,12 @@ class WhipForm(forms.Form, DecisionIdMixin):
         label="Select a Party",
         empty_label="Choose a Party",
         widget=forms.Select(attrs={"class": "form-control"}),
+        required=False,
+    )
+    apply_to_all_parties = forms.BooleanField(
+        required=False,
+        label="Apply to all voting parties",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
     whip_direction = forms.ChoiceField(
         choices=enum_to_choices(WhipDirection),
@@ -52,16 +83,43 @@ class WhipForm(forms.Form, DecisionIdMixin):
         widget=forms.Textarea(attrs={"class": "form-control"}), required=False
     )
 
+    def clean(self):
+        cleaned_data = super().clean()
+        apply_to_all_parties = cleaned_data.get("apply_to_all_parties")
+        party = cleaned_data.get("party")
+
+        if not apply_to_all_parties and not party:
+            self.add_error(
+                "party", 'Please select a party or check "Apply to all voting parties"'
+            )
+
+        return cleaned_data
+
     def save(self, request: HttpRequest, decision_id: int):
-        model = WhipReport(
-            division_id=decision_id,
-            party_id=self.cleaned_data["party"].id,
-            whip_direction=self.cleaned_data["whip_direction"],
-            whip_priority=self.cleaned_data["whip_priority"],
-            evidence_type=self.cleaned_data["evidence_type"],
-            evidence_detail=self.cleaned_data["evidence_detail"],
-        )
-        model.save()
+        if self.cleaned_data.get("apply_to_all_parties"):
+            # Get all parties that had members voting in this division
+            voting_parties_ids = (
+                Vote.objects.filter(division_id=decision_id)
+                .exclude(vote=VotePosition.ABSENT)
+                .select_related("person")
+                .values_list("person__memberships__party_id", flat=True)
+                .distinct()
+            )
+
+            voting_parties = Organization.objects.filter(id__in=voting_parties_ids)
+        else:
+            voting_parties = [self.cleaned_data["party"]]
+
+        for party in voting_parties:
+            model = WhipReport(
+                division_id=decision_id,
+                party=party,
+                whip_direction=self.cleaned_data["whip_direction"],
+                whip_priority=self.cleaned_data["whip_priority"],
+                evidence_type=self.cleaned_data["evidence_type"],
+                evidence_detail=self.cleaned_data["evidence_detail"],
+            )
+            model.save()
 
 
 class RepWhipForm(forms.Form, DecisionIdMixin):
@@ -168,3 +226,125 @@ class RepAnnotationForm(BaseAnnotationForm):
             link=self.cleaned_data["link"],
         )
         model.save()
+
+
+class BulkVoteAnnotationForm(forms.Form, DecisionIdMixin):
+    """
+    Form for handling bulk vote annotation updates
+    """
+
+    title = "Bulk Vote Annotation Form"
+    desc = "This form is for adding or updating multiple vote annotations at once."
+
+    decision_id = forms.IntegerField(widget=forms.HiddenInput())
+    annotations_json = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 15, "cols": 60, "class": "form-control"}),
+        label="Vote Annotations (JSON)",
+        help_text="""
+        Provide a JSON list of vote annotations in the following format:
+        [
+            {
+                "person_id": 1234,
+                "link": "https://example.com/reference",
+                "detail": "Optional explanation"
+            },
+            ...
+        ]
+        
+        To delete an existing annotation, include the "delete" flag:
+        {
+            "person_id": 1234,
+            "delete": true
+        }
+        """,
+    )
+
+    def clean_annotations_json(self):
+        """
+        Validates the JSON data and converts it to a Pydantic model
+        """
+
+        json_data = self.cleaned_data.get("annotations_json")
+        if not json_data:
+            raise forms.ValidationError("This field is required.")
+
+        # Parse the JSON data
+        try:
+            annotations_data = json.loads(json_data)
+        except json.JSONDecodeError as e:
+            # Format the JSON error in a user-friendly way
+            line_col = (
+                f"line {e.lineno}, column {e.colno}"
+                if hasattr(e, "lineno")
+                else "unknown position"
+            )
+            error_msg = f"Invalid JSON format at {line_col}: {e.msg}"
+            raise forms.ValidationError(error_msg)
+
+        # Validate with Pydantic model
+        try:
+            vote_updates = VoteUpdates.model_validate(annotations_data)
+        except ValidationError as e:
+            # Format validation errors in a user-friendly way
+            error_messages = []
+            for error in e.errors():
+                location = ".".join(str(loc) for loc in error["loc"])
+                message = error["msg"]
+                error_messages.append(f"Error at {location}: {message}")
+
+            formatted_error = (
+                "Please fix the following validation errors:\n"
+                + "\n".join(error_messages)
+            )
+            raise forms.ValidationError(formatted_error)
+
+        # Return the parsed and validated data so it's available in save
+        return vote_updates
+
+    def save(self, request: HttpRequest, decision_id: int):
+        """
+        Process the validated data and create/update/delete annotations
+        This method assumes all validation has already happened in clean method
+        """
+
+        # Get the validated vote updates from cleaned_data
+        vote_updates = self.cleaned_data["annotations_json"]
+
+        # Process each annotation update
+        created_count = 0
+        updated_count = 0
+        deleted_count = 0
+
+        for update in vote_updates.root:
+            # Check if this annotation should be deleted
+            if update.delete:
+                try:
+                    annotation = VoteAnnotation.objects.get(
+                        division_id=decision_id, person_id=update.person_id
+                    )
+                    annotation.delete()
+                    deleted_count += 1
+                except VoteAnnotation.DoesNotExist:
+                    # If it doesn't exist, nothing to delete
+                    pass
+            else:
+                # Try to find existing annotation for this person and division
+                annotation, created = VoteAnnotation.objects.update_or_create(
+                    division_id=decision_id,
+                    person_id=update.person_id,
+                    defaults={
+                        "link": update.link,
+                        "detail": update.detail,
+                    },
+                )
+
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
+
+        result_message = f"Successfully processed annotations: {created_count} created, {updated_count} updated"
+        if deleted_count > 0:
+            result_message += f", {deleted_count} deleted"
+
+        return result_message

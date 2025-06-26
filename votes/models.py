@@ -122,7 +122,10 @@ class UrlColumn:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, UrlColumn):
             return NotImplemented
-        return self.text == other.text
+        return self.text == other.text and self.url == other.url
+
+    def __hash__(self) -> int:
+        return hash((self.url, self.text))
 
     def __lt__(self, other: object) -> bool:
         if not isinstance(other, UrlColumn):
@@ -988,6 +991,12 @@ class Division(DjangoVoteModel):
         related_name="divisions",
     )
 
+    def bulk_annotations_url(self) -> str:
+        """
+        Get the URL for the bulk vote annotations admin page
+        """
+        return reverse("forms", args=["bulk_vote_annotation", self.id])
+
     def first_breakdown(self):
         """
         This doesn't use the 'first' because it's been prefetched.
@@ -998,17 +1007,27 @@ class Division(DjangoVoteModel):
     def decision_number_or_ref(self) -> str:
         return str(self.division_number)
 
-    def whip_report_df(self) -> pd.DataFrame | None:
+    def whip_report_df(self, include_admin_links: bool = False) -> pd.DataFrame | None:
         wf = list(
             self.whip_reports.all().values(
-                "party__name", "whip_direction", "whip_priority"
+                "id", "party__name", "whip_direction", "whip_priority"
             )
         )
         if not wf:
             return None
         df = pd.DataFrame(data=wf)
-        df.columns = ["Party", "Whip direction", "Whip priority"]
-        # remove duplicates
+        df.columns = ["ID", "Party", "Whip direction", "Whip priority"]
+
+        def make_link(id: int) -> UrlColumn:
+            return UrlColumn(url=f"/admin/votes/whipreport/{id}/change/", text=str(id))
+
+        # Create admin links if requested
+        if include_admin_links:
+            df["ID"] = df["ID"].apply(make_link)  # type: ignore
+        else:
+            df = df.drop(columns=["ID"])
+
+        # Remove duplicates
         df = df.drop_duplicates()
         return df
 

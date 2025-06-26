@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import calendar
 import datetime
+import json
 import re
 import string
 from pathlib import Path
@@ -36,6 +37,7 @@ from ..consts import (
 )
 from ..forms import (
     AgreementAnnotationForm,
+    BulkVoteAnnotationForm,
     DivisionAnnotationForm,
     OpenRepAnnotationForm,
     RepAnnotationForm,
@@ -59,6 +61,7 @@ from ..models import (
     UrlColumn,
     UserPersonLink,
     Vote,
+    VoteAnnotation,
     VoteDistribution,
 )
 from .auth import can_view_draft_content, super_users_or_group
@@ -88,6 +91,8 @@ class FormsView(TemplateView):
                 return OpenRepAnnotationForm
             case "rep_annotation":
                 return RepAnnotationForm
+            case "bulk_vote_annotation":
+                return BulkVoteAnnotationForm
             case _:
                 raise Http404("Form not found")
 
@@ -112,6 +117,10 @@ class FormsView(TemplateView):
             case "open_rep_annotation":
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
+                )
+            case "bulk_vote_annotation":
+                return super_users_or_group(
+                    self.request.user, PermissionGroupSlug.CAN_BULK_EDIT_ANNOTATIONS
                 )
             case "rep_annotation":
                 if not self.request.user.is_authenticated:
@@ -146,7 +155,7 @@ class FormsView(TemplateView):
             return redirect(decision.url())
 
         else:
-            # return the form with errors
+            # Form has validation errors, return the form with errors
             return self.render_to_response({"form": form, "decision": decision})
 
     def get_context_data(self, form_slug: str, decision_id: int, **kwargs):
@@ -158,6 +167,28 @@ class FormsView(TemplateView):
         decision = self.get_decision_instance(form_slug, decision_id)
 
         form = form_model.from_decision_id(decision_id)
+
+        # For bulk vote annotation form, pre-populate with existing annotations
+        if form_slug == "bulk_vote_annotation":
+            # Get existing annotations for this division
+            existing_annotations = VoteAnnotation.objects.filter(
+                division_id=decision_id
+            ).select_related("person")
+
+            # Prepare initial JSON data showing existing annotations
+            initial_data = [
+                {
+                    "person_id": annotation.person_id,
+                    "link": annotation.link,
+                    "detail": annotation.detail,
+                }
+                for annotation in existing_annotations
+            ]
+
+            # Always set a value - empty list if no annotations exist
+            form.fields["annotations_json"].initial = (
+                json.dumps(initial_data, indent=2) if initial_data else "[]"
+            )
 
         return {"form": form, "decision": decision}
 
@@ -426,6 +457,9 @@ class DivisionPageView(TitleMixin, TemplateView):
         context["can_add_annotations"] = super_users_or_group(
             self.request.user, PermissionGroupSlug.CAN_ADD_ANNOTATIONS
         )
+        context["can_bulk_edit_annotations"] = super_users_or_group(
+            self.request.user, PermissionGroupSlug.CAN_BULK_EDIT_ANNOTATIONS
+        )
         context["can_report_whip"] = super_users_or_group(
             self.request.user, PermissionGroupSlug.CAN_REPORT_WHIP
         )
@@ -436,6 +470,10 @@ class DivisionPageView(TitleMixin, TemplateView):
             self.request.user, PermissionGroupSlug.CAN_REPORT_SELF_WHIP
         )
         context["page_title"] = f"{decision.date} - {decision.safe_decision_name()}"
+
+        context["whip_report_df"] = decision.whip_report_df(
+            include_admin_links=self.request.user.is_superuser
+        )
 
         context["og_image"] = reverse("division_opengraph_image", args=[decision.id])
 
