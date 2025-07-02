@@ -1,0 +1,13 @@
+id: 20011
+name: Private School VAT
+context_description: charging VAT on private school fees
+policy_description: Votes in favour of charging VAT on private school fees.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links: []
+agreement_links: []

@@ -1,0 +1,13 @@
+id: 20018
+name: Gambling levies
+context_description: new/increased levies on the gambling industry
+policy_description: Decisions on new/increased levies on the gambling industry
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links: []
+agreement_links: []
