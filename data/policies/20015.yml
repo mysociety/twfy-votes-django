@@ -13,5 +13,27 @@ highlightable: false
 chamber: commons
 groups:
 - education
-division_links: []
-agreement_links: []
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-01-08
+    division_number: 74
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-03-18
+    division_number: 131
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-01-08
+    decision_ref: b.960.0.2
+    division_name: ''
+  alignment: agree
+  strength: weak
+  notes: ''

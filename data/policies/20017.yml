@@ -11,5 +11,19 @@ highlightable: false
 chamber: commons
 groups:
 - foreignpolicy
-division_links: []
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-02-10
+    division_number: 98
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-02-10
+    division_number: 97
+  alignment: against
+  strength: strong
+  notes: ''
 agreement_links: []

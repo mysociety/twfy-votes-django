@@ -11,5 +11,12 @@ highlightable: false
 chamber: commons
 groups:
 - misc
-division_links: []
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-03-24
+    division_number: 139
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []

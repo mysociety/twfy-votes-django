@@ -2,8 +2,8 @@ id: 811
 name: Smoking bans
 context_description: <b>smoking bans</b>
 policy_description: Smoking Bans - Over the years there have been votes in Parliament
-  on banning smoking in restaurants, public buildings, pubs, and in cars with children
-  present.
+  on banning smoking in restaurants, public buildings, pubs, in cars with children
+  present, and sale to those born after 2009.
 notes: ''
 status: active
 strength_meaning: simplified
@@ -87,6 +87,13 @@ division_links:
     chamber_slug: commons
     date: 2015-02-11
     division_number: 152
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-03-26
+    division_number: 155
   alignment: agree
   strength: strong
   notes: ''

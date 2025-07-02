@@ -11,5 +11,12 @@ highlightable: false
 chamber: commons
 groups:
 - welfare
-division_links: []
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-02-03
+    division_number: 96
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []

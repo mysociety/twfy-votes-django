@@ -1,9 +1,9 @@
 id: 20010
 name: Renters rights
-context_description: more rights for tenants (draft)
-policy_description: more rights for tenants (draft)
+context_description: more rights for tenants and regulation on landlords
+policy_description: more rights for tenants and regulation on landlords
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons
@@ -17,6 +17,13 @@ division_links:
   alignment: against
   strength: strong
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-01-14
+    division_number: 79
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links:
 - decision:
     chamber_slug: commons
@@ -25,4 +32,5 @@ agreement_links:
     division_name: ''
   alignment: agree
   strength: weak
-  notes: 'Second reading agreement included for context but not scored because of immediately proceding reasoned amendment. '
+  notes: 'Second reading agreement included for context but not scored because of
+    immediately proceding reasoned amendment. '

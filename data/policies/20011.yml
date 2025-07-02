@@ -9,5 +9,19 @@ highlightable: false
 chamber: commons
 groups:
 - taxation
-division_links: []
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-01-15
+    division_number: 86
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-03-25
+    division_number: 149
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []
