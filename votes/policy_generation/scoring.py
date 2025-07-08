@@ -169,7 +169,7 @@ class SimplifiedScore(ScoringFuncProtocol, Generic[ScoreType]):
                     score = 0.94
 
             # if more than one-third absent vote cap the score to prevent an 'almost always'
-            if votes_absent.strong >= total / 3:
+            if votes_absent.strong > 0 and votes_absent.strong >= total / 3:
                 if score <= 0.15:
                     score = 0.16
                 elif score >= 0.85:

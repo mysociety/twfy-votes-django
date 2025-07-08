@@ -1,7 +1,7 @@
 id: 20008
 name: Employment rights
 context_description: shifting the balance of <b>employment rights</b> towards employees
-policy_description: 'Votes that affect employment rights - giving employees more rights.'
+policy_description: Votes that affect employment rights - giving employees more rights.
 notes: ''
 status: active
 strength_meaning: simplified
@@ -21,6 +21,13 @@ division_links:
     chamber_slug: commons
     date: 2024-10-21
     division_number: 23
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-03-12
+    division_number: 123
   alignment: agree
   strength: strong
   notes: ''

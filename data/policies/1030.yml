@@ -382,6 +382,20 @@ division_links:
   alignment: against
   strength: strong
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-01-15
+    division_number: 82
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-04-02
+    division_number: 169
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links:
 - decision:
     chamber_slug: commons

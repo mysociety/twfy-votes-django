@@ -1,0 +1,28 @@
+id: 20013
+name: EU Standards Alignment
+context_description: aligning <b>product standards with EU standards</b>
+policy_description: Votes in favour of greater alignment between UK and EU regimes
+  on product standards.
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- business
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-04-01
+    division_number: 167
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-04-01
+    division_number: 166
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

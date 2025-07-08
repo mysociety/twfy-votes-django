@@ -1,0 +1,29 @@
+id: 20017
+name: Border Security Bill
+context_description: tougher border security, faster asylum decisions, and scrapping
+  the Rwanda deportation scheme (Border Security Bill)
+policy_description: Votes for tougher border security, faster asylum decisions, and
+  scrapping the Rwanda deportation scheme (Border Security Bill)
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-02-10
+    division_number: 98
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-02-10
+    division_number: 97
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

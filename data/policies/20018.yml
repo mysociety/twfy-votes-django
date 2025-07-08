@@ -1,0 +1,21 @@
+id: 20018
+name: Gambling levies
+context_description: <b>new/increased levies</b> on the gambling industry
+policy_description: Decisions on new/increased levies on the gambling industry
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links: []
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-02-03
+    decision_ref: e.638.6.2
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: ''

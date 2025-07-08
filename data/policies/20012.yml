@@ -1,0 +1,22 @@
+id: 20012
+name: Powers to investigate welfare fraud
+context_description: more powers to <b>investigate welfare fraud</b>, including requiring
+  banks to <b>monitor accounts of welfare recipients</b>
+policy_description: Votes for more powers to investigate welfare fraud, including
+  requiring banks to monitor accounts of welfare recipients
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-02-03
+    division_number: 96
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

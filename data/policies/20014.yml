@@ -1,0 +1,56 @@
+id: 20014
+name: Encouraging Electric Vehicles
+context_description: measures to <b>encourage purchase and use of electric vehicles</b>
+policy_description: Votes on measures to encourage purchase and use of electric vehicles
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- environment
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-04-02
+    division_number: 170
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2023-12-04
+    division_number: 25
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2021-05-24
+    division_number: 11
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-11-30
+    division_number: 106
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-03-03
+    division_number: 112
+  alignment: agree
+  strength: weak
+  notes: 'Informative vote as extending the measures in the 2021 Act'
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2023-10-24
+    decision_ref: b.802.9.2
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: 'Informative vote as extending the measures in the 2021 Act'

@@ -1,0 +1,22 @@
+id: 20016
+name: Planning Infrastructure
+context_description: speeding up <b>nationwide infrastructure consents</b> and opposing local
+  veto powers over large energy schemes
+policy_description: Voting on speeding up nationwide infrastructure consents and opposing
+  local veto powers over large energy schemes
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- misc
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-03-24
+    division_number: 139
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

@@ -254,7 +254,7 @@ class joined_division_agreement_comparison:
     select
         period_id: coalesce(division_comparison.period_id, agreement_comparison.period_id),
         policy_id: coalesce(division_comparison.policy_id, agreement_comparison.policy_id),
-        is_target: coalesce(division_comparison.is_target, 0),
+        is_target: coalesce(division_comparison.is_target, 1),
         person_id: {{ _person_id }},
         chamber_id: {{ _chamber_id }},
         party_id: {{ _party_slug }},
