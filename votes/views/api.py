@@ -34,6 +34,7 @@ from ..models import (
     VoteAnnotation,
     VoteDistribution,
 )
+from .auth import can_view_draft_content
 from .helper_models import PairedPolicy, PolicyDisplayGroup, PolicyReport
 from .twfy_bridge import PopoloPolicy
 
@@ -557,7 +558,7 @@ def get_divisions_by_month(
 
 @api.get("/policies.json", response=list[PolicySchema])
 def get_policies(request: HttpRequest):
-    return Policy.objects.all().prefetch_related(
+    policies_query = Policy.objects.all().prefetch_related(
         "groups",
         "division_links",
         "division_links__decision",
@@ -566,6 +567,13 @@ def get_policies(request: HttpRequest):
         "agreement_links__decision",
         "agreement_links__decision__tags",
     )
+
+    if not can_view_draft_content(request.user):
+        policies_query = policies_query.filter(
+            status__in=[PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
+        )
+
+    return policies_query
 
 
 @api.get("/policy/{chamber_slug}/{status}/{group_slug}.json", response=PolicySchema)
