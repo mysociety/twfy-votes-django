@@ -1,6 +1,6 @@
 id: 20011
 name: Private School VAT
-context_description: charging VAT on private school fees
+context_description: charging <b>VAT on private school fees</b>
 policy_description: Votes in favour of charging VAT on private school fees.
 notes: ''
 status: active
