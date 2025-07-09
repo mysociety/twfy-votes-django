@@ -623,10 +623,14 @@ class StatementPageView(TitleMixin, TemplateView):
     ):
         context = super().get_context_data(**kwargs)
         try:
-            statement = Statement.objects.prefetch_related("tags").get(
-                chamber__slug=chamber_slug,
-                date=statement_date,
-                slug=statement_slug,
+            statement = (
+                Statement.objects.prefetch_related("tags")
+                .annotate(signature_count=Count("signatures"))
+                .get(
+                    chamber__slug=chamber_slug,
+                    date=statement_date,
+                    slug=statement_slug,
+                )
             )
         except Statement.DoesNotExist:
             raise Http404("Statement not found")

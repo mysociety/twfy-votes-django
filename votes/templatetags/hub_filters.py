@@ -283,3 +283,27 @@ def smart_number(value):
     if isinstance(value, float) and value.is_integer():
         return int(value)
     return value
+
+
+@register.filter(name="pluralise_s")
+def pluralise_s(word, count):
+    """
+    Add 's' to a word if count is 0 or more than 1.
+    Usage: {{ "signature"|pluralise_s:statement.signature_count }}
+    """
+    if not isinstance(count, (int, float)):
+        return word
+
+    return word if count == 1 else word + "s"
+
+
+@register.filter(name="pluralise_es")
+def pluralise_es(word, count):
+    """
+    Add 'es' to a word if count is 0 or more than 1.
+    Usage: {{ "box"|pluralise_es:box_count }}
+    """
+    if not isinstance(count, (int, float)):
+        return word
+
+    return word if count == 1 else word + "es"
