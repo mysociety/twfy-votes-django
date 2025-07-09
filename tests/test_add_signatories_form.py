@@ -285,3 +285,26 @@ def test_add_signatories_link_not_visible_for_unauthorized_users(
     content = response.content.decode()
     assert "Add Signatories" not in content
     assert f"/submit/add_signatories/{test_statement.id}" not in content
+
+
+def test_add_signatories_form_submission_duplicate_name_in_list(
+    client: Client, test_super_user: User, test_statement: Statement
+):
+    """Test add signatories form submission with the same name listed twice"""
+    client.force_login(test_super_user)
+
+    form_data = {
+        "statement_id": test_statement.id,
+        "date": "2023-06-16",
+        "signatories": "Jeremy Corbyn\nEd Miliband\nJeremy Corbyn",  # Jeremy Corbyn listed twice
+    }
+
+    response = client.post(f"/submit/add_signatories/{test_statement.id}", form_data)
+
+    # Should return form with errors
+    assert response.status_code == 200
+    assert "Duplicate signatory" in response.content.decode()
+
+    # Check that no new signatures were created
+    count = Signature.objects.filter(statement=test_statement).count()
+    assert count == 1  # Only the initial signature

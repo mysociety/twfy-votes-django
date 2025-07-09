@@ -50,10 +50,16 @@ def validate_signatories_text(
     lines = [line.strip() for line in signatories_text.split("\n") if line.strip()]
     signatory_errors = []
 
+    previous_person_ids = []
     for line_num, name in enumerate(lines, 1):
         person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
         if person_id is None:
             signatory_errors.append(f"Line {line_num}: Could not find person '{name}'")
+        if person_id in previous_person_ids:
+            signatory_errors.append(
+                f"Line {line_num}: Duplicate signatory '{name}' found"
+            )
+        previous_person_ids.append(person_id)
 
     if signatory_errors:
         raise forms.ValidationError(signatory_errors)
