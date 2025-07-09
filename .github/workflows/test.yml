@@ -20,6 +20,7 @@ jobs:
           run: |
             script/setup
             script/populate --all
+            script/populate --all --update-last 5
             script/test
      
     
