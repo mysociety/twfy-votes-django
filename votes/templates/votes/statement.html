@@ -5,7 +5,9 @@
 {% block content.title %}
     <h1 id="top-header">{{ statement.chamber.name }} – {{ statement.date }}</h1>
     <h2>{{ statement.nice_title }}</h2>
-    <p class="text-muted">Type: {{ statement.type_display }}</p>
+    <p class="text-muted">
+        {{ statement.type_display }} - {{ statement.signature_count }} {{ "signature"|pluralise_s:statement.signature_count }}
+    </p>
 {% endblock content.title %}
 
 {% block content.menu %}
@@ -41,7 +43,7 @@
     {% if statement.url %}
         <hr />
         <li class="nav-item">
-            <a class="nav-link h6 pl-0 mb-0" href="{{ statement.url }}">View source</a>
+            <a class="nav-link h6 pl-0 mb-0" href="{{ statement.url }}">View source ({{ statement.url|domain_human }})</a>
         </li>
     {% endif %}
     {% featureflag permission_group.CAN_ADD_SIGNATORIES %}

@@ -45,7 +45,7 @@
             {% for statement in month_statements %}
                 <li class="statement-type-{{ statement.type.lower }}">
                     {{ statement.date|date:"j M" }} – <a href="{{ statement.page_url }}">{{ statement.nice_title|safe }}</a>
-                    <span class="text-muted">({{ statement.type_display }})</span>
+                    <span class="text-muted">({{ statement.signature_count }} {{ "signature"|pluralise_s:statement.signature_count }})</span>
                 </li>
             {% endfor %}
         </ul>
