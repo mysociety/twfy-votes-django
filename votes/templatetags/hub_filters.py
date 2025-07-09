@@ -269,6 +269,8 @@ def filter_metadata(extra_info_dict):
         "status_date",
         "chamber",
         "sponsors_count",
+        "data_entered_via",
+        "data_entered_by",
     ]
     if not isinstance(extra_info_dict, dict):
         return {}
