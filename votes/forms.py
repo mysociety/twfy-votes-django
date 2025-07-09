@@ -557,7 +557,10 @@ class StatementForm(forms.Form):
             date=date,
             type=StatementType(self.cleaned_data["statement_type"]),
             url=self.cleaned_data.get("url", ""),
-            extra_info={},
+            extra_info={
+                "data_entered_via": "form",
+                "data_entered_by": request.user.username,
+            },
         )
         statement.save()
 
