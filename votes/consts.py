@@ -250,6 +250,7 @@ class WhipPriority(StrEnum):
     THREE_LINE = (
         "three_line"  # three line - instruct to attend and vote with preference
     )
+    UNKNOWN = "unknown"  # unknown whip priority
 
 
 class EvidenceType(StrEnum):
