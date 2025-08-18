@@ -12,6 +12,13 @@ groups:
 division_links:
 - decision:
     chamber_slug: commons
+    date: 2024-11-06
+    division_number: 34
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
     date: 2025-01-15
     division_number: 86
   alignment: agree
