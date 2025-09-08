@@ -126,6 +126,20 @@ class DummyManager(models.Manager, Generic[ModelType]):
     def get(self, *args: Any, **kwargs: Any) -> ModelType: ...
 
 
+def extract_field_from_optional(type_hint: Any) -> Any:
+    """
+    If the type hint is Optional[T], return T.
+    Otherwise, return the original type hint.
+    """
+    origin = get_origin(type_hint)
+    args = get_args(type_hint)
+
+    if origin is Union and len(args) == 2 and type(None) in args:
+        non_none_type = args[0] if args[1] is type(None) else args[1]
+        return non_none_type
+    return type_hint
+
+
 AllowJustAnnotated = object()
 
 ForeignKey = Annotated[
@@ -135,6 +149,17 @@ DoNothingForeignKey = Annotated[
     ModelType,
     lambda x: field(
         models.ForeignKey, to=x, on_delete=models.DO_NOTHING, db_constraint=False
+    ),
+]
+OptionalDoNothingForeignKey = Annotated[
+    Optional[ModelType],
+    lambda x: field(
+        models.ForeignKey,
+        to=extract_field_from_optional(x),
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        blank=True,
     ),
 ]
 ManyToMany = Annotated[

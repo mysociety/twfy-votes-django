@@ -119,7 +119,7 @@ def import_statement_party_breakdowns(
             date__gte=update_since
         ).values_list("id", flat=True)
         # Filter df
-        df = df[df["statement_id"].map(lambda sid: (sid in statement_ids_in_scope))]
+        df = df[df["statement_id"].isin(statement_ids_in_scope)]
     party_id_lookup = Organization.id_from_slug("slug")
 
     to_create = []
