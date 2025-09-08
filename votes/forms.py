@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import json
 import re
@@ -34,71 +36,221 @@ from .models import (
 )
 from .name_reconciliation import person_id_from_name
 
+NON_PARL_PERSON = -1
+
 
 def enum_to_choices(en: Type[StrEnum]) -> list[tuple[str, str]]:
     return [(enum_.value, enum_.value.title().replace("_", " ")) for enum_ in en]
 
 
-def validate_signatories_text(
-    signatories_text: str, chamber_slug: str, date: datetime.date
-) -> list[str]:
+class MiniSignature(BaseModel):
+    name: str
+    person_id: int | None = None
+    extra_info: dict = Field(default_factory=dict)
+
+    def to_text(self) -> str:
+        """
+        Convert MiniSignature back to text format.
+        If person_id is present, append (person_id) to name.
+        If extra_info is present, append (JSON) to name.
+        """
+        if self.extra_info:
+            meta = json.dumps(self.extra_info)
+            return f"{self.name} ({meta})"
+        elif self.person_id is not None:
+            return f"{self.name} ({self.person_id})"
+        else:
+            return self.name
+
+    @classmethod
+    def from_text(cls, name: str) -> MiniSignature:
+        """
+        Extract person_id and extra metadata from a signatory name.
+        - Short format: (10001) at end of name
+        - JSON format: ({...}) at end of name
+        Returns (person_id, extra_info) tuple. If no match, returns (None, {}).
+        """
+
+        person_id = None
+        extra_info = {}
+        # Short format: (10001) at end
+
+        short_id_match = re.search(r"\((\d+)\)$", name.strip())
+        if short_id_match:
+            name = re.sub(r"\(\d+\)$", "", name).strip()
+            person_id = int(short_id_match.group(1))
+            return cls(name=name, person_id=person_id, extra_info=extra_info)
+        # JSON format: ({...}) at end
+        json_match = re.search(r"\((\{.*\})\)$", name.strip())
+        if json_match:
+            name = re.sub(r"\(\{.*\}\)$", "", name).strip()
+            meta = json.loads(json_match.group(1))
+            if isinstance(meta, dict):
+                if "person_id" in meta:
+                    person_id = meta["person_id"]
+                for k, v in meta.items():
+                    if k != "person_id":
+                        extra_info[k] = v
+            else:
+                raise ValueError("Invalid JSON metadata format")
+        return cls(name=name, person_id=person_id, extra_info=extra_info)
+
+
+class MiniSignatureList(RootModel):
     """
-    Validate signatories text and return list of names if all are valid.
+    Helper function to manage a list of MiniSignature objects
     """
-    if not signatories_text.strip():
-        raise forms.ValidationError("At least one signatory is required.")
 
-    lines = [line.strip() for line in signatories_text.split("\n") if line.strip()]
-    signatory_errors = []
+    root: list[MiniSignature]
 
-    previous_person_ids = []
-    for line_num, name in enumerate(lines, 1):
-        person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
-        if person_id is None:
-            signatory_errors.append(f"Line {line_num}: Could not find person '{name}'")
-        if person_id in previous_person_ids:
-            signatory_errors.append(
-                f"Line {line_num}: Duplicate signatory '{name}' found"
-            )
-        previous_person_ids.append(person_id)
+    def to_text(self) -> str:
+        """
+        Convert the list of MiniSignature objects back to text format.
+        """
+        return "\n".join(mini_sig.to_text() for mini_sig in self.root)
 
-    if signatory_errors:
-        raise forms.ValidationError(signatory_errors)
+    @classmethod
+    def from_text(cls, text: str) -> MiniSignatureList:
+        """
+        Parse signatories text into a list of MiniSignature objects.
+        Each line is treated as a separate signatory.
+        """
+        lines = [line.strip() for line in text.split("\n") if line.strip()]
+        mini_sigs = [MiniSignature.from_text(line) for line in lines]
+        return cls(root=mini_sigs)
 
-    return lines
+    def __iter__(self):
+        return iter(self.root)
 
+    def __len__(self):
+        return len(self.root)
 
-def create_signatures_for_statement(
-    statement: Statement,
-    signatories: list[str],
-    date: datetime.date,
-    start_order: int = 0,
-) -> list[Signature]:
-    """
-    Create Signature objects for a given statement based on the provided signatories.
-    """
-    signatures = []
-    chamber_slug = statement.chamber.popolo_slug_alias()
+    def assign_person_ids_from_chamber(
+        self,
+        chamber_slug: str,
+        date: datetime.date,
+        allow_signatures_without_person_ids: bool = False,
+    ):
+        for mini_sig in self:
+            if mini_sig.person_id is None:
+                mini_sig.person_id = person_id_from_name(
+                    mini_sig.name, chamber_slug=chamber_slug, date=date
+                )
+            if mini_sig.person_id is None and allow_signatures_without_person_ids:
+                mini_sig.person_id = NON_PARL_PERSON
 
-    statement_id = statement.id
-    if not statement_id:
-        raise ValueError("Statement must be saved before creating signatures.")
+    def validate_signatories_text(
+        self,
+        chamber_slug: str,
+        date: datetime.date,
+        allow_signatures_without_person_ids: bool = False,
+    ) -> MiniSignatureList:
+        """
+        Validate signatories text and return list of names if all are valid.
+        """
+        if not self.root:
+            raise forms.ValidationError("At least one signatory is required.")
 
-    for order, name in enumerate(signatories, start=start_order):
-        person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
-        if person_id:  # This should always be true due to validation
+        self.assign_person_ids_from_chamber(
+            chamber_slug=chamber_slug,
+            date=date,
+            allow_signatures_without_person_ids=allow_signatures_without_person_ids,
+        )
+
+        signatory_errors = []
+        previous_person_ids = []
+        for line_num, mini_sig in enumerate(self, 1):
+            if mini_sig.person_id is None:
+                signatory_errors.append(
+                    f"Line {line_num}: Could not find person '{mini_sig.name}'"
+                )
+            else:
+                if (
+                    mini_sig.person_id in previous_person_ids
+                    and mini_sig.person_id != NON_PARL_PERSON
+                ):
+                    signatory_errors.append(
+                        f"Line {line_num}: Duplicate signatory '{mini_sig.name}' found"
+                    )
+            previous_person_ids.append(mini_sig.person_id)
+
+        if signatory_errors:
+            raise forms.ValidationError(signatory_errors)
+
+        return self
+
+    def create_signatures_for_statement(
+        self,
+        statement: Statement,
+        date: datetime.date,
+        start_order: int = 0,
+        allow_signatures_without_person_ids: bool = False,
+    ) -> list[Signature]:
+        """
+        Create Signature objects for a given statement based on the provided signatories.
+
+        Extra properties can be included in the signatory name using JSON syntax, e.g.:
+            John Smith [{"person_id": 1234, "role": "sponsor"}]
+            Jane Doe [{"person_id": 5678, "role": "opponent"}].
+
+        """
+        signatures = []
+        if statement.chamber.slug == "other":
+            chamber_slug = "house-of-commons"
+        else:
+            chamber_slug = statement.chamber.popolo_slug_alias()
+
+        statement_id = statement.id
+        if not statement_id:
+            raise ValueError("Statement must be saved before creating signatures.")
+
+        self.assign_person_ids_from_chamber(
+            chamber_slug=chamber_slug,
+            date=date,
+            allow_signatures_without_person_ids=allow_signatures_without_person_ids,
+        )
+
+        for order, mini_sig in enumerate(self, start=start_order):
+            if mini_sig.person_id == NON_PARL_PERSON:
+                # Strip metadata from name before saving
+                mini_sig.extra_info["name"] = mini_sig.name
+                key = f"{statement.key}-noperson-{slugify(mini_sig.name)}-{order}"
+                person_id_val = None
+            elif mini_sig.person_id:
+                key = f"{statement.key}-{mini_sig.person_id}"
+                person_id_val = mini_sig.person_id
+            else:
+                raise ValueError(
+                    f"Cannot create signature for '{mini_sig.name}' without a valid person ID (or -1)."
+                )
             signature = Signature(
-                key=f"{statement.key}-{person_id}",
+                key=key,
                 statement_id=statement_id,
-                person_id=person_id,
+                person_id=person_id_val,
                 date=date,
                 order=order,
-                extra_info={},
+                extra_info=mini_sig.extra_info,
             )
             signature.save()
             signatures.append(signature)
 
-    return signatures
+        return signatures
+
+
+class MiniSigField(forms.CharField):
+    def to_python(self, value: str) -> MiniSignatureList:
+        if not value:
+            return MiniSignatureList(root=[])
+        try:
+            mini_sig_list = MiniSignatureList.from_text(value)
+            return mini_sig_list
+        except ValueError as e:
+            raise forms.ValidationError(f"Error parsing signatories: {e}")
+
+    def prepare_value(self, value: MiniSignatureList | str) -> str:
+        if isinstance(value, MiniSignatureList):
+            return value.to_text()
+        return value or ""
 
 
 class VoteAnnotationUpdate(BaseModel):
@@ -494,10 +646,16 @@ class StatementForm(forms.Form):
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 10}),
         label="Statement Content",
     )
-    signatories = forms.CharField(
+    signatories = MiniSigField(
         required=False,
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 5}),
         label="Signatories (one name per line)",
+    )
+    allow_signatures_without_person_ids = forms.BooleanField(
+        required=False,
+        label="Allow signatures without person IDs",
+        help_text="If ticked, names that can't be matched will be saved as signatures without a person.",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
     )
 
     def clean_date(self):
@@ -511,25 +669,28 @@ class StatementForm(forms.Form):
 
     def clean_signatories(self):
         """Validate that all signatories can be found and return person IDs"""
-        signatories_text = self.cleaned_data.get("signatories", "")
+        signatories = self.cleaned_data.get("signatories", MiniSignatureList(root=[]))
+        allow_signatures_without_person_ids = self.data.get(
+            "allow_signatures_without_person_ids", False
+        )
 
-        # Check if chamber and date are available in cleaned_data
-        chamber = self.cleaned_data.get("chamber")
+        chamber: Chamber | None = self.cleaned_data.get("chamber")
         date = self.cleaned_data.get("date")
 
         if not chamber or not date:
-            # If chamber or date is invalid, we can't validate signatories
-            # Return the lines for now and let other field validation handle the errors
-            if signatories_text.strip():
-                return [
-                    line.strip()
-                    for line in signatories_text.split("\n")
-                    if line.strip()
-                ]
-            return []
+            self.add_error("chamber", "Chamber is required.")
+            self.add_error("date", "Date is required.")
+            return signatories
 
-        return validate_signatories_text(
-            signatories_text, chamber.popolo_slug_alias(), date
+        if chamber.slug == "other":
+            chamber_alias = "house-of-commons"
+        else:
+            chamber_alias = chamber.popolo_slug_alias()
+
+        return signatories.validate_signatories_text(
+            chamber_alias,
+            date,
+            allow_signatures_without_person_ids=allow_signatures_without_person_ids,
         )
 
     def save(self, request: HttpRequest, decision_id: int | None = None) -> Statement:
@@ -567,8 +728,17 @@ class StatementForm(forms.Form):
             raise ValueError("Failed to save statement - no ID generated")
 
         # Create signatures for each signatory
-        signatories = self.cleaned_data["signatories"]
-        create_signatures_for_statement(statement, signatories, date)
+        signatories: MiniSignatureList = self.cleaned_data["signatories"]
+        allow_no_person = self.cleaned_data.get(
+            "allow_signatures_without_person_ids", False
+        )
+
+        signatories.create_signatures_for_statement(
+            statement,
+            date,
+            allow_signatures_without_person_ids=allow_no_person,
+        )
+
         # Generate party breakdowns for the statement
         statement.generate_party_breakdowns()
 
@@ -588,7 +758,7 @@ class AddSignatoriesForm(forms.Form):
         label="Signature Date",
         help_text="Date when the signatories signed (may be different from statement date)",
     )
-    signatories = forms.CharField(
+    signatories = MiniSigField(
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 5}),
         label="New Signatories (one name per line)",
         help_text="Enter one signatory name per line. Names will be validated against the chamber membership.",
@@ -628,7 +798,9 @@ class AddSignatoriesForm(forms.Form):
 
     def clean_signatories(self):
         """Validate that all signatories can be found and return person IDs"""
-        signatories_text = self.cleaned_data.get("signatories", "")
+        signatories: MiniSignatureList = self.cleaned_data.get(
+            "signatories", MiniSignatureList(root=[])
+        )
         date = self.cleaned_data.get("date")
 
         if not self.statement:
@@ -652,9 +824,7 @@ class AddSignatoriesForm(forms.Form):
             )
 
         chamber_slug = self.statement.chamber.popolo_slug_alias()
-        validated_names = validate_signatories_text(
-            signatories_text, chamber_slug, date
-        )
+        validated_names = signatories.validate_signatories_text(chamber_slug, date)
 
         # Check for duplicate signatories (people who already signed this statement)
         existing_signatures = Signature.objects.filter(statement=self.statement)
@@ -664,11 +834,10 @@ class AddSignatoriesForm(forms.Form):
             existing_person_ids.add(signature.person_id)
 
         duplicate_errors = []
-        for line_num, name in enumerate(validated_names, 1):
-            person_id = person_id_from_name(name, chamber_slug=chamber_slug, date=date)
-            if person_id and person_id in existing_person_ids:
+        for line_num, mini_sig in enumerate(validated_names, 1):
+            if mini_sig.person_id and mini_sig.person_id in existing_person_ids:
                 duplicate_errors.append(
-                    f"Line {line_num}: '{name}' has already signed this statement"
+                    f"Line {line_num}: '{mini_sig.name}' has already signed this statement"
                 )
 
         if duplicate_errors:
@@ -679,7 +848,7 @@ class AddSignatoriesForm(forms.Form):
     def save(self, request: HttpRequest, statement_id: int) -> Statement:
         """Add new signatories to the existing statement"""
         statement = Statement.objects.get(id=statement_id)
-        signatories = self.cleaned_data["signatories"]
+        signatories: MiniSignatureList = self.cleaned_data["signatories"]
         date = self.cleaned_data["date"]
 
         # Get the current maximum order to continue numbering
@@ -689,8 +858,12 @@ class AddSignatoriesForm(forms.Form):
             max_order = max(sig.order for sig in existing_signatures)
 
         # Create new signatures starting after the existing ones
-        create_signatures_for_statement(
-            statement, signatories, date, start_order=max_order + 1
+
+        signatories.create_signatures_for_statement(
+            statement=statement,
+            date=date,
+            start_order=max_order + 1,
+            allow_signatures_without_person_ids=False,
         )
 
         # Regenerate party breakdowns for the updated statement

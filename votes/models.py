@@ -43,6 +43,7 @@ from twfy_votes.helpers.typed_django.models import (
     ManyToMany,
     OptionalDateField,
     OptionalDateTimeField,
+    OptionalDoNothingForeignKey,
     OptionalStr,
     PositiveIntegerField,
     PrimaryKey,
@@ -1138,16 +1139,28 @@ class Statement(DjangoVoteModel):
 
         data = [
             {
-                "Person": UrlColumn(
-                    url=sig.person.statements_url(), text=sig.person.name
+                "Person": (
+                    UrlColumn(url=sig.person.statements_url(), text=sig.person.name)
+                    if sig.person
+                    else sig.extra_info.get("name", "Unknown")
                 ),
+                "Role": sig.extra_info.get("role", None),
                 "Date Signed": sig.date or self.date,
                 "Status": sig.withdrawn_status(),
             }
             for sig in signatures
         ]
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        # check if Role and Status columns have any value other than None
+        # if not remove them
+        if "Role" in df.columns and all(df["Role"].isna()):
+            df = df.drop(columns=["Role"])
+        if "Status" in df.columns and all(df["Status"] == "-"):
+            df = df.drop(columns=["Status"])
+
+        return df
 
     def page_url(self) -> str:
         """
@@ -1182,6 +1195,7 @@ class Statement(DjangoVoteModel):
         # Fetch all signatures for this statement
         signatures_qs = self.signatures.all().select_related("person")
         chamber_slug = self.chamber_slug
+        unknown_id = Organization.objects.get(slug="unknown").id
 
         party_ids = []
         for sig in signatures_qs:
@@ -1189,7 +1203,7 @@ class Statement(DjangoVoteModel):
             sig_date = sig.date if sig.date else self.date
             person = sig.person
             if not person:
-                party_ids.append(Organization.objects.get(slug="unknown").id)
+                party_ids.append(unknown_id)
                 continue
             try:
                 membership = person.membership_in_chamber_on_date(
@@ -1197,8 +1211,8 @@ class Statement(DjangoVoteModel):
                 )
                 if membership and membership.party_id:
                     party_ids.append(membership.party_id)
-            except Exception:
-                party_ids.append(Organization.objects.get(slug="unknown").id)
+            except ValueError:
+                party_ids.append(unknown_id)
 
         party_counts = Counter(party_ids)
         for party_id, count in party_counts.items():
@@ -1709,15 +1723,15 @@ class Signature(DjangoVoteModel):
     key: str
     statement_id: Dummy[int]
     statement: DoNothingForeignKey[Statement] = related_name("signatures")
-    person_id: Dummy[int]
-    person: DoNothingForeignKey[Person] = related_name("signatures")
+    person_id: Dummy[Optional[int]]
+    person: OptionalDoNothingForeignKey[Person] = related_name("signatures")
     date: OptionalDateField  # if different from statement date
     order: int = 999
     withdrawn: bool = False
     withdrawn_date: OptionalDateField = None
     extra_info: DictField
 
-    def withdrawn_status(self) -> str | None:
+    def withdrawn_status(self) -> str:
         """
         Return withdrawal status - either None or 'withdrawn on {date}'
         """
