@@ -106,6 +106,7 @@ Where a Lords amendment has been rejected without an alternative, a committee is
 
 Now historical, but a vote recognising an EU document in Parliament was a requirement before a minister could support in council.
 
+
 ## Other
 
-This is a vote that doesn’t fit into any current category.
+This is a vote that doesnt fit into any current category.
