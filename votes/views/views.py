@@ -1209,17 +1209,22 @@ class StatementsListPageView(TitleMixin, TemplateView):
     template_name = "votes/statements_list.html"
 
     def statement_search(
-        self, chamber: Chamber, start_date: datetime.date, end_date: datetime.date
+        self,
+        chamber: Chamber,
+        start_date: datetime.date,
+        end_date: datetime.date,
+        statement_type: str | None = None,
     ):
+        qs = Statement.objects.filter(
+            chamber=chamber, date__range=(start_date, end_date)
+        )
+        if statement_type:
+            qs = qs.filter(type=statement_type)
         statements = (
-            Statement.objects.filter(
-                chamber=chamber, date__range=(start_date, end_date)
-            )
-            .prefetch_related("tags")
+            qs.prefetch_related("tags")
             .annotate(signature_count=Count("signatures"))
             .order_by("-date")
         )
-
         return StatementSearch(
             start_date=start_date,
             end_date=end_date,
@@ -1232,14 +1237,24 @@ class StatementsListPageView(TitleMixin, TemplateView):
         year_start = datetime.date(year, 1, 1)
         year_end = datetime.date(year, 12, 31)
         chamber = Chamber.objects.get(slug=chamber_slug)
-
-        search = self.statement_search(chamber, year_start, year_end)
+        statement_type = self.request.GET.get("type")
+        search = self.statement_search(chamber, year_start, year_end, statement_type)
         context["search"] = search
+        context["selected_type"] = statement_type
+        context["statement_types"] = [
+            {"type": "proposed_motion", "label": "🟢 Proposed Motions"},
+            {
+                "type": "negative_si_request",
+                "label": "🟠 SI Requests (Negative Procedure)",
+            },
+            {"type": "proposed_amendment", "label": "🔵 Proposed Amendments"},
+            {"type": "letter", "label": "📄 Letters"},
+            {"type": "other", "label": "⚪ Other"},
+        ]
         context["page_title"] = f"{year} {chamber.name} Statements"
         context["og_image"] = reverse(
             "statements_list_opengraph_image", args=[chamber_slug, year]
         )
-
         return context
 
 
