@@ -624,7 +624,7 @@ class StatementPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         try:
             statement = (
-                Statement.objects.prefetch_related("tags")
+                Statement.objects.prefetch_related("tags", "party_breakdowns__party")
                 .annotate(signature_count=Count("signatures"))
                 .get(
                     chamber__slug=chamber_slug,
@@ -637,6 +637,15 @@ class StatementPageView(TitleMixin, TemplateView):
 
         context["statement"] = statement
         context["page_title"] = f"{statement.date} - {statement.nice_title()}"
+        # Convert party_breakdowns to a pandas DataFrame
+        party_breakdowns = statement.party_breakdowns.all()
+        party_data = [
+            {"Party": pb.party.name, "Count": pb.count} for pb in party_breakdowns
+        ]
+        df = pd.DataFrame(party_data)
+        if "Count" in df.columns:
+            df = df.sort_values("Count", ascending=False)
+        context["party_breakdowns_df"] = df
 
         return context
 

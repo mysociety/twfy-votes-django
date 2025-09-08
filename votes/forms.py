@@ -1,5 +1,6 @@
 import datetime
 import json
+import re
 from enum import StrEnum
 from typing import Type
 
@@ -532,8 +533,7 @@ class StatementForm(forms.Form):
         )
 
     def save(self, request: HttpRequest, decision_id: int | None = None) -> Statement:
-        """Save the statement and its signatures"""
-        # Create the statement
+        """Save the statement, its signatures, and party breakdowns"""
         chamber: Chamber = self.cleaned_data["chamber"]
         date: datetime.date = self.cleaned_data["date"]
         title: str = self.cleaned_data["statement_title"]
@@ -541,7 +541,6 @@ class StatementForm(forms.Form):
         if not chamber.id:
             raise ValueError("Chamber must be selected and have a valid ID")
 
-        # Generate a unique key and slug
         key = f"stmt-{chamber.slug}-{date.isoformat()}-{slugify(title)}"
         slug = slugify(title)
         slug = Statement.get_free_slug(slug, date=date)
@@ -564,13 +563,14 @@ class StatementForm(forms.Form):
         )
         statement.save()
 
-        # Verify the statement was saved and has an ID
         if not statement.id:
             raise ValueError("Failed to save statement - no ID generated")
 
         # Create signatures for each signatory
         signatories = self.cleaned_data["signatories"]
         create_signatures_for_statement(statement, signatories, date)
+        # Generate party breakdowns for the statement
+        statement.generate_party_breakdowns()
 
         return statement
 
@@ -692,5 +692,8 @@ class AddSignatoriesForm(forms.Form):
         create_signatures_for_statement(
             statement, signatories, date, start_order=max_order + 1
         )
+
+        # Regenerate party breakdowns for the updated statement
+        statement.generate_party_breakdowns()
 
         return statement
