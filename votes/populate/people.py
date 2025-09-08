@@ -244,6 +244,15 @@ def import_popolo(quiet: bool = False):
 
         to_create.append(item)
 
+    # Need to add an 'Unknown' party for unknown members
+    to_create.append(
+        Organization(
+            slug="unknown",
+            name="Unknown",
+            classification=OrganisationType.PARTY,
+        )
+    )
+
     to_create = Organization.get_lookup_manager("slug").add_ids(to_create)
 
     Organization.objects.all().delete()

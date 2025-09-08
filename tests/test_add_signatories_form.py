@@ -6,7 +6,7 @@ from django.test import Client
 import pytest
 
 from votes.consts import PermissionGroupSlug, StatementType
-from votes.models import Chamber, Signature, Statement
+from votes.models import Chamber, Signature, Statement, StatementPartyBreakdown
 
 pytestmark = pytest.mark.django_db
 
@@ -63,9 +63,9 @@ def test_statement(commons_chamber):
 
     # Add initial signature
     Signature.objects.create(
-        key=f"{statement.key}-10001",
+        key=f"{statement.key}-10045",
         statement_id=statement.id,
-        person_id=10001,  # Diane Abbott
+        person_id=10045,  # Clive Betts (Labour)
         date=date(2023, 6, 15),
         order=0,
         extra_info={},
@@ -200,7 +200,7 @@ def test_add_signatories_form_submission_duplicate_signatory(
     form_data = {
         "statement_id": test_statement.id,
         "date": "2023-06-16",
-        "signatories": "Diane Abbott\nJeremy Corbyn",  # Diane Abbott already signed
+        "signatories": "Clive Betts\nJeremy Corbyn",  # Clive Betts already signed
     }
 
     response = client.post(f"/submit/add_signatories/{test_statement.id}", form_data)
@@ -308,3 +308,44 @@ def test_add_signatories_form_submission_duplicate_name_in_list(
     # Check that no new signatures were created
     count = Signature.objects.filter(statement=test_statement).count()
     assert count == 1  # Only the initial signature
+
+
+def test_add_signatories_form_submission_updates_party_breakdowns(
+    client: Client, test_super_user: User, test_statement: Statement
+):
+    """Test that party breakdowns are updated when adding new signatories"""
+    from votes.models import Organization
+
+    client.force_login(test_super_user)
+
+    # Generate initial party breakdown for the existing statement
+    test_statement.generate_party_breakdowns()
+
+    # Check initial state - should have Labour breakdown with count 1 (Clive Betts)
+    labour_org = Organization.objects.get(slug="labour")
+    initial_breakdown = StatementPartyBreakdown.objects.filter(
+        statement=test_statement, party=labour_org
+    ).first()
+    assert initial_breakdown is not None
+    assert initial_breakdown.count == 1
+
+    # Add more Labour signatories
+    form_data = {
+        "statement_id": test_statement.id,
+        "date": "2023-06-16",
+        "signatories": "Chi Onwurah\nBridget Phillipson",  # Two more Labour members
+    }
+
+    response = client.post(f"/submit/add_signatories/{test_statement.id}", form_data)
+    assert response.status_code == 302
+
+    # Check that new signatures were created
+    count = Signature.objects.filter(statement=test_statement).count()
+    assert count == 3  # Initial + 2 new signatures
+
+    # Check that party breakdowns were updated
+    updated_breakdown = StatementPartyBreakdown.objects.filter(
+        statement=test_statement, party=labour_org
+    ).first()
+    assert updated_breakdown is not None
+    assert updated_breakdown.count == 3  # Now should have 3 Labour signatories

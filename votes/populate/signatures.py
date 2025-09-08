@@ -117,6 +117,6 @@ def load_commons_edms(quiet: bool = False, update_since: datetime.date | None = 
         rich.print(f"Imported {len(to_create)} signatures for {chamber_slug} EDMs")
 
 
-@import_register.register("signatures", group=ImportOrder.VOTES)
+@import_register.register("signatures", group=ImportOrder.SIGNATURES)
 def import_divisions(quiet: bool = False, update_since: datetime.date | None = None):
     load_commons_edms(update_since=update_since)
