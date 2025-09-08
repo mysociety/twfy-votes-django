@@ -31,6 +31,9 @@
         </li>
     {% endif %}
     <li class="nav-item">
+        <a class="nav-link h6 pl-0 mb-0" href="#party-breakdown">Party Breakdown</a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link h6 pl-0 mb-0" href="#signatures">Signatures</a>
     </li>
     <div class="month-navigation">
@@ -99,6 +102,15 @@
             {% endfor %}
         </ul>
     {% endif %}
+    {% with party_breakdowns_df as party_breakdowns_df %}
+        {% if party_breakdowns_df.shape.0 > 0 %}
+            <h2 class="section-header" id="party-breakdown">Party Breakdown</h2>
+            {% style_df party_breakdowns_df %}
+        {% else %}
+            <h2 class="section-header" id="party-breakdown">Party Breakdown</h2>
+            <p>No party breakdowns available.</p>
+        {% endif %}
+    {% endwith %}
     <h2 class="section-header" id="signatures">Signatures</h2>
     {% with statement.signatures_df as signatures_df %}
         {% if signatures_df.shape.0 > 0 %}

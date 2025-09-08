@@ -571,7 +571,8 @@ class StatementForm(forms.Form):
         # Create signatures for each signatory
         signatories = self.cleaned_data["signatories"]
         create_signatures_for_statement(statement, signatories, date)
-
+        # Generate party breakdowns for the statement
+        statement.generate_party_breakdowns()
         return statement
 
 
@@ -692,5 +693,8 @@ class AddSignatoriesForm(forms.Form):
         create_signatures_for_statement(
             statement, signatories, date, start_order=max_order + 1
         )
+
+        # Regenerate party breakdowns for the updated statement
+        statement.generate_party_breakdowns()
 
         return statement

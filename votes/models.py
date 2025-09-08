@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import html
 import secrets
+from collections import Counter
 from dataclasses import dataclass
 from itertools import groupby
 from typing import (
@@ -758,6 +759,9 @@ class Organization(DjangoVoteModel):
     classification: OrganisationType = OrganisationType.UNKNOWN
     org_memberships: DummyOneToMany["Membership"] = related_name("organization")
     party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
+    statement_party_breakdowns: DummyOneToMany["StatementPartyBreakdown"] = (
+        related_name("organization")
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -1095,7 +1099,7 @@ class Statement(DjangoVoteModel):
     chamber: DoNothingForeignKey[Chamber] = related_name("statements")
     info_source: str = ""
     date: datetime.date
-    type: StatementType = StatementType.OTHER
+    type: StatementType = StatementType.OTHER  # default
     extra_info: DictField
     signatures: DummyOneToMany[Signature] = related_name("statement")
     tags: DummyManyToMany[DecisionTag] = field(
@@ -1107,6 +1111,9 @@ class Statement(DjangoVoteModel):
         default=None,
     )
     url: str = ""
+    party_breakdowns: DummyOneToMany[StatementPartyBreakdown] = related_name(
+        "statement"
+    )
 
     @classmethod
     def get_free_slug(cls, slug: str, date: datetime.date) -> str:
@@ -1162,6 +1169,44 @@ class Statement(DjangoVoteModel):
         Return a properly formatted type display name.
         """
         return self.type.replace("_", " ").title()
+
+    def generate_party_breakdowns(self) -> None:
+        """
+        Generate party breakdowns for this statement based on its signatures.
+        Deletes existing party breakdowns and recreates them.
+        """
+
+        # Delete existing party breakdowns
+        self.party_breakdowns.all().delete()
+
+        # Fetch all signatures for this statement
+        signatures_qs = self.signatures.all().select_related("person")
+        chamber_slug = self.chamber_slug
+
+        party_ids = []
+        for sig in signatures_qs:
+            # Use signature date if present, else statement date
+            sig_date = sig.date if sig.date else self.date
+            person = sig.person
+            if not person:
+                party_ids.append(Organization.objects.get(slug="unknown").id)
+                continue
+            try:
+                membership = person.membership_in_chamber_on_date(
+                    chamber_slug, sig_date
+                )
+                if membership and membership.party_id:
+                    party_ids.append(membership.party_id)
+            except Exception:
+                party_ids.append(Organization.objects.get(slug="unknown").id)
+
+        party_counts = Counter(party_ids)
+        for party_id, count in party_counts.items():
+            StatementPartyBreakdown.objects.create(
+                party_id=party_id,
+                statement=self,
+                count=count,
+            )
 
 
 @is_valid_decision_model
@@ -1606,6 +1651,16 @@ class DivisionBreakdown(DjangoVoteModel):
                 return "Failure"
             case _:
                 raise ValueError(f"Invalid motion result {self.motion_result_int}")
+
+
+class StatementPartyBreakdown(DjangoVoteModel):
+    party_id: Dummy[int]
+    party: DoNothingForeignKey[Organization] = related_name(
+        "statement_party_breakdowns"
+    )
+    statement_id: Dummy[int]
+    statement: DoNothingForeignKey[Statement] = related_name("party_breakdowns")
+    count: int
 
 
 class DivisionsIsGovBreakdown(DjangoVoteModel):
