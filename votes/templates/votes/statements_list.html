@@ -1,8 +1,8 @@
 {% extends "votes/base_with_menu.html" %}
 
 {% block content.title %}
-    <h1 id="top-header">Statements in {{ search.chamber.name }} ({{ search.start_date.year }})</h1>
-    <p>{{ search.statements|length }} statements from {{ search.start_date }} to {{ search.end_date }}</p>
+    <h1 id="top-header">Signatures in {{ search.chamber.name }} ({{ search.start_date.year }})</h1>
+    <p>{{ search.statements|length }} signatures from {{ search.start_date }} to {{ search.end_date }}</p>
     <div class="statement-type-nav mb-3">
         <span>Filter by type:</span>
         {% for st in statement_types %}
@@ -21,7 +21,7 @@
         <a id="side-top-header"
            class="nav-link h6 pl-0 mb-0"
            href="#top"
-           style="display:none">Statements in {{ search.chamber.name }} ({{ search.start_date.year }})</a>
+           style="display:none">Signatures in {{ search.chamber.name }} ({{ search.start_date.year }})</a>
     </p>
     <li class="nav-item">
         <a class="nav-link h6 pl-0 mb-0" href="#about">About</a>
@@ -37,7 +37,7 @@
 
 {% block content.inner %}
     <h2 id="about" class="section-header">About</h2>
-    <p>Statements include:</p>
+    <p>Signatures include:</p>
     <ul>
         <li>🟢 Proposed Motions – motions proposed for future debate.</li>
         <li>🟠 Request to vote on SI under negative procedure.</li>
@@ -46,7 +46,7 @@
         <li>⚪ Other.</li>
     </ul>
     {% if search.statements|length == 0 %}
-        <div class="alert alert-warning mt-4">No statements found for this chamber, year, and filter.</div>
+        <div class="alert alert-warning mt-4">No signatures found for this chamber, year, and filter.</div>
     {% else %}
         {% regroup search.statements by date.month as statements_by_date %}
         {% for month, month_statements in statements_by_date %}
