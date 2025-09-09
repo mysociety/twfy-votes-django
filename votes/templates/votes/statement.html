@@ -60,9 +60,7 @@
 
 {% block content.inner %}
     <h2 class="section-header" id="content">Content</h2>
-    <div class="motion_text">
-        <p>{{ statement.statement_text|linebreaks }}</p>
-    </div>
+    <div class="motion_text">{{ statement.statement_text|markdown }}</div>
     {% if statement.url %}
         <p>
             <a href="{{ statement.url }}">View source</a>
