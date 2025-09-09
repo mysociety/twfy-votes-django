@@ -255,6 +255,16 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
+class PolicyWithFreeVoteListSchema(PolicySchema):
+    """Extended Policy schema that includes free vote counts for specific endpoints"""
+
+    free_vote_parties: list[str]
+
+    @staticmethod
+    def resolve_free_vote_parties(obj: Policy) -> list[str]:
+        return obj.get_free_vote_parties()
+
+
 class RebellionRateSchema(ModelSchema):
     class Meta:
         model = RebellionRate
@@ -738,7 +748,7 @@ def get_divisions_by_month(
     ]
 
 
-@api.get("/policies.json", response=list[PolicySchema])
+@api.get("/policies.json", response=list[PolicyWithFreeVoteListSchema])
 def get_policies(request: HttpRequest):
     policies_query = Policy.objects.all().prefetch_related(
         "groups",
@@ -758,16 +768,19 @@ def get_policies(request: HttpRequest):
     return policies_query
 
 
-@api.get("/policy/{chamber_slug}/{status}/{group_slug}.json", response=PolicySchema)
+@api.get(
+    "/policy/{chamber_slug}/{status}/{group_slug}.json",
+    response=PolicyWithFreeVoteListSchema,
+)
 def get_policy(request: HttpRequest, chamber_slug: str, status: str, group_slug: str):
-    return Policy.objects.get(
-        chamber_slug=chamber_slug, status=status, group_slug=group_slug
-    )
+    return Policy.objects.filter(
+        chamber_slug=chamber_slug, status=status, groups__slug=group_slug
+    ).first()
 
 
-@api.get("/policy/{policy_id}.json", response=PolicySchema)
+@api.get("/policy/{policy_id}.json", response=PolicyWithFreeVoteListSchema)
 def get_policy_by_id(request: HttpRequest, policy_id: int):
-    return Policy.objects.get(id=policy_id)
+    return Policy.objects.filter(id=policy_id).first()
 
 
 @api.get("/policy/{policy_id}/report.json")
@@ -778,7 +791,7 @@ def get_policy_report_by_id(request: HttpRequest, policy_id: int):
 
 @api.get(
     "/policies/{chamber_slug}/{status_slug}/{group_slug}.json",
-    response=list[PolicySchema],
+    response=list[PolicyWithFreeVoteListSchema],
 )
 def get_chamber_status_policies(
     request: HttpRequest, chamber_slug: str, status_slug: str, group_slug: str
@@ -787,7 +800,7 @@ def get_chamber_status_policies(
         query = Policy.objects.filter(chamber__slug=chamber_slug, status=status_slug)
     else:
         query = Policy.objects.filter(
-            chamber__slug=chamber_slug, status=status_slug, group__slug=group_slug
+            chamber__slug=chamber_slug, status=status_slug, groups__slug=group_slug
         )
     return query.prefetch_related(
         "groups",

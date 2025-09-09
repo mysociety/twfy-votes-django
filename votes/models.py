@@ -1922,6 +1922,20 @@ class Policy(DjangoVoteModel):
             case _:
                 raise ValueError(f"Invalid strength meaning {self.strength_meaning}")
 
+    def get_free_vote_parties(self) -> list[str]:
+        """
+        Get a list of party slugs that had free votes for this policy
+        """
+        return list(
+            WhipReport.objects.filter(
+                division__division_links__policy=self,
+                division__division_links__strength=PolicyStrength.STRONG,
+                whip_priority=WhipPriority.FREE,
+            )
+            .values_list("party__slug", flat=True)
+            .distinct()
+        )
+
 
 class BasePolicyDecisionLink(DjangoVoteModel, abstract=True):
     alignment: PolicyDirection
