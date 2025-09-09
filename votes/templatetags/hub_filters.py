@@ -309,3 +309,15 @@ def pluralise_es(word, count):
         return word
 
     return word if count == 1 else word + "es"
+
+
+@register.filter(name="markdown")
+@stringfilter
+def markdown_filter(value):
+    """
+    Convert markdown text to HTML.
+    Usage: {{ statement.statement_text|markdown }}
+    """
+    if not value:
+        return value
+    return mark_safe(markdown.markdown(value))
