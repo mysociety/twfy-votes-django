@@ -5,7 +5,7 @@
 {% block title %}{{ settings.site_name }}{% endblock %}
 
 {% block content.title %}
-    <h1 id="top-header">Statements by Parliament and year</h1>
+    <h1 id="top-header">Signatures by Parliament and year</h1>
 {% endblock content.title %}
 
 {% block content.menu %}
@@ -13,7 +13,7 @@
         <a id="side-top-header"
            class="nav-link h6 pl-0 mb-0"
            href="#top"
-           style="display:none">Statements by Parliament and year</a>
+           style="display:none">Signatures by Parliament and year</a>
     </p>
     {% for chamber in chambers %}
         <li class="nav-item">
@@ -25,7 +25,7 @@
 {% block content.inner %}
     {% featureflag permission_group.CAN_ADD_STATEMENT %}
         <div class="mb-3">
-            <a href="{% url 'statement_form' %}" class="btn btn-primary">Add New Statement</a>
+            <a href="{% url 'statement_form' %}" class="btn btn-primary">Add New Signature</a>
         </div>
     {% endfeatureflag %}
     {% for c in chambers %}
@@ -45,7 +45,7 @@
                     </ul>
                 </div>
             {% else %}
-                <p>No statements available for {{ c.name }}.</p>
+                <p>No signatures available for {{ c.name }}.</p>
             {% endif %}
         {% endwith %}
     {% endfor %}
