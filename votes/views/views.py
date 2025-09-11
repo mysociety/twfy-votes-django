@@ -638,6 +638,7 @@ class StatementPageView(TitleMixin, TemplateView):
 
         context["statement"] = statement
         context["page_title"] = f"{statement.date} - {statement.nice_title()}"
+        context["og_image"] = reverse("statement_opengraph_image", args=[statement.id])
         # Convert party_breakdowns to a pandas DataFrame
         party_breakdowns = statement.party_breakdowns.all()
         party_data = [
