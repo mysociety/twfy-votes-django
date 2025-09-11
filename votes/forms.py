@@ -29,6 +29,7 @@ from .models import (
     Person,
     Signature,
     Statement,
+    Update,
     UserPersonLink,
     Vote,
     VoteAnnotation,
@@ -742,6 +743,13 @@ class StatementForm(forms.Form):
         # Generate party breakdowns for the statement
         statement.generate_party_breakdowns()
 
+        # Create export update task to update parquet files
+        Update.create_task(
+            {"model": "statement_export"},
+            created_via="StatementForm",
+            check_for_running=True,
+        )
+
         return statement
 
 
@@ -868,5 +876,12 @@ class AddSignatoriesForm(forms.Form):
 
         # Regenerate party breakdowns for the updated statement
         statement.generate_party_breakdowns()
+
+        # Create export update task to update parquet files
+        Update.create_task(
+            {"model": "statement_export"},
+            created_via="AddSignatoriesForm",
+            check_for_running=True,
+        )
 
         return statement

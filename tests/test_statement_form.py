@@ -450,3 +450,107 @@ def test_statement_form_submission_generates_party_breakdowns(
     labour_breakdown = party_breakdowns.filter(party=labour_org).first()
     assert labour_breakdown is not None
     assert labour_breakdown.count == 2  # Two Labour signatories
+
+
+def test_statement_form_creates_export_update_task(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test that creating a statement via form triggers an export update task"""
+    from votes.models import Update
+
+    client.force_login(test_super_user)
+
+    # Check initial state - should have no update tasks
+    initial_update_count = Update.objects.count()
+
+    form_data = {
+        "statement_title": "Test Statement Export Update",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "url": "https://example.com/test-statement-export",
+        "content": "This statement should trigger an export update.",
+        "signatories": "Diane Abbott",
+    }
+
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    ).delete()
+
+    response = client.post("/submit/statement", form_data)
+    assert response.status_code == 302
+
+    # Check that an export update task was created
+    export_updates = Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    )
+    assert export_updates.count() == 1
+
+    # Verify the total count increased by 1
+    assert Update.objects.count() == initial_update_count + 1
+
+    # clean up the created statement
+    Statement.objects.filter(title="Test Statement Export Update").delete()
+
+    # clean up the update task
+
+    Update.objects.all().delete()
+
+
+def test_add_signatories_form_creates_export_update_task(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test that adding signatories via form triggers an export update task"""
+    from votes.models import Update
+
+    client.force_login(test_super_user)
+
+    # First create a statement to add signatories to
+    statement_form_data = {
+        "statement_title": "Test Statement For Signatories",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "content": "Initial statement content.",
+        "signatories": "Diane Abbott",
+    }
+    response = client.post("/submit/statement", statement_form_data)
+    assert response.status_code == 302
+
+    # Get the created statement
+    statement = Statement.objects.filter(title="Test Statement For Signatories").first()
+    assert statement is not None
+
+    # Clear any existing update tasks
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    ).delete()
+
+    initial_update_count = Update.objects.count()
+    assert initial_update_count == 0
+
+    form_data = {
+        "statement_id": statement.id,
+        "date": "2023-06-16",
+        "signatories": "Chi Onwurah",
+    }
+
+    response = client.post(f"/submit/add_signatories/{statement.id}", form_data)
+    assert response.status_code == 302
+
+    # Check that an export update task was created
+    export_updates = Update.objects.filter(
+        instructions__model="statement_export", created_via="AddSignatoriesForm"
+    )
+    assert export_updates.count() == 1
+
+    # Verify the total count increased by 1
+    assert Update.objects.count() == initial_update_count + 1
+
+    # clean up the created statement
+    Statement.objects.filter(title="Test Statement For Signatories").delete()
+
+    # clean up the update task
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="AddSignatoriesForm"
+    ).delete()
