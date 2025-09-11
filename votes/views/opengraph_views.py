@@ -6,6 +6,7 @@ from io import BytesIO
 from pathlib import Path
 
 from django.conf import settings
+from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.views.generic import View
 
@@ -19,6 +20,7 @@ from ..models import (
     Membership,
     Person,
     Policy,
+    Statement,
 )
 from .opengraph import draw_custom_image, draw_vote_image
 
@@ -69,6 +71,26 @@ class AgreementOpenGraphImageView(BaseOpenGraphView):
             return draw_custom_image(header, subheader, include_logo=True)
         except Agreement.DoesNotExist:
             raise Http404("Agreement not found")
+
+
+class StatementOpenGraphImageView(BaseOpenGraphView):
+    """View for serving OpenGraph images for statements."""
+
+    def get_image(self, request, statement_id: int, **kwargs) -> Image.Image:
+        try:
+            # Annotate with signature count to match what's displayed on the page
+            statement = Statement.objects.annotate(
+                signature_count=Count("signatures")
+            ).get(id=statement_id)
+
+            header = statement.nice_title()
+            signature_count = statement.signature_count  # type:ignore
+            signature_text = "signature" if signature_count == 1 else "signatures"
+
+            subheader = f"{signature_count} {signature_text}"
+            return draw_custom_image(header, subheader, include_logo=True)
+        except Statement.DoesNotExist:
+            raise Http404("Statement not found")
 
 
 class GeneralOpenGraphImageView(BaseOpenGraphView):
