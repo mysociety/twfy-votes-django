@@ -14,6 +14,7 @@ from .views.opengraph_views import (
     MarkdownOpenGraphImageView,
     PersonOpenGraphImageView,
     PolicyOpenGraphImageView,
+    StatementOpenGraphImageView,
     StatementsListOpenGraphImageView,
     TagOpenGraphImageView,
 )
@@ -208,6 +209,11 @@ urlpatterns = [
         "opengraph/agreement/{agreement_id:int}",
         AgreementOpenGraphImageView,
         name="agreement_opengraph_image",
+    ),
+    fast_path(
+        "opengraph/statement/{statement_id:int}",
+        StatementOpenGraphImageView,
+        name="statement_opengraph_image",
     ),
     fast_path(
         "opengraph/misc/{page_slug:slug}",

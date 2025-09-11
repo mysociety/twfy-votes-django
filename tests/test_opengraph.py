@@ -2,7 +2,7 @@ from django.test import Client
 
 import pytest
 
-from votes.models import Agreement, DecisionTag, Division, Person, Policy
+from votes.models import Agreement, DecisionTag, Division, Person, Policy, Statement
 
 pytestmark = pytest.mark.django_db
 
@@ -54,6 +54,15 @@ def policy_id():
 
 
 @pytest.fixture
+def statement_id():
+    statement = Statement.objects.first()
+    if statement:
+        return statement.id
+    # Skip test if no statement exists
+    pytest.skip("No statements in database")
+
+
+@pytest.fixture
 def tag():
     tag = DecisionTag.objects.first()
     if tag:
@@ -77,5 +86,11 @@ def test_policy_image(client: Client, policy_id: int):
 def test_tag_image(client: Client, tag):
     tag_type, tag_slug = tag
     response = client.get(f"/opengraph/tag/{tag_type}/{tag_slug}")
+    assert response.status_code == 200
+    assert response["Content-Type"] == "image/png"
+
+
+def test_statement_image(client: Client, statement_id: int):
+    response = client.get(f"/opengraph/statement/{statement_id}")
     assert response.status_code == 200
     assert response["Content-Type"] == "image/png"
