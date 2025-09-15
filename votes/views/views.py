@@ -1087,12 +1087,26 @@ class PersonPolicyView(TitleMixin, TemplateView):
         party = Organization.objects.get(slug=party_slug)
         period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
         policy = Policy.objects.get(id=policy_id)
+
+        if party_slug == "independent":
+            comparison_party = None
+        else:
+            comparison_party = party
+
         own_distribution = person.vote_distributions.get(
-            chamber=chamber, period=period, party=party, policy=policy, is_target=1
+            chamber=chamber,
+            period=period,
+            party=comparison_party,
+            policy=policy,
+            is_target=1,
         )
         try:
             other_distribution = person.vote_distributions.get(
-                chamber=chamber, period=period, party=party, policy=policy, is_target=0
+                chamber=chamber,
+                period=period,
+                party=comparison_party,
+                policy=policy,
+                is_target=0,
             )
         except VoteDistribution.DoesNotExist:
             other_distribution = None
