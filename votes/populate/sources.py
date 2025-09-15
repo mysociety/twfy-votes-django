@@ -32,7 +32,7 @@ def get_external_data(quiet: bool = False):
         # use httpx to download the file
         if not quiet:
             rich.print(f"Downloading [blue]{url}[/blue] to [blue]{target}[/blue]")
-        with httpx.stream("GET", url) as response:
+        with httpx.stream("GET", url, timeout=httpx.Timeout(30.0)) as response:
             with target.open("wb") as f:
                 for chunk in response.iter_bytes():
                     f.write(chunk)
