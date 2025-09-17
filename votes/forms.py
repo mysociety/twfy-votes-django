@@ -26,6 +26,7 @@ from .models import (
     Person,
     Signature,
     Statement,
+    Update,
     UserPersonLink,
     Vote,
     VoteAnnotation,
@@ -305,6 +306,14 @@ class OpenRepAnnotationForm(BaseAnnotationForm):
         )
         model.save()
 
+        Update.create_task(
+            instructions={
+                "model": "export_annotations",
+            },
+            created_via="bulk_vote_annotation_form",
+            check_for_running=True,
+        )
+
 
 class RepAnnotationForm(BaseAnnotationForm):
     title = "Vote Annotation Form"
@@ -321,6 +330,14 @@ class RepAnnotationForm(BaseAnnotationForm):
             link=self.cleaned_data["link"],
         )
         model.save()
+
+        Update.create_task(
+            instructions={
+                "model": "export_annotations",
+            },
+            created_via="bulk_vote_annotation_form",
+            check_for_running=True,
+        )
 
 
 class BulkVoteAnnotationForm(forms.Form, DecisionIdMixin):
@@ -457,6 +474,15 @@ class BulkVoteAnnotationForm(forms.Form, DecisionIdMixin):
         if deleted_count > 0:
             result_message += f", {deleted_count} deleted"
 
+        # Queue an update to export annotations after any changes
+        if created_count > 0 or updated_count > 0 or deleted_count > 0:
+            Update.create_task(
+                instructions={
+                    "model": "export_annotations",
+                },
+                created_via="bulk_vote_annotation_form",
+                check_for_running=True,
+            )
         return result_message
 
 
