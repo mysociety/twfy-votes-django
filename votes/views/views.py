@@ -360,6 +360,7 @@ class DataView(TitleMixin, TemplateView):
             "per_person_party_diff_year": "Voting alignment scores by year",
             "policy_calc_to_load": "The calculated policy alignment data",
             "policy_comparison_period": "The policy comparison periods",
+            "vote_annotations": "Vote annotations with person, division, and related policy data",
         }
 
         context["data"] = data

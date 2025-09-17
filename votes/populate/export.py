@@ -18,9 +18,11 @@ from ..models import (
     DivisionTagLink,
     Organization,
     PolicyComparisonPeriod,
+    PolicyDivisionLink,
     Signature,
     Statement,
     StatementTagLink,
+    VoteAnnotation,
 )
 from .register import ImportOrder, import_register
 
@@ -251,6 +253,34 @@ def dump_models(quiet: bool = False):
                 "extra_data"
             ].apply(json.dumps)
         all_statement_tag_links.to_parquet(DATA_DIR / "statement_tag_link.parquet")
+
+    # Export VoteAnnotations with relevant policies
+    vote_annotations_data = []
+    
+    # A mapping of division_id to policy_ids
+    division_to_policies = {}
+    for link in PolicyDivisionLink.objects.all().values('decision_id', 'policy_id'):
+        division_id = link['decision_id']
+        policy_id = link['policy_id']
+        if division_id not in division_to_policies:
+            division_to_policies[division_id] = []
+        division_to_policies[division_id].append(policy_id)
+    
+    # Export vote annotations with their relevant policies
+    for annotation in VoteAnnotation.objects.select_related('division').all():
+        vote_annotations_data.append({
+            'person_id': annotation.person_id,
+            'division_key': annotation.division.key,
+            'detail': annotation.detail,
+            'link': annotation.link,
+            'relevant_policies': division_to_policies.get(annotation.division_id, [])
+        })
+    
+    if vote_annotations_data:
+        vote_annotations_df = pd.DataFrame(vote_annotations_data)
+        # Convert the list of policy IDs to JSON string for storage
+        vote_annotations_df['relevant_policies'] = vote_annotations_df['relevant_policies'].apply(json.dumps)
+        vote_annotations_df.to_parquet(DATA_DIR / "vote_annotations.parquet")
 
     all_periods = pd.DataFrame(list(PolicyComparisonPeriod.objects.all().values()))
     all_periods.to_parquet(DATA_DIR / "policy_comparison_period.parquet")
