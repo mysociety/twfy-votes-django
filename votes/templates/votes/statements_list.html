@@ -1,8 +1,19 @@
 {% extends "votes/base_with_menu.html" %}
 
 {% block content.title %}
-    <h1 id="top-header">Statements in {{ search.chamber.name }} ({{ search.start_date.year }})</h1>
-    <p>{{ search.statements|length }} statements from {{ search.start_date }} to {{ search.end_date }}</p>
+    <h1 id="top-header">Signatures in {{ search.chamber.name }} ({{ search.start_date.year }})</h1>
+    <p>{{ search.statements|length }} signatures from {{ search.start_date }} to {{ search.end_date }}</p>
+    <div class="statement-type-nav mb-3">
+        <span>Filter by type:</span>
+        {% for st in statement_types %}
+            {% if selected_type == st.type %}
+                <span class="badge bg-primary mx-1">{{ st.label }}</span>
+            {% else %}
+                <a class="badge bg-light text-dark mx-1" href="?type={{ st.type }}">{{ st.label }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if selected_type %}<a class="badge bg-secondary mx-1" href="?">Show all</a>{% endif %}
+    </div>
 {% endblock content.title %}
 
 {% block content.menu %}
@@ -10,7 +21,7 @@
         <a id="side-top-header"
            class="nav-link h6 pl-0 mb-0"
            href="#top"
-           style="display:none">Statements in {{ search.chamber.name }} ({{ search.start_date.year }})</a>
+           style="display:none">Signatures in {{ search.chamber.name }} ({{ search.start_date.year }})</a>
     </p>
     <li class="nav-item">
         <a class="nav-link h6 pl-0 mb-0" href="#about">About</a>
@@ -26,28 +37,33 @@
 
 {% block content.inner %}
     <h2 id="about" class="section-header">About</h2>
-    <p>Statements include:</p>
+    <p>Signatures include:</p>
     <ul>
         <li>🟢 Proposed Motions – motions proposed for future debate.</li>
+        <li>🟠 Request to vote on SI under negative procedure.</li>
         <li>🔵 Proposed Amendments – amendments proposed to legislation.</li>
         <li>📄 Letters – signed open letters.</li>
         <li>⚪ Other.</li>
     </ul>
-    {% regroup search.statements by date.month as statements_by_date %}
-    {% for month, month_statements in statements_by_date %}
-        <h2 id="{{ month }}" class="section-header">{{ month|month_name }}</h2>
-        <p>
-            <a href="{% url 'statements_list_month' search.chamber.slug month_statements.0.date.year month_statements.0.date.month %}">View
-                as
-            table</a>
-        </p>
-        <ul>
-            {% for statement in month_statements %}
-                <li class="statement-type-{{ statement.type.lower }}">
-                    {{ statement.date|date:"j M" }} – <a href="{{ statement.page_url }}">{{ statement.nice_title|safe }}</a>
-                    <span class="text-muted">({{ statement.signature_count }} {{ "signature"|pluralise_s:statement.signature_count }})</span>
-                </li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
+    {% if search.statements|length == 0 %}
+        <div class="alert alert-warning mt-4">No signatures found for this chamber, year, and filter.</div>
+    {% else %}
+        {% regroup search.statements by date.month as statements_by_date %}
+        {% for month, month_statements in statements_by_date %}
+            <h2 id="{{ month }}" class="section-header">{{ month|month_name }}</h2>
+            <p>
+                <a href="{% url 'statements_list_month' search.chamber.slug month_statements.0.date.year month_statements.0.date.month %}">View
+                    as
+                table</a>
+            </p>
+            <ul>
+                {% for statement in month_statements %}
+                    <li class="statement-type-{{ statement.type.lower }}">
+                        {{ statement.date|date:"j M" }} – <a href="{{ statement.page_url }}">{{ statement.nice_title|safe }}</a>
+                        <span class="text-muted">({{ statement.signature_count }} {{ "signature"|pluralise_s:statement.signature_count }})</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    {% endif %}
 {% endblock content.inner %}

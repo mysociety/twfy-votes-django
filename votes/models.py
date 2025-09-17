@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime
 import html
 import secrets
+from collections import Counter
 from dataclasses import dataclass
 from itertools import groupby
 from typing import (
@@ -42,6 +43,7 @@ from twfy_votes.helpers.typed_django.models import (
     ManyToMany,
     OptionalDateField,
     OptionalDateTimeField,
+    OptionalDoNothingForeignKey,
     OptionalStr,
     PositiveIntegerField,
     PrimaryKey,
@@ -758,6 +760,9 @@ class Organization(DjangoVoteModel):
     classification: OrganisationType = OrganisationType.UNKNOWN
     org_memberships: DummyOneToMany["Membership"] = related_name("organization")
     party_memberships: DummyOneToMany["Membership"] = related_name("on_behalf_of")
+    statement_party_breakdowns: DummyOneToMany["StatementPartyBreakdown"] = (
+        related_name("organization")
+    )
 
     def __str__(self) -> str:
         return self.name
@@ -1095,7 +1100,7 @@ class Statement(DjangoVoteModel):
     chamber: DoNothingForeignKey[Chamber] = related_name("statements")
     info_source: str = ""
     date: datetime.date
-    type: StatementType = StatementType.OTHER
+    type: StatementType = StatementType.OTHER  # default
     extra_info: DictField
     signatures: DummyOneToMany[Signature] = related_name("statement")
     tags: DummyManyToMany[DecisionTag] = field(
@@ -1107,6 +1112,9 @@ class Statement(DjangoVoteModel):
         default=None,
     )
     url: str = ""
+    party_breakdowns: DummyOneToMany[StatementPartyBreakdown] = related_name(
+        "statement"
+    )
 
     @classmethod
     def get_free_slug(cls, slug: str, date: datetime.date) -> str:
@@ -1131,16 +1139,28 @@ class Statement(DjangoVoteModel):
 
         data = [
             {
-                "Person": UrlColumn(
-                    url=sig.person.statements_url(), text=sig.person.name
+                "Person": (
+                    UrlColumn(url=sig.person.statements_url(), text=sig.person.name)
+                    if sig.person
+                    else sig.extra_info.get("name", "Unknown")
                 ),
+                "Role": sig.extra_info.get("role", None),
                 "Date Signed": sig.date or self.date,
                 "Status": sig.withdrawn_status(),
             }
             for sig in signatures
         ]
 
-        return pd.DataFrame(data=data)
+        df = pd.DataFrame(data=data)
+
+        # check if Role and Status columns have any value other than None
+        # if not remove them
+        if "Role" in df.columns and all(df["Role"].isna()):
+            df = df.drop(columns=["Role"])
+        if "Status" in df.columns and all(df["Status"] == "-"):
+            df = df.drop(columns=["Status"])
+
+        return df
 
     def page_url(self) -> str:
         """
@@ -1162,6 +1182,45 @@ class Statement(DjangoVoteModel):
         Return a properly formatted type display name.
         """
         return self.type.replace("_", " ").title()
+
+    def generate_party_breakdowns(self) -> None:
+        """
+        Generate party breakdowns for this statement based on its signatures.
+        Deletes existing party breakdowns and recreates them.
+        """
+
+        # Delete existing party breakdowns
+        self.party_breakdowns.all().delete()
+
+        # Fetch all signatures for this statement
+        signatures_qs = self.signatures.all().select_related("person")
+        chamber_slug = self.chamber_slug
+        unknown_id = Organization.objects.get(slug="unknown").id
+
+        party_ids = []
+        for sig in signatures_qs:
+            # Use signature date if present, else statement date
+            sig_date = sig.date if sig.date else self.date
+            person = sig.person
+            if not person:
+                party_ids.append(unknown_id)
+                continue
+            try:
+                membership = person.membership_in_chamber_on_date(
+                    chamber_slug, sig_date
+                )
+                if membership and membership.party_id:
+                    party_ids.append(membership.party_id)
+            except ValueError:
+                party_ids.append(unknown_id)
+
+        party_counts = Counter(party_ids)
+        for party_id, count in party_counts.items():
+            StatementPartyBreakdown.objects.create(
+                party_id=party_id,
+                statement=self,
+                count=count,
+            )
 
 
 @is_valid_decision_model
@@ -1608,6 +1667,16 @@ class DivisionBreakdown(DjangoVoteModel):
                 raise ValueError(f"Invalid motion result {self.motion_result_int}")
 
 
+class StatementPartyBreakdown(DjangoVoteModel):
+    party_id: Dummy[int]
+    party: DoNothingForeignKey[Organization] = related_name(
+        "statement_party_breakdowns"
+    )
+    statement_id: Dummy[int]
+    statement: DoNothingForeignKey[Statement] = related_name("party_breakdowns")
+    count: int
+
+
 class DivisionsIsGovBreakdown(DjangoVoteModel):
     is_gov: bool
     division_id: Dummy[int]
@@ -1654,15 +1723,15 @@ class Signature(DjangoVoteModel):
     key: str
     statement_id: Dummy[int]
     statement: DoNothingForeignKey[Statement] = related_name("signatures")
-    person_id: Dummy[int]
-    person: DoNothingForeignKey[Person] = related_name("signatures")
+    person_id: Dummy[Optional[int]]
+    person: OptionalDoNothingForeignKey[Person] = related_name("signatures")
     date: OptionalDateField  # if different from statement date
     order: int = 999
     withdrawn: bool = False
     withdrawn_date: OptionalDateField = None
     extra_info: DictField
 
-    def withdrawn_status(self) -> str | None:
+    def withdrawn_status(self) -> str:
         """
         Return withdrawal status - either None or 'withdrawn on {date}'
         """

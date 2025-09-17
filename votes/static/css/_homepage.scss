@@ -67,6 +67,10 @@ li.statement-type-proposed_motion::marker {
     content: "🟢 ";
 }
 
+li.statement-type-negative_si_request::marker {
+    content: "🟠 ";
+}
+
 li.statement-type-proposed_amendment::marker {
     content: "🔵 ";
 }

@@ -82,12 +82,17 @@ def load_commons_edms(quiet: bool, update_since: datetime.date | None):
         url = f"https://edm.parliament.uk/early-day-motion/{row['id']}"
         slug = slug_dup_manager.check(slugify(row["title"]), date=date)
 
+        # Set statement type based on presence of statutory_instrument_title
+        if "statutory_instrument_title" in extra_info:
+            statement_type = StatementType.NEGATIVE_SI_REQUEST
+        else:
+            statement_type = StatementType.PROPOSED_MOTION
         statement = Statement(
             original_id=original_id,
             slug=slug,
             title=row["title"],
             statement_text=row["motion_text"],
-            type=StatementType.PROPOSED_MOTION,
+            type=statement_type,
             chamber_slug=chamber_slug,
             chamber_id=chamber_id,
             date=date,

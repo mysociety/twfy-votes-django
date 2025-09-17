@@ -6,7 +6,7 @@ from django.test import Client
 import pytest
 
 from votes.consts import PermissionGroupSlug, StatementType
-from votes.models import Chamber, Signature, Statement
+from votes.models import Chamber, Signature, Statement, StatementPartyBreakdown
 
 pytestmark = pytest.mark.django_db
 
@@ -350,3 +350,207 @@ def test_statement_form_submission_other_chamber_member(
     assert response.status_code == 200
     content = response.content.decode()
     assert "Could not find person" in content
+
+
+def test_statement_form_submission_json_metadata_signatory(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test statement form submission with signatory using JSON metadata format"""
+    client.force_login(test_super_user)
+
+    form_data = {
+        "statement_title": "Test Statement JSON Metadata",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "url": "https://example.com/test-statement-json",
+        "content": "Statement with JSON metadata signatory.",
+        "signatories": 'Clive EffordFake ({"role":"Labour Former MP"})',
+        "allow_signatures_without_person_ids": True,
+    }
+
+    response = client.post("/submit/statement", form_data)
+    assert response.status_code == 302
+
+    statement = Statement.objects.filter(title="Test Statement JSON Metadata").first()
+    assert statement is not None
+    signatures = Signature.objects.filter(statement_id=statement.id)
+    assert signatures.count() == 1
+    sig = signatures.first()
+    assert sig
+    assert sig.person_id is None
+    assert sig.extra_info.get("role") == "Labour Former MP"
+    assert sig.extra_info.get("name") == "Clive EffordFake"
+
+
+def test_statement_form_submission_short_id_signatory(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test statement form submission with signatory using short ID format"""
+    client.force_login(test_super_user)
+
+    # You may need to adjust the ID to match a real person in your test DB
+    form_data = {
+        "statement_title": "Test Statement Short ID",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "url": "https://example.com/test-statement-shortid",
+        "content": "Statement with short ID signatory.",
+        "signatories": "Diane Abbott (10001)",
+    }
+
+    response = client.post("/submit/statement", form_data)
+    assert response.status_code == 302
+
+    statement = Statement.objects.filter(title="Test Statement Short ID").first()
+    assert statement is not None
+    signatures = Signature.objects.filter(statement_id=statement.id)
+    assert signatures.count() == 1
+    sig = signatures.first()
+    assert sig
+    assert sig.person_id == 10001
+
+
+def test_statement_form_submission_generates_party_breakdowns(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test that party breakdowns are generated when creating a statement with signatories"""
+    from votes.models import Organization
+
+    client.force_login(test_super_user)
+
+    form_data = {
+        "statement_title": "Test Party Breakdown Statement",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "content": "This statement tests party breakdown generation.",
+        "url": "https://example.com/party-breakdown-test",
+        # Two Labour Commons members
+        "signatories": "Chi Onwurah\nBridget Phillipson",
+    }
+
+    response = client.post("/submit/statement", form_data)
+    assert response.status_code == 302
+
+    # Check that the statement was created
+    statement = Statement.objects.filter(title="Test Party Breakdown Statement").first()
+    assert statement is not None
+
+    # Check that signatures were created
+    signatures = Signature.objects.filter(statement_id=statement.id)
+    assert signatures.count() == 2
+
+    # Check that party breakdowns were generated
+    party_breakdowns = StatementPartyBreakdown.objects.filter(statement=statement)
+    assert party_breakdowns.count() == 1  # Should have one party (Labour)
+
+    labour_org = Organization.objects.get(slug="labour")
+    labour_breakdown = party_breakdowns.filter(party=labour_org).first()
+    assert labour_breakdown is not None
+    assert labour_breakdown.count == 2  # Two Labour signatories
+
+
+def test_statement_form_creates_export_update_task(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test that creating a statement via form triggers an export update task"""
+    from votes.models import Update
+
+    client.force_login(test_super_user)
+
+    # Check initial state - should have no update tasks
+    initial_update_count = Update.objects.count()
+
+    form_data = {
+        "statement_title": "Test Statement Export Update",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "url": "https://example.com/test-statement-export",
+        "content": "This statement should trigger an export update.",
+        "signatories": "Diane Abbott",
+    }
+
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    ).delete()
+
+    response = client.post("/submit/statement", form_data)
+    assert response.status_code == 302
+
+    # Check that an export update task was created
+    export_updates = Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    )
+    assert export_updates.count() == 1
+
+    # Verify the total count increased by 1
+    assert Update.objects.count() == initial_update_count + 1
+
+    # clean up the created statement
+    Statement.objects.filter(title="Test Statement Export Update").delete()
+
+    # clean up the update task
+
+    Update.objects.all().delete()
+
+
+def test_add_signatories_form_creates_export_update_task(
+    client: Client, test_super_user: User, commons_chamber: Chamber
+):
+    """Test that adding signatories via form triggers an export update task"""
+    from votes.models import Update
+
+    client.force_login(test_super_user)
+
+    # First create a statement to add signatories to
+    statement_form_data = {
+        "statement_title": "Test Statement For Signatories",
+        "date": "2023-06-15",
+        "chamber": commons_chamber.id,
+        "statement_type": StatementType.PROPOSED_MOTION.value,
+        "content": "Initial statement content.",
+        "signatories": "Diane Abbott",
+    }
+    response = client.post("/submit/statement", statement_form_data)
+    assert response.status_code == 302
+
+    # Get the created statement
+    statement = Statement.objects.filter(title="Test Statement For Signatories").first()
+    assert statement is not None
+
+    # Clear any existing update tasks
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="StatementForm"
+    ).delete()
+
+    initial_update_count = Update.objects.count()
+    assert initial_update_count == 0
+
+    form_data = {
+        "statement_id": statement.id,
+        "date": "2023-06-16",
+        "signatories": "Chi Onwurah",
+    }
+
+    response = client.post(f"/submit/add_signatories/{statement.id}", form_data)
+    assert response.status_code == 302
+
+    # Check that an export update task was created
+    export_updates = Update.objects.filter(
+        instructions__model="statement_export", created_via="AddSignatoriesForm"
+    )
+    assert export_updates.count() == 1
+
+    # Verify the total count increased by 1
+    assert Update.objects.count() == initial_update_count + 1
+
+    # clean up the created statement
+    Statement.objects.filter(title="Test Statement For Signatories").delete()
+
+    # clean up the update task
+    Update.objects.filter(
+        instructions__model="statement_export", created_via="AddSignatoriesForm"
+    ).delete()

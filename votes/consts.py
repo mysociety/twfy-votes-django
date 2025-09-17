@@ -222,6 +222,9 @@ class StatementType(StrEnum):
     PROPOSED_MOTION = "proposed_motion"
     PROPOSED_AMENDMENT = "proposed_amendment"
     LETTER = "letter"
+    NEGATIVE_SI_REQUEST = (
+        "negative_si_request"  # Request to vote on SI under negative procedure
+    )
     OTHER = "other"
 
 

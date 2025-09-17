@@ -624,7 +624,7 @@ class StatementPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         try:
             statement = (
-                Statement.objects.prefetch_related("tags")
+                Statement.objects.prefetch_related("tags", "party_breakdowns__party")
                 .annotate(signature_count=Count("signatures"))
                 .get(
                     chamber__slug=chamber_slug,
@@ -637,6 +637,16 @@ class StatementPageView(TitleMixin, TemplateView):
 
         context["statement"] = statement
         context["page_title"] = f"{statement.date} - {statement.nice_title()}"
+        context["og_image"] = reverse("statement_opengraph_image", args=[statement.id])
+        # Convert party_breakdowns to a pandas DataFrame
+        party_breakdowns = statement.party_breakdowns.all()
+        party_data = [
+            {"Party": pb.party.name, "Count": pb.count} for pb in party_breakdowns
+        ]
+        df = pd.DataFrame(party_data)
+        if "Count" in df.columns:
+            df = df.sort_values("Count", ascending=False)
+        context["party_breakdowns_df"] = df
 
         return context
 
@@ -1223,17 +1233,22 @@ class StatementsListPageView(TitleMixin, TemplateView):
     template_name = "votes/statements_list.html"
 
     def statement_search(
-        self, chamber: Chamber, start_date: datetime.date, end_date: datetime.date
+        self,
+        chamber: Chamber,
+        start_date: datetime.date,
+        end_date: datetime.date,
+        statement_type: str | None = None,
     ):
+        qs = Statement.objects.filter(
+            chamber=chamber, date__range=(start_date, end_date)
+        )
+        if statement_type:
+            qs = qs.filter(type=statement_type)
         statements = (
-            Statement.objects.filter(
-                chamber=chamber, date__range=(start_date, end_date)
-            )
-            .prefetch_related("tags")
+            qs.prefetch_related("tags")
             .annotate(signature_count=Count("signatures"))
             .order_by("-date")
         )
-
         return StatementSearch(
             start_date=start_date,
             end_date=end_date,
@@ -1246,14 +1261,24 @@ class StatementsListPageView(TitleMixin, TemplateView):
         year_start = datetime.date(year, 1, 1)
         year_end = datetime.date(year, 12, 31)
         chamber = Chamber.objects.get(slug=chamber_slug)
-
-        search = self.statement_search(chamber, year_start, year_end)
+        statement_type = self.request.GET.get("type")
+        search = self.statement_search(chamber, year_start, year_end, statement_type)
         context["search"] = search
+        context["selected_type"] = statement_type
+        context["statement_types"] = [
+            {"type": "proposed_motion", "label": "🟢 Proposed Motions"},
+            {
+                "type": "negative_si_request",
+                "label": "🟠 SI Requests (Negative Procedure)",
+            },
+            {"type": "proposed_amendment", "label": "🔵 Proposed Amendments"},
+            {"type": "letter", "label": "📄 Letters"},
+            {"type": "other", "label": "⚪ Other"},
+        ]
         context["page_title"] = f"{year} {chamber.name} Statements"
         context["og_image"] = reverse(
             "statements_list_opengraph_image", args=[chamber_slug, year]
         )
-
         return context
 
 
