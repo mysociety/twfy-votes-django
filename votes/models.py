@@ -1863,6 +1863,27 @@ class Policy(DjangoVoteModel):
     vote_distributions: DummyOneToMany[VoteDistribution] = related_name("policy")
     policy_hash: str
 
+    def get_free_vote_parties(self) -> list[str]:
+        """
+        Get the slugs of parties that have issued a free vote whip on any division linked to this policy.
+        Query all and then reduce in python so this works better when the policy object list has been
+        prefetched with supporting data (a filter would do a new query).
+        """
+        whip_reports = []
+        for d in self.division_links.all():
+            whip_reports.extend(d.decision.whip_reports.all())
+
+        whip_reports = [
+            x
+            for x in whip_reports
+            if x.whip_direction == WhipDirection.FREE
+            and x.whip_priority == WhipPriority.FREE
+        ]
+
+        parties = {x.party.slug for x in whip_reports}
+        parties = sorted(list(parties))
+        return parties
+
     def url(self) -> str:
         return reverse("policy", args=[self.id])
 
