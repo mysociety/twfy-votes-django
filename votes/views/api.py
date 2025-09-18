@@ -255,6 +255,16 @@ class PolicySchema(ModelSchema):
         fields = "__all__"
 
 
+class PolicyWithFreeVoteListSchema(PolicySchema):
+    """Extended Policy schema that includes free vote counts for specific endpoints"""
+
+    free_vote_parties: list[str]
+
+    @staticmethod
+    def resolve_free_vote_parties(obj: Policy):
+        return obj.get_free_vote_parties()
+
+
 class RebellionRateSchema(ModelSchema):
     class Meta:
         model = RebellionRate
@@ -738,12 +748,14 @@ def get_divisions_by_month(
     ]
 
 
-@api.get("/policies.json", response=list[PolicySchema])
+@api.get("/policies.json", response=list[PolicyWithFreeVoteListSchema])
 def get_policies(request: HttpRequest):
     policies_query = Policy.objects.all().prefetch_related(
         "groups",
         "division_links",
         "division_links__decision",
+        "division_links__decision__whip_reports",
+        "division_links__decision__whip_reports__party",
         "division_links__decision__tags",
         "agreement_links",
         "agreement_links__decision",
