@@ -2071,6 +2071,17 @@ class VoteDistribution(DjangoVoteModel):
     distance_score: float
 
     @property
+    def total_strong_decisions(self) -> float:
+        return (
+            self.num_strong_votes_same
+            + self.num_strong_votes_different
+            + self.num_strong_votes_absent
+            + self.num_strong_votes_abstain
+            + self.num_strong_agreements_same
+            + self.num_strong_agreements_different
+        )
+
+    @property
     def total_votes(self) -> float:
         return (
             self.num_votes_same
@@ -2093,6 +2104,14 @@ class VoteDistribution(DjangoVoteModel):
 
     @property
     def verbose_score(self) -> str:
+        # if one vote drop consistency language
+        if self.total_strong_decisions == 1:
+            match self.distance_score:
+                case 0:
+                    return "Voted for"
+                case 1:
+                    return "Voted against"
+
         match self.distance_score:
             case s if 0 <= s <= 0.05:
                 return "Consistently voted for"
