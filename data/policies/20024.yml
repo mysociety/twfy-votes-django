@@ -1,0 +1,29 @@
+id: 20024
+name: 2025 Sentencing changes
+context_description: <b>abolishing</b> many prison terms of less than a year, <b>expanding</b>
+  suspended sentences and electronic tagging, <b>reducing</b> independence of Sentencing
+  Council from government</b>.
+policy_description: Votes on the Sentencing Bill 2025
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-09-16
+    division_number: 307
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-09-16
+    division_number: 306
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

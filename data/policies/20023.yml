@@ -1,0 +1,36 @@
+id: 20023
+name: 2025 Universal Credit Changes
+context_description: <b>reducing the health top-up</b> for new universal credit claims, while
+  <b>increasing the rate of UC standard allowance</b>.
+policy_description: Votes on the Universal Credit and Personal Independent Payment
+  Bill/Universal Credit Bill
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-07-09
+    division_number: 265
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-07-01
+    division_number: 248
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-07-01
+    division_number: 247
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []
