@@ -1,0 +1,29 @@
+id: 20022
+name: 2025 English Devolution
+context_description: standardizing and increasing <b>powers of devolved mayoralties</b>,
+  <b>replacing two-tier local authorities with larger unitary authorities</b>, and introducing
+  a <b>community right to buy</b>.
+policy_description: Votes on the English Devolution and Community Empowerment Bill
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-09-02
+    division_number: 273
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-09-02
+    division_number: 272
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []
