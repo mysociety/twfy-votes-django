@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 import rich
+import typer
 from ruamel.yaml import YAML
 
 from votes.consts import (
@@ -95,6 +96,103 @@ def create_new_policy(
     data_to_yaml(policy, policy_path)
 
     print(f"Created policy {policy_id} at {policy_path}")
+
+
+def promote_candidates_to_active():
+    """
+    Promote all policies with 'candidate' status to 'active' status.
+    """
+    yaml = YAML()
+    yaml.default_flow_style = False
+
+    candidate_policies = []
+    promoted_count = 0
+
+    # Find all candidate policies
+    for policy_file in vote_folder.glob("*.yml"):
+        data = yaml.load(policy_file)
+        if data.get("status") == "candidate":
+            candidate_policies.append((policy_file, data))
+
+    if not candidate_policies:
+        rich.print("[yellow]No candidate policies found to promote.[/yellow]")
+        return
+
+    rich.print(
+        f"Found [blue]{len(candidate_policies)}[/blue] candidate policies to promote:"
+    )
+
+    # Show the policies that will be promoted
+    for policy_file, data in candidate_policies:
+        rich.print(f"  - {data['id']}: {data['name']}")
+
+    # Confirm with user
+    confirm = typer.confirm(
+        "Do you want to promote all these policies to active status?"
+    )
+    if not confirm:
+        rich.print("\n[yellow]Operation cancelled.[/yellow]")
+        return
+
+    # Promote each policy
+    for policy_file, data in candidate_policies:
+        data["status"] = "active"
+        data_to_yaml(data, policy_file)
+        promoted_count += 1
+        rich.print(f"Promoted policy [green]{data['id']}[/green]: {data['name']}")
+
+    rich.print(
+        f"\n[green]Successfully promoted {promoted_count} policies from candidate to active status.[/green]"
+    )
+
+
+def change_policy_status(policy_id: int, new_status: PolicyStatus):
+    """
+    Change the status of a specific policy.
+
+    Args:
+        policy_id: The ID of the policy to update
+        new_status: The new status to set for the policy
+    """
+    yaml = YAML()
+    yaml.default_flow_style = False
+
+    policy_path = vote_folder / f"{policy_id}.yml"
+
+    if not policy_path.exists():
+        rich.print(f"[red]Error: Policy {policy_id} does not exist.[/red]")
+        return
+
+    # Load the policy data
+    data = yaml.load(policy_path)
+    old_status = data.get("status")
+
+    if old_status == new_status:
+        rich.print(
+            f"[yellow]Policy {policy_id} already has status '{new_status}'.[/yellow]"
+        )
+        return
+
+    # Show current policy info
+    rich.print(f"Policy [blue]{policy_id}[/blue]: {data.get('name', 'Unknown')}")
+    rich.print(f"Current status: [yellow]{old_status}[/yellow]")
+    rich.print(f"New status: [green]{new_status}[/green]")
+
+    # Confirm the change
+    confirm = typer.confirm(
+        f"Do you want to change the status from '{old_status}' to '{new_status}'?"
+    )
+    if not confirm:
+        rich.print("\n[yellow]Operation cancelled.[/yellow]")
+        return
+
+    # Update the status
+    data["status"] = str(new_status)
+    data_to_yaml(data, policy_path)
+
+    rich.print(
+        f"\n[green]Successfully updated policy {policy_id} status from '{old_status}' to '{new_status}'.[/green]"
+    )
 
 
 def add_vote_to_policy_from_url(
