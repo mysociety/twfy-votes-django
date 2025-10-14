@@ -951,6 +951,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
         agreements: list[Agreement],
         division_links: list[PolicyDivisionLink],
         agreement_links: list[PolicyAgreementLink],
+        person: Person,
     ) -> dict[str, pd.DataFrame]:
         """
         Create 4(or more?) dataframes of the different groupings of votes
@@ -961,6 +962,15 @@ class PersonPolicyView(TitleMixin, TemplateView):
         division_vote_breakdown_lookup = {
             v.division_id: v for v in division_vote_breakdowns
         }
+
+        # Fetch annotations for this person for all relevant divisions
+        division_ids = [link.decision_id for link in division_links]
+        annotations_lookup = {}
+        if division_ids:
+            annotations = VoteAnnotation.objects.filter(
+                division_id__in=division_ids, person=person
+            )
+            annotations_lookup = {ann.division_id: ann for ann in annotations}
 
         df_lookup: dict[str, pd.DataFrame] = {}
         division_items = []
@@ -999,19 +1009,27 @@ class PersonPolicyView(TitleMixin, TemplateView):
             vote = division_vote_lookup.get(link.decision_id)
             if not vote:
                 raise ValueError(f"Vote for division {link.decision.key} not found")
-            division_items.append(
-                {
-                    "motion": UrlColumn(
-                        url=link.decision.url(), text=link.decision.division_name
-                    ),
-                    "date": link.decision.date,
-                    "person_vote": vote.vote_desc().lower(),
-                    "party_alignment": get_party_alignment(vote),
-                    "policy_direction": link.alignment,
-                    "policy_aligned": is_aligned(vote, link),
-                    "policy_strength": f"{link.strength.lower()}_votes",
-                }
-            )
+
+            # Get annotation for this division and person
+            annotation = annotations_lookup.get(link.decision_id)
+            annotation_column = ""
+            if annotation:
+                annotation_column = annotation.url_column()
+
+            item = {
+                "motion": UrlColumn(
+                    url=link.decision.url(), text=link.decision.division_name
+                ),
+                "date": link.decision.date,
+                "person_vote": vote.vote_desc().lower(),
+                "party_alignment": get_party_alignment(vote),
+                "policy_direction": link.alignment,
+                "policy_aligned": is_aligned(vote, link),
+                "annotation": annotation_column,
+                "policy_strength": f"{link.strength.lower()}_votes",
+            }
+
+            division_items.append(item)
 
         if division_items:
             df_lookup.update(
@@ -1081,6 +1099,13 @@ class PersonPolicyView(TitleMixin, TemplateView):
         # resort df_lookup based on key
         df_lookup = dict(sorted(df_lookup.items(), key=lambda x: group_order[x[0]]))
 
+        # if the annotation column is empty (either null or empty string) in any of the dfs, remove it
+        for key, df in df_lookup.items():
+            if (
+                "annotation" in df.columns
+                and df["annotation"].replace("", None).isnull().all()
+            ):
+                df_lookup[key] = df.drop(columns=["annotation"])
         return df_lookup
 
     def get_context_data(
@@ -1176,7 +1201,29 @@ class PersonPolicyView(TitleMixin, TemplateView):
             agreements=agreements,
             division_links=division_links,
             agreement_links=agreement_links,
+            person=person,
         )
+
+        # Collect all annotations for this person on this policy
+        all_division_ids = [link.decision_id for link in division_links]
+        person_annotations = []
+        if all_division_ids:
+            annotations = VoteAnnotation.objects.filter(
+                division_id__in=all_division_ids, person=person
+            ).select_related("division")
+
+            for annotation in annotations:
+                person_annotations.append(
+                    {
+                        "division_name": annotation.division.division_name,
+                        "division_url": annotation.division.url(),
+                        "annotation_html": annotation.html(),
+                        "date": annotation.division.date,
+                    }
+                )
+
+            # Sort by date (most recent first)
+            person_annotations.sort(key=lambda x: x["date"], reverse=True)
 
         context["person"] = person
         context["chamber"] = chamber
@@ -1186,6 +1233,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
         context["own_distribution"] = own_distribution
         context["other_distribution"] = other_distribution
         context["decision_links_and_votes"] = decision_links_and_votes
+        context["person_annotations"] = person_annotations
         context["page_title"] = f"{policy.name} votes for {person.name}"
         context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
 

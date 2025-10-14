@@ -68,6 +68,18 @@ View <a href="{{ policy.url }}">policy details</a>.
         <b>Comparable {{ party.name }} {{ chamber.member_plural }}</b> {{ other_distribution.verbose_score.lower }} ({{ other_distribution.str_similarity_percentage }} aligned).
     </p>
 {% endif %}
+{% if person_annotations %}
+    <h3>Public statements and annotations</h3>
+    <p>{{ person.name }} has made the following public statements or annotations related to votes on this policy:</p>
+    <ul>
+        {% for annotation in person_annotations %}
+            <li>
+                <a href="{{ annotation.division_url }}">{{ annotation.division_name }}</a> ({{ annotation.date }}) - {{ annotation.annotation_html|safe }}
+            </li>
+        {% endfor %}
+        s
+    </ul>
+{% endif %}
 {% for vote_group, df in decision_links_and_votes.items %}
     {% if vote_group == "strong_votes" %}
         <h2 class="section-header" id="{{ vote_group }}">Scoring Divisions</h2>
@@ -79,7 +91,8 @@ View <a href="{{ policy.url }}">policy details</a>.
                 - person vote: the vote cast by the person
                 - party alignment: how aligned this vote was with other members of the person’s party. Higher numbers indicate less difference from the average vote of the party.
                 - policy direction: if an aye vote is aligned or against the overall policy.
-                - policy alignment: if this MP’s vote was aligned with the policy.
+                - policy alignment: if this MP's vote was aligned with the policy.
+                - annotation: links to public statements or explanations for the vote, if available.
             {% endmarkdown %}
         </div>
     {% elif vote_group == "weak_votes" %}
@@ -87,6 +100,8 @@ View <a href="{{ policy.url }}">policy details</a>.
         <div class = "group-desc">
             {% markdown %}
                 Informative votes are thematically related to a policy, but do not count towards the overall score.
+                **Guide to columns**
+                - annotation: links to public statements or explanations for the vote, if available.
             {% endmarkdown %}
         </div>
     {% elif vote_group == "strong_agreements" %}
