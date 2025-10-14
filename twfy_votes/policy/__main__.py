@@ -65,5 +65,28 @@ def create_policy(
     )
 
 
+@app.command()
+def promote_candidates():
+    """
+    Promote all policies with 'candidate' status to 'active' status
+    """
+    from .tools import promote_candidates_to_active
+
+    promote_candidates_to_active()
+
+
+@app.command()
+def change_policy_status(
+    policy_id: int,
+    status: PolicyStatus,
+):
+    """
+    Change the status of a specific policy
+    """
+    from .tools import change_policy_status
+
+    change_policy_status(policy_id=policy_id, new_status=status)
+
+
 if __name__ == "__main__":
     app()
