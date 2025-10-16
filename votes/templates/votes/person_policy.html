@@ -77,7 +77,6 @@ View <a href="{{ policy.url }}">policy details</a>.
                 <a href="{{ annotation.division_url }}">{{ annotation.division_name }}</a> ({{ annotation.date }}) - {{ annotation.annotation_html|safe }}
             </li>
         {% endfor %}
-        s
     </ul>
 {% endif %}
 {% for vote_group, df in decision_links_and_votes.items %}
