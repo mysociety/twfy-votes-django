@@ -1,0 +1,37 @@
+id: 20025
+name: Local council power over bus services
+context_description: increasing <b>local council power over bus services</b>
+policy_description: Votes on giving new powerse to local councils to manage (directly
+  or indirectly) local bus services
+notes: ''
+status: candidate
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-09-10
+    division_number: 292
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-06-02
+    decision_ref: c.130.0.13
+    division_name: ''
+  alignment: agree
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2017-03-27
+    decision_ref: a.93.1.3
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: ''

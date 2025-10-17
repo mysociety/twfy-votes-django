@@ -1,10 +1,9 @@
-id: 20013
-name: EU Standards Alignment
-context_description: aligning <b>product standards with EU standards</b>
-policy_description: Votes in favour of greater alignment between UK and EU regimes
-  on product standards.
+id: 20020
+name: English Football Regulator
+context_description: creating a <b>new regulator for English Football</b>
+policy_description: Votes on Football Governance Bill (2024-25)
 notes: ''
-status: draft
+status: candidate
 strength_meaning: simplified
 highlightable: false
 chamber: commons
@@ -13,22 +12,22 @@ groups:
 division_links:
 - decision:
     chamber_slug: commons
-    date: 2025-04-01
-    division_number: 167
+    date: 2025-04-28
+    division_number: 179
   alignment: agree
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
-    date: 2025-04-01
-    division_number: 166
+    date: 2025-04-28
+    division_number: 178
   alignment: against
   strength: strong
   notes: ''
 - decision:
     chamber_slug: commons
-    date: 2025-04-02
-    division_number: 168
+    date: 2025-07-08
+    division_number: 257
   alignment: agree
   strength: strong
   notes: ''

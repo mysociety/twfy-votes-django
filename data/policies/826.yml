@@ -1,10 +1,8 @@
 id: 826
-name: Gay rights
-context_description: equal <b>gay rights</b>
-policy_description: A vote for gay rights would be a vote for homosexual people to
-  have the same rights as heterosexuals (including for example the ability to marry,
-  an equal age of consent, and the right to adopt) and for discrimination on the basis
-  of sexual orientation to be illegal.
+name: LGBT+ rights
+context_description: measures that increased <b>LGBT+ rights</b> and social equality.
+policy_description: Votes that relate to LGBT+ rights, including legal rights, anti-discrimination
+  measures, and social equality.
 notes: ''
 status: active
 strength_meaning: simplified
@@ -225,4 +223,26 @@ division_links:
   alignment: agree
   strength: strong
   notes: ''
-agreement_links: []
+- decision:
+    chamber_slug: commons
+    date: 2025-05-07
+    division_number: 190
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2019-03-27
+    division_number: 381
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2019-10-07
+    decision_ref: c.1597.0.2
+    division_name: ''
+  alignment: agree
+  strength: weak
+  notes: ''
