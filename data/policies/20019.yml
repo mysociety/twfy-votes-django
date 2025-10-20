@@ -1,9 +1,11 @@
 id: 20019
 name: Proscribing Palestine Action
-context_description: proscribing <b>Palestine Action</b>, <b>Maniacs Murder Cult</b>, and <b>Russian Imperial Movement</b> as terrorist groups
-policy_description: Vote on proscribing a set of groups under the Terrorism Act 2000 in 2025.
+context_description: proscribing <b>Palestine Action</b>, <b>Maniacs Murder Cult</b>,
+  and <b>Russian Imperial Movement</b> as terrorist groups
+policy_description: Vote on proscribing a set of groups under the Terrorism Act 2000
+  in 2025.
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons

@@ -1,13 +1,13 @@
 id: 20021
 name: Sentencing guidelines
-context_description: preventing <b>sentencing guidelines requiring offender
-  background reports</b> based on race, religion, culture, or similar traits.
+context_description: preventing <b>sentencing guidelines requiring offender background
+  reports</b> based on race, religion, culture, or similar traits.
 policy_description: |
   Votes on Sentencing Guidelines Bill 2025.
   This was overriding a recommendation of the Sentencing Council that a pre-sentencing report should be written on the specific circumstances
   of an offender before sentencing if their general background fell into groups judged to currently experience more severe sentencing. 
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons

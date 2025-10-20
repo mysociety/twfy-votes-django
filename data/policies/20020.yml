@@ -3,7 +3,7 @@ name: English Football Regulator
 context_description: creating a <b>new regulator for English Football</b>
 policy_description: Votes on Football Governance Bill (2024-25)
 notes: ''
-status: candidate
+status: active
 strength_meaning: simplified
 highlightable: false
 chamber: commons

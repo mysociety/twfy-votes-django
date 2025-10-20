@@ -3,7 +3,7 @@ name: Gambling levies
 context_description: <b>new/increased levies</b> on the gambling industry
 policy_description: Decisions on new/increased levies on the gambling industry
 notes: ''
-status: candidate
+status: draft
 strength_meaning: simplified
 highlightable: false
 chamber: commons
