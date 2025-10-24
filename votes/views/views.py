@@ -68,6 +68,7 @@ from ..models import (
     Vote,
     VoteAnnotation,
     VoteDistribution,
+    WhipReport,
 )
 from .auth import can_view_draft_content, super_users_or_group
 from .helper_models import (
@@ -952,6 +953,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
         division_links: list[PolicyDivisionLink],
         agreement_links: list[PolicyAgreementLink],
         person: Person,
+        party: Organization | None = None,
     ) -> dict[str, pd.DataFrame]:
         """
         Create 4(or more?) dataframes of the different groupings of votes
@@ -971,6 +973,14 @@ class PersonPolicyView(TitleMixin, TemplateView):
                 division_id__in=division_ids, person=person
             )
             annotations_lookup = {ann.division_id: ann for ann in annotations}
+
+        # Fetch whip reports for the party for all relevant divisions
+        whip_reports_lookup = {}
+        if division_ids and party:
+            whip_reports = WhipReport.objects.filter(
+                division_id__in=division_ids, party=party
+            ).select_related("division")
+            whip_reports_lookup = {wr.division_id: wr for wr in whip_reports}
 
         df_lookup: dict[str, pd.DataFrame] = {}
         division_items = []
@@ -1016,6 +1026,14 @@ class PersonPolicyView(TitleMixin, TemplateView):
             if annotation:
                 annotation_column = annotation.url_column()
 
+            # Get whip report for this division and party
+            whip_report = whip_reports_lookup.get(link.decision_id)
+            if whip_report:
+                # Format whip report information as readable text
+                whip_info = whip_report.whip_direction.replace("_", " ").title()
+            else:
+                whip_info = ""
+
             item = {
                 "motion": UrlColumn(
                     url=link.decision.url(), text=link.decision.division_name
@@ -1025,6 +1043,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
                 "party_alignment": get_party_alignment(vote),
                 "policy_direction": link.alignment,
                 "policy_aligned": is_aligned(vote, link),
+                "whip_report": whip_info,
                 "annotation": annotation_column,
                 "policy_strength": f"{link.strength.lower()}_votes",
             }
@@ -1100,12 +1119,13 @@ class PersonPolicyView(TitleMixin, TemplateView):
         df_lookup = dict(sorted(df_lookup.items(), key=lambda x: group_order[x[0]]))
 
         # if the annotation column is empty (either null or empty string) in any of the dfs, remove it
-        for key, df in df_lookup.items():
-            if (
-                "annotation" in df.columns
-                and df["annotation"].replace("", None).isnull().all()
-            ):
-                df_lookup[key] = df.drop(columns=["annotation"])
+        for blank_col in ["annotation", "whip_report"]:
+            for key, df in df_lookup.items():
+                if (
+                    blank_col in df.columns
+                    and df[blank_col].replace("", None).isnull().all()
+                ):
+                    df_lookup[key] = df.drop(columns=[blank_col])
         return df_lookup
 
     def get_context_data(
@@ -1202,6 +1222,7 @@ class PersonPolicyView(TitleMixin, TemplateView):
             division_links=division_links,
             agreement_links=agreement_links,
             person=person,
+            party=party,
         )
 
         # Collect all annotations for this person on this policy
