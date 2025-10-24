@@ -370,6 +370,15 @@ class WhipForm(forms.Form, DecisionIdMixin):
             )
             model.save()
 
+        # Queue an update to export whip reports after creating new reports
+        Update.create_task(
+            instructions={
+                "model": "export_whip_reports",
+            },
+            created_via="whip_form",
+            check_for_running=True,
+        )
+
 
 class RepWhipForm(forms.Form, DecisionIdMixin):
     title = "Whip Reporting Form"
@@ -406,6 +415,15 @@ class RepWhipForm(forms.Form, DecisionIdMixin):
             evidence_type=EvidenceType.REP,
         )
         model.save()
+
+        # Queue an update to export whip reports after creating new report
+        Update.create_task(
+            instructions={
+                "model": "export_whip_reports",
+            },
+            created_via="rep_whip_form",
+            check_for_running=True,
+        )
 
 
 class BaseAnnotationForm(forms.Form, DecisionIdMixin):
