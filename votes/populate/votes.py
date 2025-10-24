@@ -199,7 +199,7 @@ def import_votes(quiet: bool = False, update_since: datetime.date | None = None)
     df = pd.read_parquet(votes_with_diff)
     df = df[df["division_id"].isin(rel_division_ids)]
 
-    to_create = []
+    to_create: list[Vote] = []
 
     existing_relevant_votes = Vote.objects.filter(division_id__in=rel_division_ids)
     lookup = {f"{x.division_id}-{x.person_id}": x.id for x in existing_relevant_votes}
@@ -231,9 +231,12 @@ def import_votes(quiet: bool = False, update_since: datetime.date | None = None)
             )
         )
 
-    # Bulk create votes
-    Vote.objects.filter(division_id__in=rel_division_ids).delete()
+    # Only delete votes for divisions we're actually updating
+    divisions_being_updated = set(vote.division_id for vote in to_create)
+    Vote.objects.filter(division_id__in=divisions_being_updated).delete()
     Vote.objects.bulk_create(to_create)
 
     if not quiet:
-        rich.print(f"Imported [green]{len(to_create)}[/green] votes")
+        rich.print(
+            f"Imported [green]{len(to_create)}[/green] votes for {len(divisions_being_updated)} divisions"
+        )

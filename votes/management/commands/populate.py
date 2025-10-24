@@ -21,7 +21,7 @@ shortcuts: dict[str, InstructionDict] = {
         "end_group": "decisions",
     },
     "refresh_daily": {
-        "update_last": 1,
+        "update_last": 2,
         "all": True,
     },
     "refresh_recent": {
