@@ -5,3 +5,90 @@
         display: none;
     }
 }
+
+.motion-type {
+    background: $gray-100;
+    border-left: 4px solid $blue;
+
+    .motion-type-label {
+        font-weight: 600;
+        color: $gray-700;
+        margin-bottom: 0.25rem;
+    }
+
+    .motion-type-title {
+        font-weight: 600;
+        color: $gray-900;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .motion-type-details {
+        .motion-type-details-summary {
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+            color: $gray-600;
+
+            &::-webkit-details-marker {
+                display: none;
+            }
+
+            &::before {
+                content: "▶";
+                margin-right: 0.5rem;
+                font-size: 0.7em;
+                transition: transform 0.3s ease;
+            }
+        }
+
+        &[open] .motion-type-details-summary::before {
+            transform: rotate(90deg);
+        }
+
+        .motion-type-description {
+            overflow: hidden;
+
+            .motion-type-description-content {
+                line-height: 1.5;
+                padding: 0;
+
+                p {
+                    margin-bottom: 0.5rem;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+                }
+            }
+        }
+
+    }
+}
+
+.motion-text {
+    background: $gray-100;
+    border-left: 4px solid $success;
+
+    .motion-text-header {
+        font-weight: 600;
+        color: $gray-700;
+        display: flex;
+        align-items: center;
+    }
+
+    .motion-text-content {
+        line-height: 1.5;
+        color: $gray-700;
+
+        p {
+            margin-bottom: 0.5rem;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+        }
+    }
+}
