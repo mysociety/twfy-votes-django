@@ -71,8 +71,8 @@ class Division(BaseModel):
     NoTellers: Optional[list[Member]] = Field(default_factory=list)
     Ayes: list[Member] = Field(default_factory=list)
     Noes: list[Member] = Field(default_factory=list)
-    FriendlyDescription: None
-    FriendlyTitle: None
+    FriendlyDescription: Optional[str] = None
+    FriendlyTitle: Optional[str] = None
     NoVoteRecorded: list[Member] = Field(default_factory=list)
     RemoteVotingStart: None
     RemoteVotingEnd: None
