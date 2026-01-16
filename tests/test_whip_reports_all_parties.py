@@ -11,7 +11,7 @@ from votes.consts import (
     WhipDirection,
     WhipPriority,
 )
-from votes.models import Division, Organization, Vote, WhipReport
+from votes.models import Division, Organization, Update, Vote, WhipReport
 
 pytestmark = pytest.mark.django_db
 
@@ -54,6 +54,8 @@ def test_apply_to_all_voting_parties(client: Client, test_user_with_whip_permiss
 
     # Delete any existing whip reports for this division to start clean
     WhipReport.objects.filter(division_id=division.id).delete()
+    # Clear any existing update tasks
+    Update.objects.filter(instructions__model="export_whip_reports").delete()
 
     # Submit form with "apply_to_all_parties" checked
     form_url = reverse(
@@ -85,6 +87,10 @@ def test_apply_to_all_voting_parties(client: Client, test_user_with_whip_permiss
         assert report.evidence_type == EvidenceType.OTHER
         assert report.evidence_detail == "Test detail"
 
+    # Verify that an export task was created
+    export_tasks = Update.objects.filter(instructions__model="export_whip_reports")
+    assert export_tasks.count() >= 1, "No export task was created for whip reports"
+
 
 def test_apply_to_single_party(client: Client, test_user_with_whip_permission):
     # Log in the user
@@ -104,6 +110,8 @@ def test_apply_to_single_party(client: Client, test_user_with_whip_permission):
 
     # Delete any existing whip reports for this division to start clean
     WhipReport.objects.filter(division_id=division.id).delete()
+    # Clear any existing update tasks
+    Update.objects.filter(instructions__model="export_whip_reports").delete()
 
     # Submit form with a single party selected
     form_url = reverse(
@@ -134,3 +142,7 @@ def test_apply_to_single_party(client: Client, test_user_with_whip_permission):
     assert report.whip_priority == WhipPriority.THREE_LINE
     assert report.evidence_type == EvidenceType.OTHER
     assert report.evidence_detail == "Test single party"
+
+    # Verify that an export task was created
+    export_tasks = Update.objects.filter(instructions__model="export_whip_reports")
+    assert export_tasks.count() >= 1, "No export task was created for whip reports"
