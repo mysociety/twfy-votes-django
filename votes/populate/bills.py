@@ -32,8 +32,8 @@ class Bill(BaseModel):
     billId: int
     shortTitle: str
     formerShortTitle: str | None = None
-    currentHouse: str
-    originatingHouse: str
+    currentHouse: str | None = None
+    originatingHouse: str | None = None
     lastUpdate: datetime.datetime
     billWithdrawn: None | datetime.datetime
     isDefeated: bool
@@ -41,7 +41,7 @@ class Bill(BaseModel):
     introducedSessionId: int
     includedSessionIds: list
     isAct: bool
-    currentStage: Stage
+    currentStage: Stage | None = None
 
     @property
     def url(self):
