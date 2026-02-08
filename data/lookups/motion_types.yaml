@@ -1,0 +1,157 @@
+first_stage:
+- chamber: all
+  title: "First stage"
+  description: |
+    This is the first stage/reading of a draft law.
+
+    It will introduce the topic area, but not the full details of the bill.
+
+second_stage:
+- chamber: all
+  title: "Second stage"
+  description: |
+    This is the second stage/reading of a draft law. 
+
+    It introduces a complete bill that may be subject to future amendment. 
+
+    If this passes, in the House of Commons it will proceed to a committee stage.
+
+third_stage:
+- chamber: all
+  title: "Third stage"
+  description: |
+    This is the third stage/reading of a draft law.
+
+    The chamber confirms the final text of the bill, and it will proceed to the Lords if it is a Commons bill (or to the Commons if it starts as a Lords bill).
+ten_minute_rule:
+- chamber: all
+  title: "Ten minute rule"
+  description: |
+    A Ten Minute Rule motion is a way for MPs to propose a law by making a brief speech of up to ten minutes in support of it. 
+
+    In practice, even when these pass they are unlikely to be given time in the schedule to become legislation.
+programme:
+- chamber: all
+  title: "Programme"
+  description: |
+    A programme motion sets out the timetable and time available for a bill to be debated.
+closure:
+- chamber: all
+  title: "Closure"
+  description: |
+    Motion to stop debate and move to a vote on the main issue.
+amendment:
+- chamber: all
+  title: "Amendment"
+  description: |
+    An amendment is a change to the text of a motion or bill.
+reasoned_amendment:
+- chamber: all
+  title: "Reasoned amendment"
+  description: |
+    A reasoned amendment is an attempt to convert 'this bill has passed the second stage' motions into 'this bill should not pass *because* reason a,b,c'.
+
+    This opposition amendment will rarely if ever passed – but is the framing for the opposition's final critique of the bill at this stage.
+lords_amendment:
+- chamber: all
+  title: "Lords amendment"
+  description: |
+    This is a vote to accept or reject a change made by the House of Lords to a bill.
+committee_clause:
+- chamber: all
+  title: "Committee clause"
+  description: |
+    This is a vote to approve a clause in a bill.
+add_clause_to_bill:
+- chamber: all
+  title: "Add clause to bill"
+  description: |
+    This is a vote to approve adding a clause to a bill.
+timetable_change:
+- chamber: all
+  title: "Timetable change"
+  description: |
+    This is a vote to change the order of business in the chamber.
+adjournment:
+- chamber: all
+  title: "Adjournment"
+  description: |
+    This is a vote to end the day's business.
+
+    Adjournment debates are usually used as a mechanism to have a debate on a topic without a vote.
+humble_address:
+- chamber: all
+  title: "Humble address"
+  description: |
+    This is used as a way of Parliament compelling the government to release information.
+government_agenda:
+- chamber: all
+  title: "Government agenda"
+  description: |
+    This is a vote on the government's agenda (monarch's speech).
+financial:
+- chamber: all
+  title: "Financial"
+  description: |
+    This is a vote on a financial instrument.
+confidence:
+- chamber: all
+  title: "Confidence"
+  description: |
+    This is a vote of confidence in the government.
+standing_order_change:
+- chamber: all
+  title: "Standing order change"
+  description: |
+    This is a vote to change the rules of the chamber.
+private_sitting:
+- chamber: all
+  title: "Private sitting"
+  description: |
+    This is a vote to sit in private.
+
+    Generally this is not a real vote about sitting in private, but because it is a vote that can be called by any MP, it can be used to end a low participation debate. 
+
+    Calling for the vote leads to a check if there are more than 40 MPs present, and if not, proceedings end. 
+
+    However, it can also only be called once a day, so sometimes people in *favour* of a debate will call for this vote earlier when there are more people around. This prevents it being used to close debate later on.
+reasons_committee:
+- chamber: all
+  title: "Reasons committee"
+  description: |
+    Where a Lords amendment has been rejected without an alternative, a committee is assigned to draw up a reason for each disagreement to return to the Lords.
+eu_document_scrutiny:
+- chamber: all
+  title: "EU document scrutiny"
+  description: |
+    Now historical, but a vote recognising an EU document in Parliament was a requirement before a minister could support in council.
+other:
+- chamber: all
+  title: "Other"
+  description: |
+    This is a vote that doesnt fit into any current category.
+approve_statutory_instrument:
+- chamber: all
+  title: "Approve statutory instrument"
+  description: |
+    This is a vote to approve a statutory instrument.
+revoke_statutory_instrument:
+- chamber: all
+  title: "Revoke statutory instrument"
+  description: |
+    This is a vote to revoke a statutory instrument (negative procedure).
+bill_introduction:
+- chamber: all
+  title: "Bill introduction"
+  description: |
+    This is a vote relating to the introduction of a bill.
+proposed_clause:
+- chamber: all
+  title: "Proposed clause"
+  description: |
+    This is a vote on a proposed clause.
+unknown:
+- chamber: all
+  title: "Unknown"
+  description: |-
+    This is a motion whose type could not be determined.

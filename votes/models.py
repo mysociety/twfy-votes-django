@@ -5,7 +5,9 @@ import html
 import secrets
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from itertools import groupby
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -20,6 +22,7 @@ from typing import (
     cast,
 )
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import F
@@ -30,6 +33,8 @@ import markdown
 import numpy as np
 import pandas as pd
 from numpy import nan
+from pydantic import BaseModel, RootModel
+from ruamel.yaml import YAML
 
 from twfy_votes.helpers.base_model import DjangoVoteModel
 from twfy_votes.helpers.typed_django.models import (
@@ -83,6 +88,67 @@ if TYPE_CHECKING:
         Vote,
         VoteDistribution,
     )
+
+
+class MotionTypeDescription(BaseModel):
+    """
+    Container for motion type description loaded from YAML.
+    """
+
+    chamber: str = "all"
+    title: str
+    description: str
+
+
+class MotionTypeDescriptionCollection(RootModel):
+    """
+    Interface for the collection of motion type descriptions.
+    Dictionary of a motion type constant to a list of descriptions.
+    for different cambers
+    """
+
+    root: dict[MotionType, list[MotionTypeDescription]]
+
+    def get_title(self, motion_type: MotionType, chamber_slug: str) -> str:
+        """
+        Get the title for a motion type and chamber slug.
+        Falls back to 'all' chamber if specific chamber not found.
+        """
+        descriptions = self.root.get(motion_type, [])
+        for desc in descriptions:
+            if desc.chamber == chamber_slug:
+                return desc.title
+        for desc in descriptions:
+            if desc.chamber == "all":
+                return desc.title
+        return "Unknown Motion Type"
+
+    def get_description(self, motion_type: MotionType, chamber_slug: str) -> str:
+        """
+        Get the description for a motion type and chamber slug.
+        Falls back to 'all' chamber if specific chamber not found.
+        """
+        descriptions = self.root.get(motion_type, [])
+        for desc in descriptions:
+            if desc.chamber == chamber_slug:
+                return desc.description
+        for desc in descriptions:
+            if desc.chamber == "all":
+                return desc.description
+        return "No description available."
+
+    @classmethod
+    @lru_cache(maxsize=1)
+    def load(cls):
+        """
+        Load motion type descriptions from YAML file.
+        """
+        base_dir = Path(settings.BASE_DIR)
+        yaml_path = base_dir / "data" / "lookups" / "motion_types.yaml"
+
+        yaml = YAML(typ="safe")
+        data = yaml.load(yaml_path)
+        return cls.model_validate(data)
 
 
 class NavigationResult(NamedTuple):
@@ -1044,6 +1110,23 @@ class Motion(DjangoVoteModel):
     def motion_type_nice(self):
         return str(self.motion_type).replace("_", " ").title()
 
+    def motion_type_description(self, chamber_slug: str = "all") -> str:
+        """
+        Get the description for this motion's type from the YAML file.
+        """
+        return MotionTypeDescriptionCollection.load().get_description(
+            self.motion_type, chamber_slug
+        )
+
+    def motion_type_title(self, chamber_slug: str = "all") -> str:
+        """
+        Get the title for this motion's type from the YAML file, or fallback to motion_type_nice.
+        """
+        motion_description = MotionTypeDescriptionCollection.load().get_title(
+            self.motion_type, chamber_slug
+        )
+        return motion_description or self.motion_type_nice()
+
     def nice_html(self) -> str:
         return markdown.markdown(self.nice_text(), extensions=["tables"])
 
@@ -1638,6 +1721,24 @@ class Division(DjangoVoteModel):
         """
         return get_same_day_decision_navigation(self)
 
+    @property
+    def motion_type_description(self) -> str:
+        """
+        Get the chamber-aware description for this division's motion type.
+        """
+        if not self.motion:
+            return ""
+        return self.motion.motion_type_description(self.chamber_slug)
+
+    @property
+    def motion_type_title(self) -> str:
+        """
+        Get the chamber-aware title for this division's motion type.
+        """
+        if not self.motion:
+            return ""
+        return self.motion.motion_type_title(self.chamber_slug)
+
 
 class DivisionBreakdown(DjangoVoteModel):
     division_id: Dummy[int]
@@ -1899,6 +2000,24 @@ class Agreement(DjangoVoteModel):
         Returns a NavigationResult with both decisions (or None if not available).
         """
         return get_same_day_decision_navigation(self)
+
+    @property
+    def motion_type_description(self) -> str:
+        """
+        Get the chamber-aware description for this agreement's motion type.
+        """
+        if not self.motion:
+            return ""
+        return self.motion.motion_type_description(self.chamber_slug)
+
+    @property
+    def motion_type_title(self) -> str:
+        """
+        Get the chamber-aware title for this agreement's motion type.
+        """
+        if not self.motion:
+            return ""
+        return self.motion.motion_type_title(self.chamber_slug)
 
 
 DecisionType = Division | Agreement
