@@ -132,7 +132,17 @@ def import_statement_party_breakdowns(
             )
         )
 
-    StatementPartyBreakdown.objects.all().delete()
+    # Only delete breakdowns for statements in scope
+    if update_since:
+        statement_ids_in_scope = Statement.objects.filter(
+            date__gte=update_since
+        ).values_list("id", flat=True)
+        StatementPartyBreakdown.objects.filter(
+            statement_id__in=statement_ids_in_scope
+        ).delete()
+    else:
+        StatementPartyBreakdown.objects.all().delete()
+
     StatementPartyBreakdown.objects.bulk_create(to_create, batch_size=10000)
 
     if not quiet:
