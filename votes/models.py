@@ -1605,7 +1605,11 @@ class Division(DjangoVoteModel):
         data = [
             {
                 "Person": UrlColumn(url=v.person.url(), text=v.person.name),
-                "Party": person_to_membership_map[v.person_id].party.name,
+                "Party": (
+                    person_to_membership_map[v.person_id].party.name
+                    if v.person_id in person_to_membership_map
+                    else "Unknown"
+                ),
                 "Vote": v.vote_desc(),
                 "Party alignment": 1
                 - (
