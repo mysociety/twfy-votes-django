@@ -13,7 +13,11 @@
 -   slug: objection_to_si
     name: Objection to Statutory Instrument
     tag_type: statement_tags
-    description: Objection (or prayer against) a SI through the negative procedure. 
+    description: Objection (or prayer against) a SI through the negative procedure.
+-   slug: non_si_fatal_motion
+    name: Non-SI Fatal Motion
+    tag_type: statement_tags
+    description: A motion subject to a negative procedure similar to a negative SI request, but relating to guidelines or codes rather than a Statutory Instrument. 
 -   slug: gov_aye_opp_lean_no
     name: "Divided opposition: Government Aye, Opposition divided"
     tag_type: gov_clusters

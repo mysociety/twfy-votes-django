@@ -1,0 +1,10 @@
+# Statements to classify as negative_si_request despite lacking
+# statutory_instrument_title in the source data.
+# Identify by EDM original_id + chamber (chamber included for future-proofing).
+#
+
+- original_id: "65938"
+  chamber: commons
+  type: negative_si_request
+  tags:
+    - non_si_fatal_motion
