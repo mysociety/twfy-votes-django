@@ -1,6 +1,7 @@
 import datetime
 from collections import Counter
 from pathlib import Path
+from typing import NamedTuple
 
 from django.conf import settings
 from django.db import transaction
@@ -8,6 +9,8 @@ from django.template.defaultfilters import slugify
 
 import pandas as pd
 import rich
+import yaml
+from pydantic import BaseModel
 
 from twfy_votes.helpers.duck import DuckQuery
 
@@ -19,6 +22,44 @@ duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
 
 BASE_DIR = Path(settings.BASE_DIR)
 DATA_DIR = BASE_DIR / "data" / "source"
+LOOKUPS_DIR = BASE_DIR / "data" / "lookups"
+
+
+class StatementOverrideKey(NamedTuple):
+    original_id: str
+    chamber: ChamberSlug
+
+
+class StatementOverride(BaseModel):
+    original_id: str
+    chamber: ChamberSlug
+    type: StatementType
+    tags: list[str] = []
+
+
+def load_statement_overrides() -> dict[StatementOverrideKey, StatementOverride]:
+    """
+    Load manual statement overrides from YAML.
+    Returns dict keyed by (original_id, chamber).
+    """
+    overrides_file = LOOKUPS_DIR / "statement_overrides.yaml"
+    if not overrides_file.exists():
+        return {}
+
+    with open(overrides_file) as f:
+        data = yaml.safe_load(f)
+        if not data:
+            return {}
+
+    result = {}
+    for item in data:
+        override = StatementOverride(**item)
+        key = StatementOverrideKey(
+            original_id=override.original_id, chamber=override.chamber
+        )
+        result[key] = override
+
+    return result
 
 
 class DuplicateSlugManager:
@@ -64,6 +105,9 @@ def load_commons_edms(quiet: bool, update_since: datetime.date | None):
     if chamber_id is None:
         raise ValueError(f"Chamber with slug {chamber_slug} not found")
 
+    # Load YAML overrides
+    overrides = load_statement_overrides()
+
     to_create: list[Statement] = []
 
     direct_fields = ["id", "title", "motion_text", "date_tabled"]
@@ -82,11 +126,17 @@ def load_commons_edms(quiet: bool, update_since: datetime.date | None):
         url = f"https://edm.parliament.uk/early-day-motion/{row['id']}"
         slug = slug_dup_manager.check(slugify(row["title"]), date=date)
 
-        # Set statement type based on presence of statutory_instrument_title
-        if "statutory_instrument_title" in extra_info:
+        # Determine statement type: YAML override > auto-detection
+        yaml_override = overrides.get(
+            StatementOverrideKey(original_id=original_id, chamber=chamber_slug)
+        )
+        if yaml_override:
+            statement_type = yaml_override.type
+        elif "statutory_instrument_title" in extra_info:
             statement_type = StatementType.NEGATIVE_SI_REQUEST
         else:
             statement_type = StatementType.PROPOSED_MOTION
+
         statement = Statement(
             original_id=original_id,
             slug=slug,
@@ -125,6 +175,14 @@ def load_commons_edms(quiet: bool, update_since: datetime.date | None):
     with transaction.atomic():
         to_delete.delete()
         Statement.objects.bulk_create(to_create, batch_size=10000)
+
+        # Enforcement pass: ensure YAML overrides are applied to ALL matching statements,
+        # not just those in the update_since window. This ensures that adding a new
+        # YAML entry for old data is enforced on the next populate run.
+        for override_key, override in overrides.items():
+            Statement.objects.filter(
+                original_id=override_key.original_id, chamber_slug=override_key.chamber
+            ).exclude(type=override.type).update(type=override.type)
 
     if not quiet:
         rich.print(
