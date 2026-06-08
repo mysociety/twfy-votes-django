@@ -351,18 +351,19 @@ def draw_vote_image(division: Division) -> Image.Image:
         group = group.sort_values(by=["party_count", "party"], ascending=[False, True])
 
         vote_count = len(group)
+        member_singular = division.chamber.member_singular
         member_plural = division.chamber.member_plural
 
         # Special handling for Absent + Abstain when both are present
         if vote_type == "Absent" and "Abstain" in votes_by_type.groups:
-            abstain_group = votes_by_type.get_group("Abstain")
-            abstain_count = len(abstain_group)
-            vote_label = f"Absent: {vote_count} {member_plural}, Abstain: {abstain_count} {member_plural}"
+            absent_label = f"Absent: {vote_count} {member_singular if vote_count == 1 else member_plural}"
+            abstain_label = f"Abstain: {abstain_count} {member_singular if abstain_count == 1 else member_plural}"
+            vote_label = f"{absent_label}, {abstain_label}"
         else:
             # Skip "Abstain" as it's handled with "Absent"
             if vote_type == "Abstain":
                 continue
-            vote_label = f"{vote_type}: {vote_count} {member_plural}"
+            vote_label = f"{vote_type}: {vote_count} {member_singular if vote_count == 1 else member_plural}"
 
         # Draw vote label
         label_dimensions = get_text_dimensions(font=label_font, text=vote_label)
