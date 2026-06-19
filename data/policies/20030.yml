@@ -1,0 +1,31 @@
+id: 20030
+name: Northern Ireland Troubles Legacy 2023
+context_description: setting up <b>an independent body to investigate Troubles-related
+  deaths and injuries</b>, ending <b>most other criminal investigations and inquests</b>,
+  and offering people immunity from prosecution in exchange for cooperating
+policy_description: Votes on the Northern Ireland Troubles (Legacy and Reconciliation)
+  Bill 2022-23, which established the Independent Commission for Reconciliation and
+  Information Recovery (ICRIR) and introduced conditional immunity from prosecution.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2022-07-04
+    division_number: 28
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-24
+    division_number: 8
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

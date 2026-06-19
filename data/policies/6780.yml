@@ -489,4 +489,12 @@ division_links:
   alignment: against
   strength: strong
   notes: ''
-agreement_links: []
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-02-04
+    decision_ref: a.374.3.6
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: ''

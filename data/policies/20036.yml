@@ -1,0 +1,34 @@
+id: 20036
+name: Courts and Tribunals Bill
+context_description: '[to add]'
+policy_description: '[to add]'
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-01-07
+    division_number: 396
+  alignment: against
+  strength: weak
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-03-10
+    division_number: 445
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-03-10
+    division_number: 444
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

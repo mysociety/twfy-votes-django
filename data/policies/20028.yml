@@ -1,0 +1,31 @@
+id: 20028
+name: Railways Bill
+context_description: bringing the <b>railways into public ownership</b> by creating
+  Great British Railways, a single body running most train services and the track
+  in England
+policy_description: Votes on the Railways Bill, which creates Great British Railways
+  to take over running train services and track infrastructure in England under public
+  ownership.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- transport
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-12-09
+    division_number: 388
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-12-09
+    division_number: 387
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []
