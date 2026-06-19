@@ -76,6 +76,28 @@ def promote_candidates():
 
 
 @app.command()
+def flip_policy(
+    source_policy_id: int,
+    name: str,
+    context_description: str,
+    policy_description: str,
+    status: PolicyStatus = PolicyStatus.CANDIDATE,
+):
+    """
+    Create a new policy by copying another and swapping agree/against alignments.
+    """
+    from .tools import flip_policy_alignments
+
+    flip_policy_alignments(
+        source_policy_id=source_policy_id,
+        name=name,
+        context_description=context_description,
+        policy_description=policy_description,
+        status=status,
+    )
+
+
+@app.command()
 def change_policy_status(
     policy_id: int,
     status: PolicyStatus,

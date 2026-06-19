@@ -251,7 +251,7 @@ def add_vote_to_policy_from_url(
             [
                 decision["chamber_slug"],
                 str(decision["date"]),
-                str(decision.get("division_number", decision.get("division_ref"))),
+                str(decision.get("division_number", decision.get("decision_ref"))),
             ]
         )
         if key in keys:
@@ -261,3 +261,78 @@ def add_vote_to_policy_from_url(
     data_to_yaml(data, policy_path)
 
     rich.print(f"Added [green]{decision_type}[/green] to policy {policy_id}")
+
+
+def flip_policy_alignments(
+    source_policy_id: int,
+    name: str,
+    context_description: str,
+    policy_description: str,
+    status: PolicyStatus = PolicyStatus.CANDIDATE,
+):
+    """
+    Create a new policy by copying an existing one and swapping
+    agree/against alignments on all division and agreement links.
+    Neutral alignments are left unchanged.
+    """
+    source_path = vote_folder / f"{source_policy_id}.yml"
+    if not source_path.exists():
+        rich.print(
+            f"[red]Error: Source policy {source_policy_id} does not exist.[/red]"
+        )
+        return
+
+    yaml = YAML()
+    source_data = yaml.load(source_path)
+
+    # Determine the source chamber for ID allocation
+    chamber = ChamberSlug(source_data["chamber"])
+
+    # Get next available ID (same logic as create_new_policy)
+    all_current_ids = [int(x.stem) for x in vote_folder.glob("*.yml")]
+    starting_value = {
+        ChamberSlug.COMMONS: 20001,
+        ChamberSlug.LORDS: 30001,
+        ChamberSlug.WALES: 40001,
+        ChamberSlug.SCOTLAND: 50001,
+        ChamberSlug.NI: 60001,
+    }
+    policy_id = starting_value[chamber]
+    while policy_id in all_current_ids:
+        policy_id += 1
+
+    flip_map = {"agree": "against", "against": "agree", "neutral": "neutral"}
+
+    def flip_links(links: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        flipped = []
+        for link in links:
+            new_link = dict(link)
+            new_link["alignment"] = flip_map[str(link["alignment"])]
+            flipped.append(new_link)
+        return flipped
+
+    new_data = {
+        "id": policy_id,
+        "name": name,
+        "context_description": context_description,
+        "policy_description": policy_description,
+        "notes": "",
+        "status": str(status),
+        "strength_meaning": source_data.get("strength_meaning", "simplified"),
+        "highlightable": source_data.get("highlightable", False),
+        "chamber": str(chamber),
+        "groups": list(source_data.get("groups", [])),
+        "division_links": flip_links(source_data.get("division_links", [])),
+        "agreement_links": flip_links(source_data.get("agreement_links", [])),
+    }
+
+    policy_path = vote_folder / f"{policy_id}.yml"
+    data_to_yaml(new_data, policy_path)
+
+    div_count = len(new_data["division_links"])
+    agr_count = len(new_data["agreement_links"])
+    rich.print(
+        f"Created flipped policy [green]{policy_id}[/green] from source "
+        f"[blue]{source_policy_id}[/blue] at {policy_path}"
+    )
+    rich.print(f"  Flipped {div_count} division links and {agr_count} agreement links")
