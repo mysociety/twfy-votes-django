@@ -1,0 +1,30 @@
+id: 20027
+name: Universal Credit (Removal of Two Child Limit) Bill
+context_description: scrapping the <b>two-child limit</b> so that families on Universal
+  Credit get extra support for every child, not just their first two
+policy_description: Votes on the Universal Credit (Removal of Two Child Limit) Bill,
+  which removes the restriction limiting Universal Credit child payments to the first
+  two children in a household.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- welfare
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-02-03
+    division_number: 424
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-02-23
+    division_number: 433
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

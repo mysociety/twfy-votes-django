@@ -1,0 +1,28 @@
+id: 20037
+name: Representation of the People Bill
+context_description: '[to add]'
+policy_description: '[to add]'
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- reform
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-03-02
+    division_number: 435
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-03-02
+    decision_ref: f.693.1.4
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: ''

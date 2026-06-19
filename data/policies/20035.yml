@@ -1,0 +1,20 @@
+id: 20035
+name: Diego Garcia Military Base and British Indian Ocean Territory Bill
+context_description: '[to add]'
+policy_description: '[to add]'
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- foreignpolicy
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-10-20
+    division_number: 318
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

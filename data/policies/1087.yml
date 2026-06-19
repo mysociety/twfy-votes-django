@@ -428,4 +428,18 @@ division_links:
   alignment: agree
   strength: strong
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-04-28
+    division_number: 514
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-04-28
+    division_number: 515
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []

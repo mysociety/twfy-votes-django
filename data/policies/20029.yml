@@ -1,0 +1,52 @@
+id: 20029
+name: Northern Ireland Troubles Legacy 2025
+context_description: <b>scrapping the scheme</b> that let people avoid prosecution
+  for <b>Troubles-related crimes</b> in exchange for cooperating, and <b>removing
+  the ban</b> on bringing Troubles-related claims in the civil courts
+policy_description: Votes on the Northern Ireland Troubles (Legacy and Reconciliation)
+  Act 2023 (Amendment) Bill, which repeals the conditional immunity scheme and the
+  civil proceedings bar introduced by the 2023 Act.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- justice
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-11-18
+    division_number: 359
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-11-18
+    division_number: 358
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-01-21
+    division_number: 417
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-07-04
+    division_number: 28
+  alignment: against
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2022-05-24
+    division_number: 8
+  alignment: against
+  strength: strong
+  notes: ''
+agreement_links: []

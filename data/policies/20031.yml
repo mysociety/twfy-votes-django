@@ -1,0 +1,30 @@
+id: 20031
+name: NIC Changes (Employer Pensions Contributions) Bill
+context_description: taxing <b>salary-sacrifice pension contributions</b> above £2,000
+  a year
+policy_description: Votes on the National Insurance Contributions (Employer Pensions
+  Contributions) Bill, which applies employer National Insurance to salary-sacrifice
+  pension contributions exceeding £2,000 per year from April 2029.
+notes: ''
+status: active
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- taxation
+division_links:
+- decision:
+    chamber_slug: commons
+    date: 2025-12-17
+    division_number: 395
+  alignment: agree
+  strength: strong
+  notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-01-21
+    division_number: 416
+  alignment: agree
+  strength: strong
+  notes: ''
+agreement_links: []

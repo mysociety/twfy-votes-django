@@ -26,4 +26,11 @@ division_links:
   alignment: against
   strength: strong
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2025-10-29
+    division_number: 336
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links: []

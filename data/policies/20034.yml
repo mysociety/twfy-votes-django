@@ -1,0 +1,21 @@
+id: 20034
+name: Cyber Security and Resilience (Network and Information Systems) Bill
+context_description: '[to add]'
+policy_description: '[to add]'
+notes: ''
+status: draft
+strength_meaning: simplified
+highlightable: false
+chamber: commons
+groups:
+- home
+division_links: []
+agreement_links:
+- decision:
+    chamber_slug: commons
+    date: 2026-01-06
+    decision_ref: d.229.1.5
+    division_name: ''
+  alignment: agree
+  strength: strong
+  notes: ''

@@ -396,6 +396,13 @@ division_links:
   alignment: agree
   strength: strong
   notes: ''
+- decision:
+    chamber_slug: commons
+    date: 2026-02-11
+    division_number: 426
+  alignment: agree
+  strength: strong
+  notes: ''
 agreement_links:
 - decision:
     chamber_slug: commons
