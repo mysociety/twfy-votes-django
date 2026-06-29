@@ -53,7 +53,7 @@
 
 {% block content.inner %}
     <h2 class="section-header" id="description">Policy description</h2>
-    <p>{{ policy.policy_description }}</p>
+    {{ policy.policy_description|markdown }}
 </p>
 View <a href="{{ policy.url }}">policy details</a>.
 </p>
