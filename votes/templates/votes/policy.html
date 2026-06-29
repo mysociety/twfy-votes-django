@@ -34,7 +34,7 @@
     </p>
     {% if policy.highlightable %}<p>Policy may be highlighted in absence of interested votes.</p>{% endif %}
     <h2 class="section-header" id="description">Description</h2>
-    <p>{{ policy.policy_description }}</p>
+    {{ policy.policy_description|markdown }}
     <p>[Person name] voted for/against {{ policy.context_description|safe }}</p>
     <h2 class="section-header" id="decisions">Decisions</h2>
     <p>Decisions may be read as agreeing with the policy, or being against the policy.</p>
