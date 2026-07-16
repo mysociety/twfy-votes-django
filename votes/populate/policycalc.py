@@ -118,7 +118,10 @@ class agreement_count:
         -- count agreement where strength is strong and alignment is disagree
         num_strong_agreements_different: count(*) filter (where strong_int = 1 and agree_int = 0) ,
         -- count agreement where strength is weak and alignment is disagree
-        num_agreements_different: count(*) filter (where strong_int = 0 and agree_int = 0)
+        num_agreements_different: count(*) filter (where strong_int = 0 and agree_int = 0),
+        -- first and last year the person was present for an agreement under this policy
+        agreement_start_year: min(date_part('year', policy_agreements_relevant.date)),
+        agreement_end_year: max(date_part('year', policy_agreements_relevant.date))
     from
         policy_collective_relevant
     join
@@ -258,8 +261,12 @@ class joined_division_agreement_comparison:
         person_id: {{ _person_id }},
         chamber_id: {{ _chamber_id }},
         party_id: {{ _party_slug }},
-        division_comparison.* exclude (period_id, policy_id, is_target),
-        agreement_comparison.* exclude (period_id, policy_id)
+        -- least/greatest ignore nulls, so agreement-only policies get their
+        -- agreement years and division-only policies keep their division years
+        start_year: least(division_comparison.start_year, agreement_comparison.agreement_start_year),
+        end_year: greatest(division_comparison.end_year, agreement_comparison.agreement_end_year),
+        division_comparison.* exclude (period_id, policy_id, is_target, start_year, end_year),
+        agreement_comparison.* exclude (period_id, policy_id, agreement_start_year, agreement_end_year)
     from
         comparisons_by_policy_vote_pivot({{ _person_id }},
                                         {{ _chamber_id }},
