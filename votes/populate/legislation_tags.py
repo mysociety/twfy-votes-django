@@ -2,6 +2,9 @@
 Tag decisions with legislation when possible
 """
 
+from __future__ import annotations
+
+import datetime
 import html
 import re
 
@@ -82,6 +85,21 @@ def get_bills_df() -> pd.DataFrame:
     bills_df["title_set"] = bills_df["title"].apply(
         lambda x: set(slugify(x).split(" ")) if isinstance(x, str) else set()
     )
+
+    # Build word sets from former titles for fallback matching when
+    # Parliament renames a bill (e.g. drops [HL] suffix on chamber change)
+    if "former_title" in bills_df.columns:
+        bills_df["former_title"] = (
+            bills_df["former_title"]
+            .fillna("")
+            .apply(lambda x: fix_bills_title(x) if x else "")
+        )
+        bills_df["former_title_set"] = bills_df["former_title"].apply(
+            lambda x: set(slugify(x).split(" ")) if isinstance(x, str) and x else set()
+        )
+    else:
+        bills_df["former_title_set"] = [set()] * len(bills_df)
+
     return bills_df
 
 
@@ -155,24 +173,26 @@ def extract_legislation(s: str) -> str:
     return ""
 
 
-def check_set_overlap(our_set: set, their_set: set) -> bool:
+def check_set_overlap(our_set: set[str], their_set: set[str]) -> bool:
     """
-    Check if there is any overlap between two sets.
+    Check if our_set is a subset of their_set,
+    ignoring the [hl] chamber marker which is inconsistently present.
     """
-    is_subset = our_set.issubset(their_set)
-    remainder_set = their_set - our_set
-    if "[hl]" in remainder_set:
-        return False
-    return is_subset
+    clean_our = our_set - {"[hl]"}
+    clean_their = their_set - {"[hl]"}
+    return len(clean_our) > 0 and clean_our.issubset(clean_their)
 
 
-def get_division_df(verbose: bool = False) -> pd.DataFrame:
+def get_division_df(
+    verbose: bool = False,
+    update_since: datetime.date | None = None,
+) -> pd.DataFrame:
     """
     Map decisions to possible tags and legislation
     """
 
     bills_df = get_bills_df()
-    starting_date = "2024-01-01"
+    starting_date = update_since.isoformat() if update_since else "2024-01-01"
 
     divisions = Division.objects.filter(
         date__gte=starting_date,
@@ -208,11 +228,17 @@ def get_division_df(verbose: bool = False) -> pd.DataFrame:
         # a match is when the above set if a complete subset of the title_set
 
         match_df = bills_df[
-            bills_df["title_set"].apply(
-                lambda x: check_set_overlap(legislation_set, x)
-                and len(legislation_set) > 0
-            )
+            bills_df["title_set"].apply(lambda x: check_set_overlap(legislation_set, x))
         ]
+
+        # Fallback: if no match on current title, try the bill's former title
+        # (covers cases where Parliament has renamed the bill since the vote)
+        if len(match_df) == 0:
+            match_df = bills_df[
+                bills_df["former_title_set"].apply(
+                    lambda x: check_set_overlap(legislation_set, x)
+                )
+            ]
 
         if len(match_df) > 1:
             # see if there's a direct match on the set
@@ -224,16 +250,19 @@ def get_division_df(verbose: bool = False) -> pd.DataFrame:
             if len(direct_match) == 1:
                 match_df = direct_match
             else:
-                # restrict further on time
+                # No exact title match and multiple options
+                # pick the bill most recently active
+                # near the decision date (e.g. "Finance Bill" across sessions)
+                match_df = match_df.copy()
+                match_df["time_distance"] = match_df["last_update"].apply(
+                    lambda x: abs(pd.Timestamp(d.date) - pd.Timestamp(x))
+                )
+                match_df = match_df.sort_values("time_distance").head(1)
                 if verbose:
-                    print(f"Multiple matches for {ldn}:")
-                    print(f"{d.date}")
-                for i, row in match_df.iterrows():
-                    distance = abs(
-                        pd.Timestamp(d.date) - pd.Timestamp(row["last_update"])
+                    rich.print(
+                        f"Multiple matches for {ldn}, "
+                        f"selected closest: {match_df.iloc[0]['title']}"
                     )
-                    if verbose:
-                        print(f"{i}: {row['title']}: {distance.days} days")
 
         if len(match_df) == 1:
             # get the first match
@@ -266,20 +295,31 @@ def get_division_df(verbose: bool = False) -> pd.DataFrame:
 
 
 @import_register.register("legislation_tag", group=ImportOrder.DIVISION_ANALYSIS)
-def vote_analysis(quiet: bool = False):
+def vote_analysis(quiet: bool = False, update_since: datetime.date | None = None):
     """
     Map decisions to possible tags and legislation
     """
 
     # get the division df
-    df = get_division_df(verbose=False)
+    df = get_division_df(verbose=False, update_since=update_since)
 
     tags_df = df[["legislation", "url", "leg_chamber", "leg_id"]]
     tags_df["slug"] = tags_df["legislation"].apply(full_slugify)
     tags_df = tags_df.drop_duplicates("slug")
 
+    # Maps (tag_type, slug) -> id for all existing tags
     lookup = DecisionTag.id_from_slugs("tag_type", "slug")
-    all_exisiting_slugs = [x[1] for x in lookup.keys() if x[0] == TagType.LEGISLATION]
+
+    # Maps leg_id -> existing tag, so we can detect bill renames
+    # (same leg_id but different slug) and update in-place
+    leg_id_to_existing_tag: dict[str, DecisionTag] = {}
+    for tag in DecisionTag.objects.filter(tag_type=TagType.LEGISLATION):
+        extra_data = tag.extra_data or {}
+        if not isinstance(extra_data, dict):
+            continue
+        stored_leg_id = extra_data.get("leg_id", "")
+        if stored_leg_id:
+            leg_id_to_existing_tag[stored_leg_id] = tag
 
     tags: list[DecisionTag] = []
 
@@ -288,27 +328,39 @@ def vote_analysis(quiet: bool = False):
             return f"[Link to Parliamentary Tracker]({url})"
         return url
 
+    existing_slugs: list[str] = []
     for i, row in tags_df.iterrows():
-        if row["slug"] not in lookup:
-            tags.append(
-                DecisionTag(
-                    id=lookup.get((TagType.LEGISLATION, row["slug"])),
-                    slug=row["slug"],
-                    name=row["legislation"],
-                    desc=markdown_url(row["url"]),
-                    extra_data={
-                        "chamber": str(row["leg_chamber"]),
-                        "leg_id": str(row["leg_id"]),
-                    },
-                    tag_type=TagType.LEGISLATION,
-                )
+        slug = row["slug"]
+        leg_id = str(row["leg_id"])
+        existing_id = lookup.get((TagType.LEGISLATION, slug))
+
+        # Slug not found but same leg_id exists — bill was renamed,
+        # reuse the existing tag and slug so the slug updates in-place
+        if existing_id is None and leg_id in leg_id_to_existing_tag:
+            existing_id = leg_id_to_existing_tag[leg_id].id
+            slug = leg_id_to_existing_tag[leg_id].slug
+
+        existing_slugs.append(slug)
+        tags.append(
+            DecisionTag(
+                id=existing_id,
+                slug=slug,
+                name=row["legislation"],
+                desc=markdown_url(row["url"]),
+                extra_data={
+                    "chamber": str(row["leg_chamber"]),
+                    "leg_id": leg_id,
+                },
+                tag_type=TagType.LEGISLATION,
             )
+        )
 
     to_create = [x for x in tags if x.id is None]
     to_update = [x for x in tags if x.id is not None]
+
     to_remove = DecisionTag.objects.filter(
         tag_type=TagType.LEGISLATION,
-        slug__in=[x for x in all_exisiting_slugs if x not in tags_df["slug"].tolist()],
+        slug__in=[x for x in existing_slugs if x not in tags_df["slug"].tolist()],
     )
 
     if not quiet:

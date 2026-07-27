@@ -203,6 +203,7 @@ def get_bills() -> pd.DataFrame:
             "chamber": "uk",
             "id": x.billId,
             "title": x.shortTitle,
+            "former_title": x.formerShortTitle or "",
             "url": x.url,
             "last_update": x.lastUpdate,
         }
