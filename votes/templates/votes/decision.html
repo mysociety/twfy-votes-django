@@ -160,8 +160,28 @@
         {% featureflag pg.ADVANCED_INFO %}
             <p>Motion GID: {{ decision.motion.gid }}</p>
         {% endfeatureflag %}
-        <p class = "motion_type">
-            Motion type: {{ decision.motion.motion_type_nice }}(<a href="{% url 'help' 'motion_types' %}#{{ decision.motion.motion_type|replace_underscore_with_hyphen }}">?</a>)
+        <div class="motion-type mb-3 p-3 border rounded bg-light">
+            <div class="motion-type-label text-muted">Motion type:</div>
+            <div class="motion-type-title">
+                <strong>{{ decision.motion.motion_type_title }}</strong>
+            </div>
+            {% if decision.motion.motion_type_description %}
+                <details class="motion-type-details mt-2">
+                    <summary class="motion-type-details-summary small text-muted">More details</summary>
+                    <div class="motion-type-description small text-muted mt-2 pt-2 border-top">
+                        {{ decision.motion.motion_type_description|linebreaks }}
+                    </div>
+                </details>
+            {% endif %}
+        </div>
+        <div class="motion-text mb-3 p-3 border rounded bg-light">
+            <div class="motion-text-header">
+                <span class="text-muted">Motion text:</span>
+            </div>
+            <div class="motion-text-content mt-2 pt-2 border-top">{{ decision.motion.nice_html|safe }}</div>
+        </div>
+        <p>
+            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
         </p>
         {% featureflag pg.ADVANCED_INFO %}
             <p class = "motion_type">
@@ -177,12 +197,6 @@
                 {% endwith %}
             </p>
         {% endfeatureflag %}
-        <div class = "motion_text">
-            <p>{{ decision.motion.nice_html|safe }}</p>
-        </div>
-        <p>
-            <a href="{{ decision.motion_speech_url }}">Motion in TheyWorkForYou</a>
-        </p>
     {% endif %}
     {% with decision.get_annotations as annotations %}
         <h2 class="section-header" id="annotations">Annotations</h2>
