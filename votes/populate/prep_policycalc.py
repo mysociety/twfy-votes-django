@@ -2,6 +2,8 @@
 Store the duckdb connectors to share between functions
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 from django.conf import settings
@@ -82,8 +84,6 @@ class policy_divisions_relevant:
     left join 
         policy_comparison_period on (
             pw_division.date between policy_comparison_period.start_date and policy_comparison_period.end_date)
-    order by 
-        pw_division.id, policy_id, period_id
     """
 
 
@@ -112,8 +112,6 @@ class votes_relevant:
         pd_org on (pw_vote.effective_party_slug = pd_org.slug)
     where
         pw_division.id in (select distinct decision_id from policy_votes)
-    order by
-        person_id, division_id
     """
 
 
@@ -141,8 +139,6 @@ class policy_agreements_relevant:
     left join 
         policy_comparison_period on (
             pw_agreement.date between policy_comparison_period.start_date and policy_comparison_period.end_date)
-    order by
-        pw_agreement.id, policy_id, period_id
     """
 
 
@@ -168,9 +164,6 @@ class collective_relevant:
     join
         pd_memberships on (pw_agreement.date between pd_memberships.start_date and pd_memberships.end_date
         and pd_memberships.chamber_id = pw_agreement.chamber_id)
-        
-    order by
-        person_id, pw_agreement.date, decision_id
     """
 
 
@@ -257,6 +250,6 @@ class relevant_people:
 
 
 @import_register.register("prep_policycalc", group=ImportOrder.PREP_POLICYCALC)
-def run_pre_calc(quiet: bool = False):
+def run_pre_calc(quiet: bool = False) -> None:
     with DuckQuery.connect() as cduck:
         cduck.compile(duck).run()

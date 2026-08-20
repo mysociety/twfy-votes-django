@@ -3,6 +3,8 @@ This module contains the 'slow' approach to calculating the policies.
 It is used to validate the 'fast' approach in vr_generator.py.
 """
 
+from __future__ import annotations
+
 import datetime
 from math import isclose
 from pathlib import Path
@@ -26,7 +28,8 @@ from ...models import (
     Policy,
     PolicyComparisonPeriod,
 )
-from ...populate.policycalc import PolicyPivotTable, get_connected_duck
+from ...populate.policycalc import get_connected_duck
+from ...populate.policycalc_query import bulk_policy_pivot_query
 
 
 class Score(BaseModel):
@@ -423,17 +426,15 @@ def validate_approach(
 
     duck = get_connected_duck()
 
-    # get fast approach
-    df = (
-        PolicyPivotTable(
-            person_id=person_id,
-            party_id=party_id,
-            chamber_id=chamber_id,
-        )
-        .compile(duck)
-        .df()
-        .fillna(0)
-    )
+    # Run the same set-based CTE pipeline used by production, restricted to the
+    # target tuple under test. The slow ORM/Python calculation below remains the
+    # deliberately independent reference implementation.
+    target_filter = f"""
+        where person_id = {int(person_id)}
+          and chamber_id = {int(chamber_id)}
+          and coalesce(party_id, 0) = {int(party_id)}
+    """
+    df = duck.compile(bulk_policy_pivot_query(target_filter)).df().fillna(0)
 
     # filter to the policy and period_id
 

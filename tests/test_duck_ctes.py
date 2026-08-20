@@ -4,6 +4,7 @@ import duckdb
 import pytest
 
 from twfy_votes.helpers.duck import DuckQuery
+from votes.populate.policycalc_query import scored_bulk_policy_query
 
 
 def test_cte_pipeline_renders_and_executes_as_one_query() -> None:
@@ -53,3 +54,16 @@ def test_cte_pipeline_rejects_duplicate_names() -> None:
 def test_cte_pipeline_requires_at_least_one_stage() -> None:
     with pytest.raises(ValueError, match="No CTEs"):
         DuckQuery().render_ctes("select 1")
+
+
+def test_policycalc_is_one_query_with_named_materialized_stages() -> None:
+    query = scored_bulk_policy_query("where person_id in (123)")
+
+    assert query.count("WITH\n") == 1
+    assert "selected_targets AS MATERIALIZED" in query
+    assert "eligible_divisions AS MATERIALIZED" in query
+    assert "comparison_by_division AS NOT MATERIALIZED" in query
+    assert "target_comparison AS MATERIALIZED" in query
+    assert "absence_capped_score AS NOT MATERIALIZED" in query
+    assert "where person_id in (123)" in query
+    assert query.index("eligible_divisions AS") < query.index("target_by_division AS")

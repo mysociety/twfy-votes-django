@@ -1,57 +1,46 @@
 """
-This module contains the sequence of macros to
-generate a voting record for a person.
+Orchestration and data sources for the set-based policy calculation.
 """
+
+from __future__ import annotations
 
 import datetime
 from pathlib import Path
 
 from django.conf import settings
 
-import pandas as pd
 import rich
-from tqdm import tqdm
 
-from twfy_votes.helpers.duck import DuckQuery
+from twfy_votes.helpers.duck import DuckQuery, DuckResponse
+from twfy_votes.helpers.duck.core import ConnectedDuckQuery
 from twfy_votes.helpers.duck.funcs import query_to_parquet
-from twfy_votes.helpers.duck.templates import EnforceIntJinjaQuery
-from votes.models import Policy, VoteDistribution
-from votes.policy_generation.scoring import ScoreFloatPair
+from votes.models import VoteDistribution
 
+from .policycalc_query import scored_bulk_policy_query
 from .register import ImportOrder, import_register
 
 duck = DuckQuery(postgres_database_settings=settings.DATABASES["default"])
 
 BASE_DIR = Path(settings.BASE_DIR)
 compiled_dir = Path(BASE_DIR, "data", "compiled")
-compiled_policy_dir = Path(compiled_dir, "policies")
 
 
-@duck.as_table
+@duck.as_source
 class policy_divisions_relevant:
     source = compiled_dir / "policy_divisions_relevant.parquet"
 
 
-@duck.as_table
+@duck.as_source
 class policy_agreements_relevant:
     source = compiled_dir / "policy_agreements_relevant.parquet"
 
 
-@duck.as_table
+@duck.as_source
 class policy_votes_relevant:
     source = compiled_dir / "policy_votes_relevant.parquet"
 
 
-@duck.as_query
-class make_indexes:
-    query = """
-    CREATE INDEX division_id ON policy_divisions_relevant (id);
-    CREATE INDEX votes_division ON policy_votes_relevant (division_id);
-    CREATE INDEX votes_person ON policy_votes_relevant (person_id);
-    """
-
-
-@duck.as_table
+@duck.as_source
 class policy_collective_relevant:
     source = compiled_dir / "policy_collective_relevant.parquet"
 
@@ -80,217 +69,22 @@ class policies:
     alias_for = "postgres_db.votes_policy"
 
 
-@duck.as_table_macro
-class target_memberships:
-    """
-    Table macro to get the memberships for a person in a chamber
-    """
-
-    args = ["_person_id", "_chamber_id"]
-    macro = """
-    select
-        *
-    from
-        pd_memberships
-    where
-        person_id = {{ _person_id }} and
-        chamber_id = {{ _chamber_id }}
-    """
-
-
-@duck.as_table_macro
-class agreement_count:
-    """
-    We want to know, by person_id, how many agreements they were in parliament for by policy.
-    By *definition* this is the same for both target and non_target, so can be merged in the last step.
-    """
-
-    args = ["_person_id"]
-    macro = """
-    select
-        period_id,
-        person_id,
-        policy_id,
-        -- count agreement where strength is strong and alignment is agree
-        num_strong_agreements_same: count(*) filter (where strong_int = 1 and agree_int = 1),
-        -- count agreement where strength is weak and alignment is agree
-        num_agreements_same: count(*) filter (where strong_int = 0 and agree_int = 1),
-        -- count agreement where strength is strong and alignment is disagree
-        num_strong_agreements_different: count(*) filter (where strong_int = 1 and agree_int = 0) ,
-        -- count agreement where strength is weak and alignment is disagree
-        num_agreements_different: count(*) filter (where strong_int = 0 and agree_int = 0),
-        -- first and last year the person was present for an agreement under this policy
-        agreement_start_year: min(date_part('year', policy_agreements_relevant.date)),
-        agreement_end_year: max(date_part('year', policy_agreements_relevant.date))
-    from
-        policy_collective_relevant
-    join
-        policy_agreements_relevant
-         on (policy_collective_relevant.decision_id = policy_agreements_relevant.id)
-    where
-        policy_collective_relevant.person_id = {{ _person_id }}
-    group by
-        all
-    """
-
-
-@duck.as_table_macro
-class policy_alignment:
-    """
-    Table macro - For each vote/absence, calculate the policy alignment per person.
-    """
-
-    args = ["_person_id", "_chamber_id", "_party_id"]
-    macro = """
-    SELECT
-        period_id,
-        policy_id,
-        person_id: pw_vote.person_id,
-        is_target: case pw_vote.person_id when {{ _person_id }} then 1 else 0 end,
-        strong_int,
-        division_id: policy_divisions.id,
-        division_date: policy_divisions.date,
-        division_number: policy_divisions.division_number,
-        division_year: policy_divisions.division_year,
-        mp_vote: pw_vote.effective_vote,
-        -- ok, effective_vote_int should be 1 for agree, -1 for disagree
-        -- agree_int is 1 for 'policy agrees with vote', 0 for 'policy disagrees with vote'
-        -- so aligned with policy is (1,1) or (-1,0) and not aligned is (1,0) or (-1,1)
-        answer_agreed: (case when pw_vote.effective_vote_int = 1 and agree_int = 1 
-                or pw_vote.effective_vote_int = -1 and agree_int = 0 then 1 else 0 end),
-        answer_disagreed: (case when pw_vote.effective_vote_int = 1 and agree_int = 0 
-                or pw_vote.effective_vote_int = -1 and agree_int = 1 then 1 else 0 end),
-        abstained: pw_vote.abstain_int,
-        absent: pw_vote.absent_int,
-    FROM
-        -- this is the divisions table merged with the division_links table and the period table
-        policy_divisions_relevant as policy_divisions
-    join
-        -- limit to divisions within the memberships of our target person
-        target_memberships({{ _person_id}}, {{ _chamber_id }}) as target_memberships
-            on policy_divisions.date between target_memberships.start_date and target_memberships.end_date
-    join
-        -- now we bring in the actual votes
-        -- this has already been reduced to only votes for divisions we care about
-        policy_votes_relevant as pw_vote on (policy_divisions.id = pw_vote.division_id)
-    where
-        policy_divisions.chamber_id = {{ _chamber_id }}
-        and ( -- here we want either the persons own divisions, or the divisions of the party they are in.
-            pw_vote.person_id = {{ _person_id }}
-            or
-            pw_vote.effective_party_id = {{ _party_id }}
-            )
-    """
-
-
-@duck.as_table_macro
-class comparisons_by_policy_vote:
-    """
-    Table Macro.
-    For each policy/vote, group up both the target and the comparison mps, and create an equiv score for the comparison
-    This will be floats - but will sum to the same total of votes as the number of divisions the target could vote in.
-    """
-
-    args = ["_person_id", "_chamber_id", "_party_id"]
-    macro = """
-    select
-        period_id,
-        is_target,
-        policy_id,
-        division_id,
-        strong_int: ANY_VALUE(strong_int),
-        total: count(*),
-        division_year: any_value(division_year),
-        num_divisions_agreed: sum(answer_agreed) / total,
-        num_divisions_disagreed: sum(answer_disagreed) / total,
-        num_divisions_abstain: sum(abstained) / total,
-        num_divisions_absent: sum(absent) / total,
-        num_comparators: sum(answer_agreed) + sum(answer_disagreed) + sum(abstained) + sum(absent),
-    from
-        policy_alignment({{ _person_id }},
-                         {{ _chamber_id }},
-                         {{ _party_id }})
-    group by
-        period_id, is_target, policy_id, division_id
-    """
-
-
-@duck.as_table_macro
-class comparisons_by_policy_vote_pivot:
-    args = ["_person_id", "_chamber_id", "_party_slug"]
-    macro = """
-    select
-        period_id,
-        is_target,
-        policy_id,
-        num_votes_same: sum(num_divisions_agreed) filter (where strong_int = 0),
-        num_strong_votes_same: sum(num_divisions_agreed) filter (where strong_int = 1),
-        num_votes_different: sum(num_divisions_disagreed) filter (where strong_int = 0),
-        num_strong_votes_different: sum(num_divisions_disagreed) filter (where strong_int = 1),
-        num_votes_absent: sum(num_divisions_absent) filter (where strong_int = 0),
-        num_strong_votes_absent: sum(num_divisions_absent) filter (where strong_int = 1),
-        num_votes_abstain: sum(num_divisions_abstain) filter (where strong_int = 0),
-        num_strong_votes_abstain: sum(num_divisions_abstain) filter (where strong_int = 1),
-        num_comparators: list(num_comparators),
-        -- for debugging - remove for speed
-        division_ids: list(division_id),
-        start_year: min(division_year),
-        end_year: max(division_year)
-    from comparisons_by_policy_vote({{ _person_id }},
-                                    {{ _chamber_id }},
-                                    {{ _party_slug }}
-                                    )
-    group by
-        period_id, is_target, policy_id
-    """
-
-
-@duck.as_table_macro
-class joined_division_agreement_comparison:
-    """
-    Bring the division and agreement calculations together.
-    By definition, agreements don't differ, so there is no is_target to merge on
-    """
-
-    args = ["_person_id", "_chamber_id", "_party_slug"]
-    macro = """
-    select
-        period_id: coalesce(division_comparison.period_id, agreement_comparison.period_id),
-        policy_id: coalesce(division_comparison.policy_id, agreement_comparison.policy_id),
-        is_target: coalesce(division_comparison.is_target, 1),
-        person_id: {{ _person_id }},
-        chamber_id: {{ _chamber_id }},
-        party_id: {{ _party_slug }},
-        -- least/greatest ignore nulls, so agreement-only policies get their
-        -- agreement years and division-only policies keep their division years
-        start_year: least(division_comparison.start_year, agreement_comparison.agreement_start_year),
-        end_year: greatest(division_comparison.end_year, agreement_comparison.agreement_end_year),
-        division_comparison.* exclude (period_id, policy_id, is_target, start_year, end_year),
-        agreement_comparison.* exclude (period_id, policy_id, agreement_start_year, agreement_end_year)
-    from
-        comparisons_by_policy_vote_pivot({{ _person_id }},
-                                        {{ _chamber_id }},
-                                        {{ _party_slug }}
-                                        ) as division_comparison
-    full join
-        agreement_count({{ _person_id }}) as agreement_comparison using (policy_id, period_id)
-    """
-
-
-@duck.as_query
-class prepared_pivot_table:
-    query = """
-    PREPARE prepared_pivot_table AS
-    select * from joined_division_agreement_comparison($person_id, $chamber_id, $party_id)
-    """
-
-
 # so if we load before any files exist it's ok to create
-if any(compiled_policy_dir.glob("*.parquet")):
+compiled_policy_output = compiled_dir / "policy_calc_to_load.parquet"
+if compiled_policy_output.exists():
 
     @duck.as_source
+    class compiled_policies_source:  # type: ignore
+        source = compiled_policy_output
+
+    @duck.as_view
     class compiled_policies:  # type: ignore
-        source = compiled_policy_dir / "*.parquet"
+        query = """
+        select
+            * exclude (party_id),
+            coalesce(party_id, 0) as party_id
+        from compiled_policies_source
+        """
 
 else:
     # create an equiv empty table with these
@@ -372,24 +166,11 @@ class compare_hash:
     """
 
 
-class PolicyPivotTable(EnforceIntJinjaQuery):
-    """
-    Retrieve all policy breakdowns and comparison breakdowns
-    for a single person, given a chamber and a party.
-    """
-
-    query_template = """
-    EXECUTE prepared_pivot_table(person_id := {{ person_id }},
-                                 chamber_id := {{ chamber_id }},
-                                 party_id := {{ party_id }})
-    """
-    person_id: int
-    chamber_id: int
-    party_id: int
-
-
-def get_connected_duck():
+def get_connected_duck() -> ConnectedDuckQuery[DuckResponse]:
     connected = DuckQuery.connect()
+    # Keep the bulk query below the worker's memory ceiling; DuckDB spills large
+    # hash aggregates to its temporary directory when necessary.
+    connected.connection.execute("set memory_limit = '2.5GB'")
     connected.compile(duck).run()
     return connected
 
@@ -411,50 +192,10 @@ def check_generated_against_current() -> list[int]:
     return df["person_id"].unique().tolist()
 
 
-def score_generation_func():
-    """
-    This in principle can be replaced by a vectorised approach.
-    The problem is this is at the moment applied at the person level.
-    The scoring approach is done at the policy level.
-    *in principle* different policies can have different scoring functions.
-    So it needs to be all bought together in total, split by policy, and then have scoring calculated.
-    There will be time saving associated with this, but seconds rather than minutes.
-    """
-    policies = Policy.objects.all()
-    policy_score_func = {x.id: x.get_scoring_function() for x in policies}
-
-    def get_score(row: pd.Series) -> float:
-        scoring_func = policy_score_func[row["policy_id"]]
-        return scoring_func.score(
-            votes_same=ScoreFloatPair(
-                row["num_votes_same"], row["num_strong_votes_same"]
-            ),
-            votes_different=ScoreFloatPair(
-                row["num_votes_different"], row["num_strong_votes_different"]
-            ),
-            votes_absent=ScoreFloatPair(
-                row["num_votes_absent"], row["num_strong_votes_absent"]
-            ),
-            votes_abstain=ScoreFloatPair(
-                row["num_votes_abstain"], row["num_strong_votes_abstain"]
-            ),
-            agreements_same=ScoreFloatPair(
-                row["num_agreements_same"], row["num_strong_agreements_same"]
-            ),
-            agreements_different=ScoreFloatPair(
-                row["num_agreements_different"],
-                row["num_strong_agreements_different"],
-            ),
-        )
-
-    return get_score
-
-
-def generate_combo_with_id(source: Path, dest: Path):
+def generate_combo_with_id(source: Path, dest: Path) -> None:
     """
     Create a parquet file with all the items for copying into the database
     """
-    duck = get_connected_duck()
     query = f"""
     select
         row_number() over() as id,
@@ -462,8 +203,8 @@ def generate_combo_with_id(source: Path, dest: Path):
         case party_id when 0 then null else party_id end as party_id
     from '{source}' as compiled_policies
     """
-
-    duck.compile(query_to_parquet(query, dest=dest)).run()
+    with DuckQuery.connect() as duck:
+        duck.compile(query_to_parquet(query, dest=dest)).run()
 
 
 def generate_policy_distributions(
@@ -480,81 +221,62 @@ def generate_policy_distributions(
     """
 
     duck = get_connected_duck()
-    score_from_row = score_generation_func()
+    if update_from_hash and person_ids is None:
+        person_ids = check_generated_against_current()
+        if not person_ids:
+            return 0
 
-    policy_hash_df = duck.get_view(policy_hash).df()
-    policy_id_lookup = policy_hash_df.set_index(["policy_id"])["policy_hash"].to_dict()
-
-    policy_dest = compiled_dir / "policies"
-    if not update_from_hash:
-        if policy_dest.exists():
-            for file in policy_dest.glob("*"):
-                file.unlink()
-            policy_dest.rmdir()
-
-    policy_dest.mkdir(exist_ok=True, parents=True)
-
-    relevant_df = pd.read_parquet(
-        compiled_dir / "relevant_person_policy_period.parquet"
-    )
-
+    filters = []
     if person_ids:
-        relevant_df = relevant_df[relevant_df["person_id"].isin(person_ids)]
-
-    else:
-        if update_from_hash:
-            person_ids = check_generated_against_current()
-            relevant_df = relevant_df[relevant_df["person_id"].isin(person_ids)]
-
+        filters.append(f"person_id in ({','.join(str(int(x)) for x in person_ids)})")
     if policy_ids:
-        # Note, this will still regenerate other policies, just exclude people who *don't* have this policy
-        relevant_df = relevant_df[relevant_df["policy_id"].isin(policy_ids)]
-    relevant_df = relevant_df.drop(
-        columns=["policy_id", "period_id", "effective_party_slug"]
-    ).drop_duplicates()
+        # Select people connected to these policies, then regenerate all of their policies.
+        filters.append(f"policy_id in ({','.join(str(int(x)) for x in policy_ids)})")
+    target_filter = f"where {' and '.join(filters)}" if filters else ""
 
-    # for true independents who never had a party - setting to 0 means there is no comparison party to find
-    relevant_df["party_id"] = relevant_df["party_id"].fillna(0).astype(int)
-    relevant_df["chamber_id"] = relevant_df["chamber_id"].astype(int)
-    relevant_df["person_id"] = relevant_df["person_id"].astype(int)
+    combined_dest = compiled_dir / "policy_calc_combined.parquet"
+    combined_dest.unlink(missing_ok=True)
+    scored_query = scored_bulk_policy_query(target_filter)
+    final_query = f"""
+        select
+            row_number() over () as id,
+            scored.* exclude (party_id),
+            case party_id when 0 then null else party_id end as party_id
+        from ({scored_query}) as scored
+    """
+    duck.compile(query_to_parquet(final_query, dest=combined_dest)).run()
 
-    count = 0
+    if update_from_hash:
+        if compiled_policy_output.exists():
+            merged_dest = compiled_dir / "policy_distributions_merged.parquet"
+            person_filter = ",".join(str(int(x)) for x in person_ids or [])
+            merge_query = f"""
+                select row_number() over () as id, merged.* exclude (id)
+                from (
+                    select * from '{compiled_policy_output}'
+                    where person_id not in ({person_filter})
+                    union all by name
+                    select * from '{combined_dest}'
+                ) as merged
+            """
+            duck.compile(query_to_parquet(merge_query, dest=merged_dest)).run()
+            merged_dest.replace(compiled_policy_output)
+        else:
+            combined_dest.replace(compiled_policy_output)
+        combined_dest.unlink(missing_ok=True)
+    else:
+        combined_dest.replace(compiled_policy_output)
 
-    for _, row in tqdm(relevant_df.iterrows(), total=len(relevant_df), disable=quiet):
-        df = (
-            PolicyPivotTable(
-                person_id=row["person_id"],
-                chamber_id=row["chamber_id"],
-                party_id=row["party_id"],
-            )
-            .compile(duck)
-            .df()
-        )
-
-        if len(df) == 0:
-            raise ValueError("No policy calc information returned")
-
-        list_cols = ["num_comparators", "division_ids"]
-        for col in df.columns:
-            if col not in list_cols:
-                df[col] = df[col].fillna(0)
-
-        df["policy_hash"] = df["policy_id"].map(policy_id_lookup)
-        df["distance_score"] = df.apply(score_from_row, axis=1)
-
-        df.to_parquet(
-            policy_dest
-            / f"{row['person_id']}_{row['chamber_id']}_{row['party_id']}.parquet"
-        )
-        count += len(df)
-
-    return count
+    count = duck.compile(
+        f"select count(*) as count from '{compiled_policy_output}'"
+    ).df()
+    return int(count.iloc[0]["count"])
 
 
 @import_register.register("policycalc", group=ImportOrder.POLICYCALC)
 def run_policy_calculations(
     quiet: bool = False, update_since: datetime.date | None = None
-):
+) -> None:
     partial_update = update_since is not None
 
     sources = [
@@ -574,10 +296,7 @@ def run_policy_calculations(
     if not quiet:
         rich.print(f"Calculated [green]{count}[/green] policy distributions")
 
-    source_path = compiled_policy_dir / "*.parquet"
     joined_path = compiled_dir / "policy_calc_to_load.parquet"
-
-    generate_combo_with_id(source_path, joined_path)
 
     if count:
         count = VoteDistribution.replace_with_parquet(joined_path)
