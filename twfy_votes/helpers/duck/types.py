@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import (
     Any,
@@ -34,6 +36,17 @@ class CompiledJinjaSQL(NamedTuple):
 class QueryToCache(NamedTuple):
     dest: Path
     query: str
+
+
+class CTEDefinition(NamedTuple):
+    """
+    A named stage in a single WITH query.
+    """
+
+    name: str
+    query: str
+    materialized: bool | None
+    dependencies: tuple[str, ...]
 
 
 class PyArrowLike(Protocol):
@@ -113,6 +126,11 @@ class DuckAliasInstance(Protocol):
 class DuckMacro(Protocol):
     args: list[str]
     macro: str
+
+
+@runtime_checkable
+class DuckCTE(Protocol):
+    query: str
 
 
 class BaseModelLike(Protocol):

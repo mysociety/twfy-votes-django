@@ -33,8 +33,10 @@ from .response import AsyncDuckResponse, DuckResponse, ResponseType
 from .types import (
     CompiledJinjaSQL,
     ConnectionType,
+    CTEDefinition,
     DataSourceValue,
     DuckAliasView,
+    DuckCTE,
     DuckMacro,
     DuckorSourceViewType,
     DuckView,
@@ -65,6 +67,7 @@ class DuckQuery:
         self.data_sources: list[DataSourceValue] = []
         self.python_functions: list[PythonCallable] = []
         self.queries_to_cache: list[QueryToCache] = []
+        self.ctes: list[CTEDefinition] = []
 
         if postgres_database_settings:
             self.queries.append(get_postgres_attach(postgres_database_settings))
@@ -113,6 +116,71 @@ class DuckQuery:
         Decorator to store a macro as part of a longer running query
         """
         return self.as_macro(item, table=True)
+
+    def as_cte(
+        self, *, materialized: bool | None = None
+    ) -> Callable[[Type[DuckCTE]], Type[DuckCTE]]:
+        """Register a named stage for one composable ``WITH`` query.
+
+        Unlike :meth:`as_view`, this does not add an executable statement to the
+        connection setup queue. Call :meth:`render_ctes` with the final SELECT to
+        produce one query, allowing DuckDB to optimize across stage boundaries.
+
+        A CTE may declare ``depends_on`` as an ordered list of previously
+        registered CTE classes or names. Dependencies are documentation as well
+        as a guard against accidentally declaring stages out of order.
+        """
+
+        def inner(item: Type[DuckCTE]) -> Type[DuckCTE]:
+            name = get_name(item)
+            query = getattr(item, "query", None)
+            if query is None:
+                raise ValueError("CTE must have a query attribute")
+
+            existing_names = {cte.name for cte in self.ctes}
+            if name in existing_names:
+                raise ValueError(f"CTE '{name}' is already registered")
+
+            dependencies = tuple(
+                dependency if isinstance(dependency, str) else get_name(dependency)
+                for dependency in getattr(item, "depends_on", [])
+            )
+            missing = [name for name in dependencies if name not in existing_names]
+            if missing:
+                raise ValueError(
+                    f"CTE '{name}' depends on unregistered CTEs: {', '.join(missing)}"
+                )
+
+            self.ctes.append(
+                CTEDefinition(
+                    name=name,
+                    query=query.strip().removesuffix(";"),
+                    materialized=materialized,
+                    dependencies=dependencies,
+                )
+            )
+            return item
+
+        return inner
+
+    def render_ctes(self, final_query: str) -> str:
+        """
+        Render registered CTE stages followed by ``final_query``.
+        """
+
+        if not self.ctes:
+            raise ValueError("No CTEs have been registered")
+
+        rendered = []
+        for cte in self.ctes:
+            materialization = {
+                True: " MATERIALIZED",
+                False: " NOT MATERIALIZED",
+                None: "",
+            }[cte.materialized]
+            rendered.append(f"{cte.name} AS{materialization} (\n{cte.query}\n)")
+
+        return "WITH\n" + ",\n".join(rendered) + "\n" + final_query.strip()
 
     def as_macro(self, item: Type[DuckMacro], table: bool = False) -> Type[DuckMacro]:
         name = get_name(item)
