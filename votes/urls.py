@@ -1,9 +1,11 @@
 import re
-from datetime import date
 from typing import Any, Optional
 
-from django.urls import URLPattern, path, register_converter
+from django.urls import URLPattern, path
 from django.views.generic import View
+
+# import to load custom route converters
+from twfy_votes.helpers import routes as routes
 
 from .views.api import api
 from .views.opengraph_views import (
@@ -47,34 +49,6 @@ from .views.views import (
     TagListView,
     TagsHomeView,
 )
-
-
-class ISODateConverter:
-    regex = r"\d{4}-\d{2}-\d{2}"
-
-    def to_python(self, value: str) -> date:
-        return date.fromisoformat(value)
-
-    def to_url(self, value: date) -> str:
-        return value.isoformat()
-
-
-class StringNotJson:
-    """
-    checks if it's a lowercase string that doesn't end in .json
-    """
-
-    regex = r"[a-z0-9.]+(?<!\.json)"
-
-    def to_python(self, value: str) -> str:
-        return value
-
-    def to_url(self, value: str) -> str:
-        return value
-
-
-register_converter(ISODateConverter, "date")
-register_converter(StringNotJson, "str_not_json")
 
 
 def fast_path(
