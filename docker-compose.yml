@@ -2,10 +2,10 @@ version: '3.9'
 
 services:
   db:
-    image: postgres:13
+    image: postgres:15
     volumes:
       - .:/app
-      - pgdata:/var/lib/postgresql/data
+      - pgdata15:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: 'password'
       POSTGRES_DB: 'twfy-votes'
@@ -40,6 +40,6 @@ services:
     working_dir: /app
 
 volumes:
-  pgdata:
+  pgdata15:
   build:
   node_modules:
