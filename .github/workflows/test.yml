@@ -10,10 +10,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - name: Run tests and try and build project
-        uses: mysociety/run-in-devcontainer@v1
+        uses: mysociety/run-in-devcontainer@66c08bb28f45b8a250c90ee8bff7fe1255ce23a7  # v1.1.1
         with:
           dockerfile: Dockerfile
           app: web
@@ -22,5 +21,3 @@ jobs:
             script/populate --all
             script/populate --all --update-last 5
             script/test
-     
-    
