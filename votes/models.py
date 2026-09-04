@@ -861,6 +861,7 @@ class Chamber(DjangoVoteModel):
     def __hash__(self) -> int:
         return hash(self.slug)
 
+    @property
     def member_singular(self) -> str:
         return self.member_plural[:-1]
 
