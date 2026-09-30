@@ -3,6 +3,7 @@ from typing import Any, Literal
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import get_object_or_404
 
 import pandas as pd
 from ninja import ModelSchema, NinjaAPI, Schema
@@ -570,12 +571,12 @@ def get_people(request: HttpRequest, people_option: Literal["current", "all"]):
 
 @api.get("/person/{person_id}.json", response=PersonSchema)
 def get_person(request: HttpRequest, person_id: int):
-    return Person.objects.get(id=person_id)
+    return get_object_or_404(Person, id=person_id)
 
 
 @api.get("/person/{person_id}/votes.json", response=PersonWithVoteSchema)
 def get_person_with_votes(request: HttpRequest, person_id: int):
-    return Person.objects.get(id=person_id)
+    return get_object_or_404(Person, id=person_id)
 
 
 @api.get("/person/{person_id}/statements.json", response=dict)
@@ -718,8 +719,8 @@ def get_person_policy(
 def get_agreement(
     request: HttpRequest, chamber_slug: str, date: datetime.date, decision_ref: str
 ):
-    return Agreement.objects.get(
-        chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
+    return get_object_or_404(
+        Agreement, chamber_slug=chamber_slug, date=date, decision_ref=decision_ref
     ).apply_analysis_override()
 
 
@@ -772,19 +773,19 @@ def get_policies(request: HttpRequest):
 
 @api.get("/policy/{chamber_slug}/{status}/{group_slug}.json", response=PolicySchema)
 def get_policy(request: HttpRequest, chamber_slug: str, status: str, group_slug: str):
-    return Policy.objects.get(
-        chamber_slug=chamber_slug, status=status, group_slug=group_slug
+    return get_object_or_404(
+        Policy, chamber_slug=chamber_slug, status=status, group_slug=group_slug
     )
 
 
 @api.get("/policy/{policy_id}.json", response=PolicySchema)
 def get_policy_by_id(request: HttpRequest, policy_id: int):
-    return Policy.objects.get(id=policy_id)
+    return get_object_or_404(Policy, id=policy_id)
 
 
 @api.get("/policy/{policy_id}/report.json")
 def get_policy_report_by_id(request: HttpRequest, policy_id: int):
-    policy = Policy.objects.get(id=policy_id)
+    policy = get_object_or_404(Policy, id=policy_id)
     return PolicyReport.from_policy(policy).model_dump()
 
 

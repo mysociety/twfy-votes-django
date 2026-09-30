@@ -19,7 +19,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template import Context, Template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -135,8 +135,7 @@ class FormsView(TemplateView):
             case "rep_annotation":
                 if not self.request.user.is_authenticated:
                     return False
-                link = UserPersonLink.objects.get(user=self.request.user)
-                if not link:
+                if not UserPersonLink.objects.filter(user=self.request.user).exists():
                     return False
                 return super_users_or_group(
                     self.request.user, PermissionGroupSlug.CAN_ADD_SELF_ANNOTATIONS
@@ -155,17 +154,17 @@ class FormsView(TemplateView):
     def get_decision_instance(self, form_slug: str, decision_id: int):
         match form_slug:
             case "agreement_annotation":
-                agreement = Agreement.objects.get(id=decision_id)
+                agreement = get_object_or_404(Agreement, id=decision_id)
                 return agreement
             case "statement":
                 # Statement forms don't need a decision instance
                 return None
             case "add_signatories":
                 # For add_signatories, decision_id is actually the statement_id
-                statement = Statement.objects.get(id=decision_id)
+                statement = get_object_or_404(Statement, id=decision_id)
                 return statement
             case _:
-                division = Division.objects.get(id=decision_id)
+                division = get_object_or_404(Division, id=decision_id)
                 return division
 
     def post(self, request: HttpRequest, form_slug: str, decision_id: int, **kwargs):
@@ -211,7 +210,7 @@ class FormsView(TemplateView):
             decision = None
             form = form_model()
         elif issubclass(form_model, AddSignatoriesForm):
-            decision = Statement.objects.get(id=decision_id)
+            decision = get_object_or_404(Statement, id=decision_id)
             form = form_model(statement=decision)
         else:
             # For other forms, we need to fetch the decision instance
@@ -430,7 +429,7 @@ class PersonPageView(TitleMixin, TemplateView):
 
     def get_context_data(self, person_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["person"] = Person.objects.get(id=person_id)
+        context["person"] = get_object_or_404(Person, id=person_id)
         context["person_view"] = "overview"
         context["og_image"] = reverse("person_opengraph_image", args=[person_id])
         return context
@@ -443,7 +442,7 @@ class PersonVotesPageView(TitleMixin, TemplateView):
     def get_context_data(self, person_id: int, year: str, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        person = Person.objects.get(id=person_id)
+        person = get_object_or_404(Person, id=person_id)
         context["year"] = year
         context["person"] = person
         if year == "all":
@@ -472,7 +471,7 @@ class PersonStatementsPageView(TitleMixin, TemplateView):
     def get_context_data(self, person_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        person = Person.objects.get(id=person_id)
+        person = get_object_or_404(Person, id=person_id)
         context["person"] = person
         context["statements_df"] = person.statements_df()
         context["page_title"] = f"{person.name} - Signed Statements"
@@ -578,7 +577,7 @@ class AgreementPageView(TitleMixin, TemplateView):
                 date=decision_date,
                 decision_ref=decision_ref,
             )
-        except Agreement.DoesNotExist as e:
+        except Agreement.DoesNotExist:
             # this is a very basic mapping that almost always holds true
             # if 'a' is missing, see if we've loaded a newer one (there will only be one).
             # if not we could also export the gid_redirect tables from twfy
@@ -592,7 +591,7 @@ class AgreementPageView(TitleMixin, TemplateView):
                 # redirect to the new decision
                 if alts:
                     return redirect(alts.url())
-            raise e
+            raise Http404("Agreement not found")
 
         decision = decision.apply_analysis_override()
 
@@ -681,14 +680,18 @@ class TagListView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         context["tag_type"] = tag_type
         context["tag_slug"] = tag_slug
-        tag = DecisionTag.objects.prefetch_related(
-            "divisions",
-            "agreements",
-            "statements",
-            "divisions__tags",
-            "agreements__tags",
-            "statements__tags",
-        ).get(tag_type=tag_type, slug=tag_slug)
+        tag = get_object_or_404(
+            DecisionTag.objects.prefetch_related(
+                "divisions",
+                "agreements",
+                "statements",
+                "divisions__tags",
+                "agreements__tags",
+                "statements__tags",
+            ),
+            tag_type=tag_type,
+            slug=tag_slug,
+        )
         context["page_title"] = f"Tag: {tag.name}"
         context["tag"] = tag
         context["decisions_by_chamber"] = tag.decisions_df_by_chamber()
@@ -736,7 +739,7 @@ class DecisionsListPageView(TitleMixin, TemplateView):
         context = super().get_context_data(*kwargs)
         year_start = datetime.date(year, 1, 1)
         year_end = datetime.date(year, 12, 31)
-        chamber = Chamber.objects.get(slug=chamber_slug)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
 
         search = self.decision_search(chamber, year_start, year_end)
         context["search"] = search
@@ -757,7 +760,7 @@ class DecisionsListMonthPageView(DecisionsListPageView):
         month_start = datetime.date(year, month, 1)
         month_end = datetime.date(year, month, calendar.monthrange(year, month)[1])
 
-        chamber = Chamber.objects.get(slug=chamber_slug)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
         search = self.decision_search(chamber, month_start, month_end)
         context["search"] = search
         context["page_title"] = (
@@ -817,7 +820,7 @@ class PolicyPageView(TitleMixin, TemplateView):
 
     def get_context_data(self, policy_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["policy"] = Policy.objects.get(id=policy_id)
+        context["policy"] = get_object_or_404(Policy, id=policy_id)
         context["page_title"] = context["policy"].name + " | TheyWorkForYou Votes"
         context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
         return context
@@ -829,7 +832,7 @@ class PolicyReportPageView(TitleMixin, TemplateView):
 
     def get_context_data(self, policy_id: int, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["policy"] = Policy.objects.get(id=policy_id)
+        context["policy"] = get_object_or_404(Policy, id=policy_id)
         context["policy_report"] = PolicyReport.from_policy(context["policy"])
         context["page_title"] = f"{context['policy'].name} Report"
         context["og_image"] = reverse("policy_opengraph_image", args=[policy_id])
@@ -845,7 +848,7 @@ class PolicyCollectionPageView(TitleMixin, TemplateView):
         self, chamber_slug: str, status_slug: str, group_slug: str, **kwargs
     ):
         context = super().get_context_data(**kwargs)
-        context["chamber"] = Chamber.objects.get(slug=chamber_slug)
+        context["chamber"] = get_object_or_404(Chamber, slug=chamber_slug)
         context["status"] = PolicyStatus(status_slug)
         context["page_title"] = (
             f"{context['chamber'].name} {context['status'].name} Policies"
@@ -899,10 +902,10 @@ class PersonPoliciesView(TitleMixin, TemplateView):
             rq = None
 
         context = super().get_context_data(**kwargs)
-        person = Person.objects.get(id=person_id)
-        chamber = Chamber.objects.get(slug=chamber_slug)
-        party = Organization.objects.get(slug=party_slug)
-        period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
+        person = get_object_or_404(Person, id=person_id)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
+        party = get_object_or_404(Organization, slug=party_slug)
+        period = get_object_or_404(PolicyComparisonPeriod, slug=period_slug.upper())
 
         if rq and can_view_draft_content(rq.user):
             valid_status = [PolicyStatus.ACTIVE, PolicyStatus.CANDIDATE]
@@ -1118,18 +1121,19 @@ class PersonPolicyView(TitleMixin, TemplateView):
         **kwargs,
     ):
         context = super().get_context_data(**kwargs)
-        person = Person.objects.get(id=person_id)
-        chamber = Chamber.objects.get(slug=chamber_slug)
-        party = Organization.objects.get(slug=party_slug)
-        period = PolicyComparisonPeriod.objects.get(slug=period_slug.upper())
-        policy = Policy.objects.get(id=policy_id)
+        person = get_object_or_404(Person, id=person_id)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
+        party = get_object_or_404(Organization, slug=party_slug)
+        period = get_object_or_404(PolicyComparisonPeriod, slug=period_slug.upper())
+        policy = get_object_or_404(Policy, id=policy_id)
 
         if party_slug == "independent":
             comparison_party = None
         else:
             comparison_party = party
 
-        own_distribution = person.vote_distributions.get(
+        own_distribution = get_object_or_404(
+            person.vote_distributions,
             chamber=chamber,
             period=period,
             party=comparison_party,
@@ -1309,7 +1313,7 @@ class StatementsListPageView(TitleMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         year_start = datetime.date(year, 1, 1)
         year_end = datetime.date(year, 12, 31)
-        chamber = Chamber.objects.get(slug=chamber_slug)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
         statement_type = self.request.GET.get("type")
         search = self.statement_search(chamber, year_start, year_end, statement_type)
         context["search"] = search
@@ -1340,7 +1344,7 @@ class StatementsListMonthPageView(StatementsListPageView):
         month_start = datetime.date(year, month, 1)
         month_end = datetime.date(year, month, calendar.monthrange(year, month)[1])
 
-        chamber = Chamber.objects.get(slug=chamber_slug)
+        chamber = get_object_or_404(Chamber, slug=chamber_slug)
         search = self.statement_search(chamber, month_start, month_end)
         context["search"] = search
         context["page_title"] = (

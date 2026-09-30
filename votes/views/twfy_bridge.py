@@ -6,6 +6,8 @@ Which is the current import into theyworkforyou
 from datetime import date
 from enum import StrEnum
 
+from django.shortcuts import get_object_or_404
+
 from pydantic import BaseModel, ConfigDict
 
 from ..consts import ChamberSlug, PolicyDirection, PolicyStrength, VotePosition
@@ -238,7 +240,7 @@ class PopoloPolicy(BaseModel):
         Create a replacement object for the https://www.publicwhip.org.uk/data/popolo/363.json
         view
         """
-        policy = Policy.objects.get(id=policy_id)
+        policy = get_object_or_404(Policy, id=policy_id)
 
         # just refer back to public whip for moment as we're not public
         url = f"https://www.publicwhip.org.uk/policy.php?id={policy_id}"
